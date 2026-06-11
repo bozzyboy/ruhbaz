@@ -8,9 +8,9 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 - **Checkpoint disiplini:** Uzun işe başlamadan önce buraya "başlıyorum + plan" notu düşülür; iş sırasında ara adımlarda güncellenir. Oturum aniden kesilirse (usage/çökme) durum buradan + git commit'lerinden geri kurulur.
 - Sıralama netliği: güncel için 00'a bak; tarihçe için handoffs/ klasörüne bak. İkisi karışmaz.
 
-**En son snapshot:** [handoffs/2026-06-11_faz2-to-faz3_gecis.md](handoffs/2026-06-11_faz2-to-faz3_gecis.md) (Faz 2 kapanış + **Ozan'a kalan işler TAM LİSTE §2** + Faz 3 brifingi) · önceki: [faz1→2](handoffs/2026-06-11_faz1-to-faz2_gecis.md), [faz0→1](handoffs/2026-06-11_faz0-to-faz1_gecis.md), [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
+**En son snapshot:** [handoffs/2026-06-11_faz3-to-faz4_gecis.md](handoffs/2026-06-11_faz3-to-faz4_gecis.md) (Faz 3 kapanış + Faz 4/i18n brifingi) · önceki: [faz2→3 (Ozan iş listesi §2)](handoffs/2026-06-11_faz2-to-faz3_gecis.md), [faz1→2](handoffs/2026-06-11_faz1-to-faz2_gecis.md), [faz0→1](handoffs/2026-06-11_faz0-to-faz1_gecis.md), [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
 
-**Son güncelleme:** 2026-06-11 (özerk oturum sürüyor) · **Durum:** ✅ FAZ 1 (tag `faz1`) · ✅ FAZ 2 özerk kod kısmı (tag `faz2`) · 🔨 **FAZ 3 + FAZ 4 ÖZERK BAŞLADI (Ozan onayı: "iki faz daha git böyle", 2026-06-11):** Faz 3 = ses matrisi TASLAK + lore kanonu + Brand Book + K45 hitap; Faz 4 = i18n + EN. Ses/marka işleri TASLAK işlenir, onay Ozan'da; her adım ayrı commit. **Ozan'a:** `13_FAZ1` + `14_FAZ2` testleri + faz2→3 handoff §2 listesi (değişmedi).
+**Son güncelleme:** 2026-06-11 (özerk oturum sürüyor) · **Durum:** ✅ FAZ 1 (tag `faz1`) · ✅ FAZ 2 özerk kod (tag `faz2`) · ✅ **FAZ 3 BİTTİ** (tag `faz3`: ses matrisi + lore kanonu + kapanış vaat temizliği + BRAND_BOOK v0.1 + K50 oda adları; öz-review SAFE) · 🔨 **FAZ 4 (i18n/EN) ÖZERK SÜRÜYOR.** Cihaz testleri: `13_FAZ1` + `14_FAZ2` + `16_FAZ3` (üçü tek oturuş, APK gerekmez); Faz 4 sonunda expo-localization nedeniyle YENİ APK gerekecek. Ozan iş listesi: faz2→3 handoff §2 + 16_FAZ3 Grup 5 (Brand Book kararları).
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
 - **D1 ONAY:** Faz 1/2 özerk; kod + taslak Claude; yasal onay/avukat/Play Console/IAP/fiyat Ozan.
