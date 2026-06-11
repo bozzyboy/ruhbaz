@@ -109,7 +109,12 @@ export async function startNativeRecording(
   try {
     const permission = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
     if (!permission.granted) {
-      throw new Error('Mikrofon izni verilmedi.');
+      // Ekranlar bu mesajı markalı modalda gösterir (beyaz sistem uyarısı değil).
+      throw new Error(
+        permission.canAskAgain === false
+          ? 'Mikrofon izni kapalı görünüyor. Telefonun Ayarlar > Uygulamalar > Ruhbaz > İzinler bölümünden mikrofonu açıp yeniden dene.'
+          : 'Sesli soru için mikrofon izni gerekli. İzin penceresinde mikrofona onay verip yeniden dene.',
+      );
     }
 
     subscriptions.push(

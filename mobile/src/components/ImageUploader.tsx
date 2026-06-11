@@ -5,24 +5,41 @@
 
 import { Camera, CameraView } from 'expo-camera';
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, View, Text, TouchableOpacity, Image, StyleSheet, Modal } from 'react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity, Image, StyleSheet, Modal, Linking } from 'react-native';
 import { BrandedConfirmModal } from './BrandedConfirmModal';
-import { pickImage } from '../services/imageService';
+import { pickImage, pickImages } from '../services/imageService';
 
 interface ImageUploaderProps {
   label: string;
   emoji?: string;
   imageUri: string | null;
   onImageSelected: (uri: string) => void;
+  /** Galeriden tek seferde seçilebilecek görsel sayısı (kahve için 3'e kadar). Kamera her zaman tek kare çeker. */
+  multiSelectLimit?: number;
+  /** multiSelectLimit > 1 iken galeri seçiminin sonucu buraya gelir (seçim sırasıyla). */
+  onImagesSelected?: (uris: string[]) => void;
   compact?: boolean;
   hideLabel?: boolean;
 }
+
+type PermissionModalState = {
+  visible: boolean;
+  stage: 'explain' | 'settings';
+  message: string;
+};
+
+const CAMERA_EXPLAIN_MESSAGE =
+  'Fotoğraf çekebilmek için kamera izni gerekiyor. Devam dersen telefonun izin penceresi açılır; oradan onay vermen yeterli.';
+const CAMERA_SETTINGS_MESSAGE =
+  'Kamera izni kapalı görünüyor. Telefonun Ayarlar > Uygulamalar > Ruhbaz > İzinler bölümünden kamerayı açıp yeniden deneyebilirsin.';
 
 export function ImageUploader({
   label,
   emoji,
   imageUri,
   onImageSelected,
+  multiSelectLimit,
+  onImagesSelected,
   compact = false,
   hideLabel = false,
 }: ImageUploaderProps) {
@@ -32,6 +49,7 @@ export function ImageUploader({
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isSelectingImage, setIsSelectingImage] = useState(false);
   const [errorModal, setErrorModal] = useState({ visible: false, message: '' });
+  const [permissionModal, setPermissionModal] = useState<PermissionModalState>({ visible: false, stage: 'explain', message: '' });
   const cameraRef = useRef<CameraView>(null);
 
   const isBusy = isTakingPhoto || isSelectingImage;
@@ -41,15 +59,42 @@ export function ImageUploader({
     setShowSourceModal(true);
   };
 
+  const openCameraView = () => {
+    setCameraReady(false);
+    setShowCameraModal(true);
+  };
+
+  const requestCameraAndOpen = async () => {
+    setPermissionModal((prev) => ({ ...prev, visible: false }));
+    try {
+      const permission = await Camera.requestCameraPermissionsAsync();
+      if (permission.granted) {
+        openCameraView();
+        return;
+      }
+      if (permission.canAskAgain === false) {
+        setPermissionModal({ visible: true, stage: 'settings', message: CAMERA_SETTINGS_MESSAGE });
+      }
+    } catch (e: any) {
+      setErrorModal({ visible: true, message: e?.message || 'Kamera açılamadı.' });
+    }
+  };
+
   const chooseFromCamera = async () => {
     setShowSourceModal(false);
     try {
-      const permission = await Camera.requestCameraPermissionsAsync();
-      if (!permission.granted) {
-        throw new Error('Kamera erişim izni gerekli.');
+      const current = await Camera.getCameraPermissionsAsync();
+      if (current.granted) {
+        openCameraView();
+        return;
       }
-      setCameraReady(false);
-      setShowCameraModal(true);
+      if (current.canAskAgain === false) {
+        setPermissionModal({ visible: true, stage: 'settings', message: CAMERA_SETTINGS_MESSAGE });
+        return;
+      }
+      // Sistem izin penceresinden önce markalı açıklama (Ozan kuralı: beyaz
+      // sistem uyarısına yazı değil, markalı uyarı; emoji yok).
+      setPermissionModal({ visible: true, stage: 'explain', message: CAMERA_EXPLAIN_MESSAGE });
     } catch (e: any) {
       setErrorModal({ visible: true, message: e?.message || 'Kamera açılamadı.' });
     }
@@ -80,6 +125,11 @@ export function ImageUploader({
     setShowSourceModal(false);
     try {
       setIsSelectingImage(true);
+      if (onImagesSelected && (multiSelectLimit || 1) > 1) {
+        const uris = await pickImages(multiSelectLimit || 1);
+        if (uris.length) onImagesSelected(uris);
+        return;
+      }
       const uri = await pickImage();
       if (uri) onImageSelected(uri);
     } catch (e: any) {
@@ -184,6 +234,22 @@ export function ImageUploader({
         cancelLabel={null}
         onConfirm={() => setErrorModal({ visible: false, message: '' })}
         onCancel={() => setErrorModal({ visible: false, message: '' })}
+      />
+      <BrandedConfirmModal
+        visible={permissionModal.visible}
+        title="Kamera İzni"
+        message={permissionModal.message}
+        confirmLabel={permissionModal.stage === 'explain' ? 'Devam' : 'Ayarları Aç'}
+        cancelLabel="Vazgeç"
+        onConfirm={() => {
+          if (permissionModal.stage === 'explain') {
+            void requestCameraAndOpen();
+            return;
+          }
+          setPermissionModal((prev) => ({ ...prev, visible: false }));
+          void Linking.openSettings();
+        }}
+        onCancel={() => setPermissionModal((prev) => ({ ...prev, visible: false }))}
       />
     </>
   );

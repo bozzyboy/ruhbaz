@@ -245,36 +245,40 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
                 {coffeeMode === 'upload' ? (
                   <>
                     <View style={styles.photosRow}>
-                      <View style={styles.imageSlot}>
-                        <Text style={styles.imageSlotLabel}>Kahve görseli 1</Text>
-                        <ImageUploader
-                          hideLabel
-                          label="Kahve görseli 1"
-                          imageUri={imageState.cup}
-                          onImageSelected={(uri) => setImageState((prev) => ({ ...prev, cup: uri }))}
-                        />
-                      </View>
-                      <View style={styles.imageSlot}>
-                        <Text style={styles.imageSlotLabel}>Kahve görseli 2</Text>
-                        <ImageUploader
-                          hideLabel
-                          label="Kahve görseli 2"
-                          imageUri={imageState.cup2}
-                          onImageSelected={(uri) => setImageState((prev) => ({ ...prev, cup2: uri }))}
-                        />
-                      </View>
-                      <View style={styles.imageSlot}>
-                        <Text style={styles.imageSlotLabel}>Kahve görseli 3</Text>
-                        <ImageUploader
-                          hideLabel
-                          label="Kahve görseli 3"
-                          imageUri={imageState.saucer}
-                          onImageSelected={(uri) => setImageState((prev) => ({ ...prev, saucer: uri }))}
-                        />
-                      </View>
+                      {(['cup', 'cup2', 'saucer'] as const).map((slot, index) => {
+                        // Galeriden tek seferde: dokunulan slot + boş kalan slot sayısı kadar seçim.
+                        const emptyOthers = (['cup', 'cup2', 'saucer'] as const).filter(
+                          (other) => other !== slot && !imageState[other],
+                        );
+                        return (
+                          <View key={slot} style={styles.imageSlot}>
+                            <Text style={styles.imageSlotLabel}>{`Kahve görseli ${index + 1}`}</Text>
+                            <ImageUploader
+                              hideLabel
+                              label={`Kahve görseli ${index + 1}`}
+                              imageUri={imageState[slot]}
+                              onImageSelected={(uri) => setImageState((prev) => ({ ...prev, [slot]: uri }))}
+                              multiSelectLimit={1 + emptyOthers.length}
+                              onImagesSelected={(uris) =>
+                                setImageState((prev) => {
+                                  // İlk seçim dokunulan slota, kalanlar boş slotlara sırayla.
+                                  const targets = [slot, ...(['cup', 'cup2', 'saucer'] as const).filter(
+                                    (other) => other !== slot && !prev[other],
+                                  )];
+                                  const next = { ...prev };
+                                  uris.slice(0, targets.length).forEach((uri, uriIndex) => {
+                                    next[targets[uriIndex]] = uri;
+                                  });
+                                  return next;
+                                })
+                              }
+                            />
+                          </View>
+                        );
+                      })}
                     </View>
                     <Text style={styles.helperText}>
-                      Her slot fincan, tabak veya fincan+tabak olabilir. Aynı kahvenin farklı açılardan çekilmiş karelerini yükleyebilirsin.
+                      Her slot fincan, tabak veya fincan+tabak olabilir. Aynı kahvenin farklı açılardan çekilmiş karelerini yükleyebilirsin; galeriden tek seferde birden fazla kare seçebilirsin.
                     </Text>
                     <Text style={styles.creditWarning}>
                       Her yanlış yüklenen görsel kredi hesabına dahil edilir. Yanlış denemeler bir sonraki okumanın açılışına da not düşülür.

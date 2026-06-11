@@ -9,15 +9,23 @@ import * as FileSystem from 'expo-file-system';
 import { Image } from 'react-native';
 import { IMAGE_MAX_DIMENSION, IMAGE_QUALITY } from '../config/constants';
 
+async function ensureMediaLibraryPermission() {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    throw new Error(
+      permission.canAskAgain === false
+        ? 'Galeri izni kapalı. Telefonun Ayarlar > Uygulamalar > Ruhbaz > İzinler bölümünden fotoğraf iznini açıp yeniden dene.'
+        : 'Fotoğraf seçebilmek için galeri izni gerekli. İzin penceresinde onay verip yeniden dene.',
+    );
+  }
+}
+
 /**
  * Pick an image from the device gallery.
  * Returns local URI or null if cancelled.
  */
 export async function pickImage(): Promise<string | null> {
-  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permission.granted) {
-    throw new Error('Galeri erişim izni gerekli.');
-  }
+  await ensureMediaLibraryPermission();
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
@@ -31,6 +39,34 @@ export async function pickImage(): Promise<string | null> {
   }
 
   return result.assets[0].uri;
+}
+
+/**
+ * Pick multiple images from the device gallery in one batch (e.g. coffee reading
+ * accepts up to 3 frames at once). Returns URIs in selection order; empty if cancelled.
+ */
+export async function pickImages(maxCount: number): Promise<string[]> {
+  await ensureMediaLibraryPermission();
+
+  const limit = Math.max(1, Math.floor(maxCount));
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsEditing: false,
+    allowsMultipleSelection: true,
+    selectionLimit: limit,
+    orderedSelection: true,
+    exif: false,
+    quality: 1,
+  });
+
+  if (result.canceled || !result.assets?.length) {
+    return [];
+  }
+
+  return result.assets
+    .map((asset) => asset.uri)
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 /**

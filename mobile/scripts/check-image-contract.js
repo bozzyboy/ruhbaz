@@ -10,6 +10,10 @@
 //  3) El: insan avuç içi + parmaklar kabul; el sırtı/dış yüz reddedilir.
 //  4) Pati: hayvan uzvu yeterli — patinin altı/üstü, pençe, tırnaklı ayak,
 //     kuş/sürüngen ayağı; hayvan türü fark etmez.
+//  5) Fincan/tabak üzerindeki baskı, desen, marka, üretim süsü ASLA yorumlanmaz;
+//     yalnız telve/kahve izi yorumlanır.
+//  6) Birden fazla kahve karesi AYNI fincanın/tabağın farklı açıları olarak
+//     okunur (ayrı kahveler gibi değil).
 //
 // Çalıştır: node scripts/check-image-contract.js  (cwd: mobile)
 // Bu script check-turkish-utf8.js gibi her değişiklikte koşar (Claude hook + commit öncesi).
@@ -90,6 +94,26 @@ const classifyRegion = classifyRegionRaw
   const match = classifyRegion.match(pattern);
   must(!match, `Sınıflandırma çağrısında dar token bütçesi (${match && match[0]}) — JSON kırpılıp sahte red üretir; en az 250 olmalı.`);
 });
+
+// --- Okuma prompt'ları: baskı/desen yasağı + "aynı fincanın farklı açıları" ---
+const PROMPT_BUILDER = path.resolve(__dirname, '..', 'src', 'services', 'fortunePromptBuilder.ts');
+const COMMON_PROMPT = path.resolve(__dirname, '..', 'src', 'services', 'fortuneCommonPrompt.ts');
+const builderSrc = fs.existsSync(PROMPT_BUILDER) ? fs.readFileSync(PROMPT_BUILDER, 'utf8') : '';
+const commonSrc = fs.existsSync(COMMON_PROMPT) ? fs.readFileSync(COMMON_PROMPT, 'utf8') : '';
+must(Boolean(builderSrc), 'fortunePromptBuilder.ts bulunamadı (taşındıysa bekçiyi güncelle).');
+must(Boolean(commonSrc), 'fortuneCommonPrompt.ts bulunamadı (taşındıysa bekçiyi güncelle).');
+must(
+  builderSrc.includes('farklı açılardan çekilmiş kareleri olarak kabul et'),
+  "Okuma prompt'undan 'birden fazla kare = aynı fincanın farklı açıları' kuralı silinmiş (fortunePromptBuilder).",
+);
+must(
+  builderSrc.includes('üretim desenleri') && builderSrc.includes('yorum unsuru değildir'),
+  "Okuma prompt'undan 'fincan/tabak üzerindeki üretim desenleri yorum unsuru değildir' yasağı silinmiş (fortunePromptBuilder).",
+);
+must(
+  commonSrc.includes('baskı/dekorları, markaları veya aksesuarları yorum kanıtı yapma'),
+  "Ortak prompt'tan 'hazır baskı/dekor/marka yorum kanıtı yapılmaz' yasağı silinmiş (fortuneCommonPrompt).",
+);
 
 if (failures.length) {
   console.error('GÖRSEL UYGUNLUK SÖZLEŞMESİ İHLALİ:');

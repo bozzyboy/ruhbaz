@@ -58,6 +58,9 @@ Aşağıdaki akışlar özellikle korunmalıdır. Yeni özellik eklerken, refact
 - Tabak, fincan, masa, obje, baskı, desen, çizim, logo, kumaş veya arka plan üzerindeki kendi desenlerinden yorum çıkarılmamalı; yalnızca telve/kahve izi yorumlanmalı.
 - Okuma ekranında yüklenen kahve görselleri yan yana gösterilmeli ve her biri tıklanınca büyütülebilmeli.
 - Kahve ve el falında kamera açılıyorsa varsayılan kamera arka kamera olmalı; selfie/ön kamera varsayılan olmamalı.
+- Kahve yorumunda galeriden TEK SEFERDE çoklu kare seçilebilmeli (3'e kadar, seçim sırası korunur; ilk kare dokunulan slota, kalanlar boş slotlara). Kamera tek kare çeker — bu davranışı bozma.
+- Birden fazla kahve karesi yüklendiyse prompt bunları AYNI fincanın/tabağın farklı açılardan kareleri olarak okutur (ayrı kahveler değil) — fortunePromptBuilder'daki bu kural korunmalı (bekçi kontrol eder).
+- Kamera/mikrofon/galeri izin uyarıları MARKALI modallarla verilir (BrandedConfirmModal): sistem izni öncesi açıklama + kalıcı redde "Ayarları Aç" yönlendirmesi. Çıplak Alert.alert veya beyaz sistem uyarısı üstüne yazı KULLANMA; uyarı metinlerinde emoji KULLANMA.
 - LLM'e gönderilen görseller okunabilir çözünürlükte olmalı; gereksiz sıkıştırma, görseli modelin okuyamayacağı hale getirmemeli.
 - Mikro life events seçimi, tekrar etmeme hafızası ve guardrail/prompt güvenlik kuralları korunmalı.
 

@@ -129,6 +129,32 @@
 | `mobile/src/services/fortuneApiService.ts` | Pati prompt'u: alt/üst/pençe/ayak, tür fark etmez; el: avuç içi+parmaklar, `isInnerPalm !== false` | EK1-6..EK1-9 |
 | `mobile/scripts/check-image-contract.js` (yeni) | Sözleşme bekçisi — her değişiklikte otomatik (hook+pre-commit) | Cihaz testi gerekmez — Claude geçti/KALDI senaryolarıyla doğruladı ✅ |
 | `AGENTS.md` + `mobile/AGENTS.md` | Sözleşme metni netleştirildi (doküman) | Cihaz testi gerekmez |
+
+### Grup EK-2: Çoklu galeri seçimi + markalı izin uyarıları + desen yasağı bekçisi
+
+> **📦 KURULUM KUTUSU (EK-2):** Yalnız JS değişikliği — yeni APK GEREKMEZ; `npx expo start` + reload yeter. İzin testleri (EK2-4/5/6) için: telefon Ayarlar > Uygulamalar > Ruhbaz > İzinler'den kamera iznini "Sorulsun/Reddet" durumuna çekersen ilk-izin akışını yeniden görebilirsin.
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| EK2-1 | Kahve yorumu → "Kahve görseli 1" kutusuna dokun → Galeri → tek seferde 3 kare seç | Üç kare sırayla 1-2-3 slotlarına dolar; tek tek seçmek gerekmez | ☐ |
+| EK2-2 | 1. slot doluyken "Kahve görseli 2"ye dokun → Galeri → 2 kare seç | İlk kare slot 2'ye, ikinci kare boş slot 3'e dolar (dolu slot 1 bozulmaz) | ☐ |
+| EK2-3 | Kahve yorumu → Kamera ile çek | Kamera TEK kare akışında kalır (çoklu seçim yok — beklenen bu) | ☐ |
+| EK2-4 | Kamera izni hiç verilmemişken Kamera'ya dokun | Önce MARKALI açıklama kutusu ("Devam/Vazgeç", emojisiz) → Devam'da sistem izin penceresi açılır | ☐ |
+| EK2-5 | Kamera iznini Ayarlar'dan kalıcı reddetmişken Kamera'ya dokun | Markalı kutu "Ayarları Aç" düğmesiyle gelir → düğme telefonun uygulama ayarlarını açar | ☐ |
+| EK2-6 | Mikrofon izni kapalıyken sesli soru düğmesine bas | Markalı modal içinde ayar yolunu tarif eden Türkçe mesaj (beyaz sistem uyarısı değil, emojisiz) | ☐ |
+| EK2-7 | Üzerinde baskı/desen/logo olan TELVELI fincan yükle → yorum al | Yorum yalnız telve izlerinden bahseder; çiçek/baskı/marka deseni yorum unsuru olarak GEÇMEZ | ☐ |
+| EK2-8 | Aynı fincanın 2-3 farklı açıdan karesini yükle → yorum al | Tek bütün yorum gelir (aynı fincan farklı açılar); "ikinci fincanında..." gibi ayrı-kahve dili YOK | ☐ |
+
+**Değişen dosya → test eşlemesi (EK-2):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/services/imageService.ts` | `pickImages(maxCount)` — galeriden çoklu seçim (sıra korunur) + izin mesajları ayar-yönlendirmeli | EK2-1, EK2-2 |
+| `mobile/src/components/ImageUploader.tsx` | Çoklu seçim desteği + markalı kamera izin kapısı (ön açıklama + Ayarları Aç) | EK2-1..EK2-5 |
+| `mobile/src/screens/PersonalReadingSetupScreen.tsx` | Seçilen kareleri slotlara dağıtma (dokunulan slot → boş slotlar) | EK2-1, EK2-2 |
+| `mobile/src/services/nativeSttService.ts` | Mikrofon izin mesajları: kalıcı redde ayar yolu tarifi | EK2-6 |
+| `mobile/scripts/check-image-contract.js` | Bekçiye eklendi: baskı/desen yasağı + "aynı fincanın farklı açıları" prompt garantileri | EK2-7, EK2-8 + statik ✅ |
+| `mobile/AGENTS.md` | Korunan davranışlara çoklu seçim + markalı izin uyarıları eklendi (doküman) | Cihaz testi gerekmez |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |
