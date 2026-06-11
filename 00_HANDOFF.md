@@ -8,11 +8,15 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 - **Checkpoint disiplini:** Uzun işe başlamadan önce buraya "başlıyorum + plan" notu düşülür; iş sırasında ara adımlarda güncellenir. Oturum aniden kesilirse (usage/çökme) durum buradan + git commit'lerinden geri kurulur.
 - Sıralama netliği: güncel için 00'a bak; tarihçe için handoffs/ klasörüne bak. İkisi karışmaz.
 
-**En son snapshot:** [handoffs/2026-06-11_planlama-vizyon.md](handoffs/2026-06-11_planlama-vizyon.md)
+**En son snapshot:** [handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
 
-**Son güncelleme:** 2026-06-11 (oturum: kurulumlar) · **Durum:** Planlama fazı bitti; kod tabanı Ruhbaz_Fable'a kopyalandı — KOD HENÜZ YAZILMADI.
+**Son güncelleme:** 2026-06-11 (Faz 0 oturumu) · **Durum:** ✅ **FAZ 0 KOD İŞİ BİTTİ** (git tag: `faz0`); Ozan'ın toplu cihaz testi bekleniyor (`12_CIHAZ_TEST_LISTESI.md`). Sıradaki kod fazı: **Faz 1** — brifing sunulup ONAY alınmadan başlanmaz.
 
-**Checkpoint (2026-06-11, kurulum + Faz 0 oturumu):** (a) AGENTS.md yönlendirmeleri ✅; (b) izin listesi + (c) tsc/UTF-8 hook'ları `.claude/settings.json` + `.claude/hooks/post-edit-check.js` ✅ (Ozan sohbette onayladı); temiz git init + ilk commit `425c705` ✅ (.gitignore güçlendirildi: *.env.local, kişisel txt'ler, settings.local.json). **FAZ 0 BRİFİNGİ SUNULDU → OZAN ONAYLADI (2026-06-11) → FAZ 0 BAŞLADI.** Sıra: kök temizlik (_arsiv) → npm install + tsc baseline → /gemini-api-key söküm → CORS+gizli-header → 0.0.0.0 → B-5 → debug kapısı → tek-sağlayıcı → ESLint → K10 → APK + test listesi → kapanış. Bulgu: bozuk kök package.json node'u kökten kırıyor (hook testi yakaladı) — temizlik öne alındı.
+**Faz 0 özeti (detay: snapshot):** Temiz git + 12 commit. Backend delikleri kapandı (/gemini-api-key silindi; CORS söküldü; X-Agent-Secret zorunlu — varsayılan-KORUMALI; HOST env'li, varsayılan 127.0.0.1). B-5 ✅ (adres önceliği: açık env override → Expo hostUri → localhost; IP derdi bitti). Debug bayrağı `__DEV__` kapısında. ESLint + typecheck + Claude hook'ları (artımlı tsc + UTF-8, gerçekten test edildi). K9/K10 ✅ yerel LLM tamamen söküldü (−557 satır + Android native). Öz-review 7 ajanla yapıldı; DOĞRULANMIŞ astro cache-anahtarı bug'ı dahil düzeltmeler `e4f925c`'de. **Debug APK derlendi:** `mobile\android\app\build\outputs\apk\debug\app-debug.apk` (~78MB). Gizli değerler: `agent/.env` (AGENT_SHARED_SECRET, HOST) + `mobile/.env.local` (EXPO_PUBLIC_AGENT_SHARED_SECRET) — git dışı, Claude üretti; şablon: `agent/.env.example`.
+
+**⚠️ Ozan'a tek iş:** Yeni APK'yı kur → `12_CIHAZ_TEST_LISTESI.md`'yi tek oturuşta in (kurulum kutuları hazır). Eski APK YENİ server'la çalışmaz (gizli-header) — önce yeni APK.
+
+**Park edilenler (snapshot'ta gerekçeli):** telefonda yetim Gemma dosyası temizliği (Faz 1 başı adayı) · MemoryDebugScreen ürün/debug kararı (07 ❓) · production adres+cleartext (Faz 2) · agentFetch sarmalayıcı + ESLint warn→error (K6 refactor'ü).
 
 ## ⚠️ KONUM DEĞİŞTİ (2026-06-11)
 Kod tabanı `FALCI v3`'ten BURAYA (`Ruhbaz_Fable`) kopyalandı: `mobile/`, `agent/`, `docs/`, `assets/`, `scripts/`, `src/` artık burada, planlama dokümanlarının (00-09) yanında. Hariç tutulanlar: node_modules (npm install ile gelir), .git (yeni init edilecek), 2.4GB Gemma modelleri (K10 dondu; gerekirse FALCI v3'ten alınır), recovery çöpü. Saf kopya ~25MB.
@@ -48,7 +52,7 @@ FALCI v3 (yeni adı **Ruhbaz Konağı**) için kapsamlı doküman seti kuruldu (
 
 **FAZ BAŞLATMA PROTOKOLÜ (Ozan, 2026-06-11 — "ardarda fazlar"ı revize eder):** Her faz öncesi Ozan'a BRİFİNG sunulur (faz hangi bölümleri ele alıyor / şu an nasıl çalışıyor / ne değişecek / faz ortasında Ozan'a iş düşüyor mu) → Ozan ONAYLAYINCA faz başlar. Brifing sırasında "şu anda nasıl işliyor?" sorularına hazırlıklı olunur. ONAYSIZ KODA BAŞLANMAZ. Geri döndürülebilirlik: her mantıksal adım ayrı, mümkünse bağımsız-revert edilebilir commit. Ayrıca: Claude emin olamadığında Ozan'la kısa interview yapar (niyeti anla → dürüstçe değerlendir → anlat).
 
-### 📋 FAZ 0 BRİFİNGİ — ONAY BEKLİYOR (yeni oturum: bunu Ozan'a aynen sun, onayını al, sonra başla)
+### 📋 FAZ 0 BRİFİNGİ — ✅ SUNULDU, ONAYLANDI ve UYGULANDI (2026-06-11; tarihçe için tutuluyor)
 
 **Hangi bölümler?** Kullanıcı ekranları DEĞİL; üç alan: backend proxy (`agent/token_server.py`), app'in server bağlantı ayarı (tek config), proje altyapısı (git, kalite, bozuk kök dosyalar).
 
@@ -90,7 +94,7 @@ FALCI v3 (yeni adı **Ruhbaz Konağı**) için kapsamlı doküman seti kuruldu (
 
 - İsimler: Kâhya, "Kendin Gez/Kâhya ile Gez" (K18), persona renkleri (K44) — kavram ✅, isim/detay 💡.
 - Şirket yeri (K4), thinking budget (B-3), Live maliyet ölçümü (K23), fiyatlandırma (K43) — hepsi ❓, veri/avukat bekliyor.
-- Faz 0'a "başla" komutu henüz YOK.
+- ~~Faz 0'a "başla" komutu henüz YOK~~ → Faz 0 ✅ bitti (2026-06-11). Faz 1 brifingi sunulup onay alınmadan koda başlanmaz.
 
 ## Kuyruktaki teknik doğrulamalar (kod açıldığında bakılacak)
 
