@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
@@ -43,31 +43,8 @@ type GeneralReadingItem = {
   refreshLabel: string;
 };
 
-const READING_BACKGROUNDS = {
-  astro: require('../../assets/cosmic_astrology_bg.jpg'),
-  parchment: require('../../assets/parchment_bg.jpg'),
-  angel: require('../../assets/angel_bg.jpg'),
-  stone: require('../../assets/stone_bg.jpg'),
-};
-
-function generalReadingBackground(id: GeneralReadingItem['id']) {
-  if (id === 'astro-daily' || id === 'astro-weekly' || id === 'astro-monthly' || id === 'sun-compatibility') {
-    return READING_BACKGROUNDS.astro;
-  }
-  if (id === 'daily-runes') return READING_BACKGROUNDS.stone;
-  if (
-    id === 'daily-angel' ||
-    id === 'daily-angel-number' ||
-    id === 'daily-affirmation' ||
-    id === 'fortune-cookie' ||
-    id === 'magic-ball' ||
-    id === 'daily-numerology' ||
-    id === 'daisy-fortune'
-  ) {
-    return READING_BACKGROUNDS.angel;
-  }
-  return READING_BACKGROUNDS.parchment;
-}
+// Not: İkram Masası buton arka planları Ozan talebiyle kaldırıldı (sade butonlar).
+// Açılan okuma SONUCUNUN kendi kart arka planları (parşömen vb.) ilgili kartlarda durur.
 
 function weekRangeLabel(date = new Date()) {
   const day = date.getDay();
@@ -324,10 +301,6 @@ export function GeneralReadingsScreen({ navigation }: Props) {
     setSelectedReadingId((current) => current || items[0]?.id || null);
   }, [items]);
 
-  const selectedReading = useMemo(
-    () => items.find((item) => item.id === selectedReadingId) || null,
-    [items, selectedReadingId],
-  );
 
   const runGeneralReading = useCallback(
     async (item: GeneralReadingItem) => {
@@ -550,13 +523,16 @@ export function GeneralReadingsScreen({ navigation }: Props) {
     [navigation, selectedProfile],
   );
 
-  const startSelectedReading = useCallback(() => {
-    if (!selectedReading) return;
-    if (selectedReading.id === 'sun-compatibility') {
+  // Ozan: genel okumada ayrı "Okumayı Başlat" butonu yok; karta dokununca okuma
+  // DOĞRUDAN açılır. Seçilen item'ı doğrudan alır (selectedReading state'inin
+  // asenkron güncellenmesini beklemez).
+  const openReading = useCallback((reading: typeof items[number]) => {
+    if (!reading) return;
+    if (reading.id === 'sun-compatibility') {
       navigation.navigate('SunCompatibility');
       return;
     }
-    if (selectedReading.id === 'daisy-fortune') {
+    if (reading.id === 'daisy-fortune') {
       navigation.navigate('DaisyFortune');
       return;
     }
@@ -572,10 +548,10 @@ export function GeneralReadingsScreen({ navigation }: Props) {
     }
     navigation.navigate('GeneralReadingResult', {
       profileId: selectedProfile.profileId,
-      readingId: selectedReading.id,
-      title: selectedReading.title,
+      readingId: reading.id,
+      title: reading.title,
     });
-  }, [navigation, selectedProfile, selectedReading]);
+  }, [items, navigation, selectedProfile]);
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
@@ -628,31 +604,20 @@ export function GeneralReadingsScreen({ navigation }: Props) {
                   style={[styles.readingSquareCard, selected && styles.readingSquareCardSelected]}
                   onPress={() => {
                     setSelectedReadingId(item.id);
+                    openReading(item);
                   }}
                   disabled={isGenerating}
                 >
-                  <ImageBackground
-                    source={generalReadingBackground(item.id)}
-                    style={styles.readingSquareImage}
-                    imageStyle={styles.readingSquareImageRadius}
-                    resizeMode="cover"
-                  >
-                    <View style={styles.readingSquareOverlay}>
-                      <Text style={styles.readingSquareTitle}>{item.title}</Text>
-                      <Text style={styles.refreshText}>{item.refreshLabel}</Text>
-                    </View>
-                  </ImageBackground>
+                  <View style={styles.readingSquareOverlay}>
+                    <Text style={styles.readingSquareTitle}>{item.title}</Text>
+                    <Text style={styles.refreshText}>{item.refreshLabel}</Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
           </View>
         </View>
 
-        <View style={styles.panel}>
-          <TouchableOpacity style={styles.primaryButton} activeOpacity={0.86} onPress={startSelectedReading}>
-            <Text style={styles.primaryButtonText}>Okumayı Başlat</Text>
-          </TouchableOpacity>
-        </View>
       </BrandedScrollView>
 
       <BrandedConfirmModal
@@ -841,8 +806,9 @@ const styles = StyleSheet.create({
   readingSquareImageRadius: { borderRadius: 13 },
   readingSquareOverlay: {
     flex: 1,
+    width: '100%',
     padding: 8,
-    backgroundColor: 'rgba(10,10,18,0.42)',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
   },

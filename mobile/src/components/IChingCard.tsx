@@ -107,12 +107,23 @@ const IChingCard: React.FC<IChingCardProps> = ({
           <View style={styles.scrollContent}>
             <BrandedScrollView
               indicatorMode="box"
-              style={{ flex: 1 }} 
+              style={{ flex: 1 }}
               contentContainerStyle={styles.scrollContainer}
             >
-              <Text style={styles.messageText}>
-                {formatReadableText(data.text.split('\n\n').slice(1).join('\n\n'))}
-              </Text>
+              {data.text
+                .split('\n\n')
+                .slice(1)
+                .map((para) => para.trim())
+                .filter(Boolean)
+                .map((para, idx) => {
+                  const isHeader = /^(Şimdiki Durum|Gelecek Potansiyeli|Yol Gösterici Mesaj|Tavsiye)\b/.test(para);
+                  return (
+                    <Text key={idx} style={isHeader ? styles.headerText : styles.messageText}>
+                      {isHeader ? para : formatReadableText(para)}
+                    </Text>
+                  );
+                })}
+              <Text style={styles.scrollHint}>aşağı kaydır</Text>
             </BrandedScrollView>
 
             {/* Alt Gradyan (Fade) */}
@@ -239,6 +250,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 26,
     fontStyle: 'italic',
+    marginBottom: 14,
+  },
+  headerText: {
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontSize: 17,
+    color: '#2c2c2c',
+    textAlign: 'center',
+    lineHeight: 24,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  scrollHint: {
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontSize: 12,
+    color: '#8c7355',
+    textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 18,
+    letterSpacing: 1,
   },
   gradientOverlay: {
     position: 'absolute',

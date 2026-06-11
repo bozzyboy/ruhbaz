@@ -356,21 +356,16 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
       .map((l, idx) => (l === 6 || l === 9) ? { index: idx + 1, val: l } : null)
       .filter(l => l !== null) as { index: number, val: number }[];
       
-    let text = `Günün I-Ching Okuması:\n\nŞimdiki Durum: ${baseHex.name}\n${baseHex.situation}`;
-    
+    // Başlık ile açıklama arasına BOŞ SATIR (\n\n) konur: kart başlığı bold gösterir,
+    // açıklama bir satır altında yeni paragrafta başlar. "Dönüşüm Süreci / eril-dişil"
+    // bölümü Ozan talebiyle tamamen kaldırıldı (teknik/kafa karıştırıcı).
+    let text = `Günün I-Ching Okuması:\n\nŞimdiki Durum: ${baseHex.name}\n\n${baseHex.situation}`;
+
     if (changingLinesInfo.length > 0) {
-      const changesText = changingLinesInfo.map(cl => {
-        if (cl.val === 9) {
-          return `${cl.index}. çizgi Erilden Dişil enerjiye geçiyor.`;
-        } else {
-          return `${cl.index}. çizgi Dişilden Eril enerjiye geçiyor.`;
-        }
-      }).join('\n');
-      
-      text += `\n\nDönüşüm Süreci:\n${changesText}`;
-      text += `\n\nGelecek Potansiyeli ve Tavsiye: ${endHex.name}\n${endHex.situation}\n\nYol Gösterici Mesaj:\n${endHex.advice}`;
+      text += `\n\nGelecek Potansiyeli ve Tavsiye: ${endHex.name}\n\n${endHex.situation}`;
+      text += `\n\nYol Gösterici Mesaj:\n\n${endHex.advice}`;
     } else {
-      text += `\n\n(Bugün hiçbir değişen çizgi çıkmadı; durumunuz stabil ve enerjiniz tamamen mevcut hexagrama odaklı.)\n\nTavsiye:\n${baseHex.advice}`;
+      text += `\n\n(Bugün hiçbir değişen çizgi çıkmadı; durumunuz stabil ve enerjiniz tamamen mevcut hexagrama odaklı.)\n\nTavsiye:\n\n${baseHex.advice}`;
     }
     
     return {
