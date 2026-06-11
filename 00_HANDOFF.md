@@ -10,6 +10,8 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **En son snapshot:** [handoffs/faz4-bitti_ingilizce-i18n_2026-06-11.md](handoffs/faz4-bitti_ingilizce-i18n_2026-06-11.md) (**FAZ 4 BİTTİ + Ozan'a kalan NİHAİ liste §2 + Faz 5 brifingi §4**) · önceki: [faz4-ara](handoffs/2026-06-11_faz4-ara-kapanis.md), [faz3→4](handoffs/2026-06-11_faz3-to-faz4_gecis.md), [faz2→3](handoffs/2026-06-11_faz2-to-faz3_gecis.md), [faz1→2](handoffs/2026-06-11_faz1-to-faz2_gecis.md), [faz0→1](handoffs/2026-06-11_faz0-to-faz1_gecis.md)
 
+**⭐ OZAN İÇİN TEK KAPI:** Testlere nereden başlayacağını bilmiyorsan SADECE şunu aç: [19_TEST_BASLANGIC_REHBERI.md](19_TEST_BASLANGIC_REHBERI.md) — sırayı o tutuyor.
+
 **Son güncelleme:** 2026-06-11 (özerk maraton bitti) · **Durum:** ✅ FAZ 1 (`faz1`) · ✅ FAZ 2 özerk kod (`faz2`) · ✅ FAZ 3 (`faz3`) · ✅ **FAZ 4 BİTTİ** (`faz4`: i18n + EN UI + EN içerik (tarot/melek/rün/I-Ching/numeroloji) + 7 persona EN sesi + EN kriz güvenliği; saf JS — **APK gerekmez**; bilinçli boşluklar `18_FAZ4 §SON`). **Ozan'a:** 4 cihaz-test dokümanı (13/14/16/18, tek oturuş) + faz4-bitti §2'deki 15 maddelik NİHAİ liste. ⏸️ **FAZ 5 (Konak Akışı+bildirimler) ÖZERK BAŞLAMADI** — brifing faz4-bitti §4'te onay bekliyor.
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
