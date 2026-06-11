@@ -1,6 +1,8 @@
 # 17 — EN LOKALİZASYON PLANI + STORE METNİ TASLAĞI (Faz 4)
 
-> Durum: i18n altyapısı kuruldu (Faz 4a, commit 3f72d26). Bu doküman kalan işin haritası + Ozan onayı bekleyen EN taslakları. **Çeviri değil lokalleştirme** ilkesi (K45/K13): persona sesleri EN'de yeniden YAZILIR.
+> Durum (2026-06-11 sonu): **FAZ 4 TAMAMLANDI** (tag faz4) — dilim 1-2-5-6 bitti, dilim 3 (yasal EN) TASLAK girdi, dilim 4'ün ana gövdesi (divinationData) bitti. Kalan boşluklar: 18_FAZ4 §SON. Orijinal plan metni tarihçe için korunuyor:
+>
+> ~~Durum: i18n altyapısı kuruldu (Faz 4a, commit 3f72d26).~~ Bu doküman kalan işin haritası + Ozan onayı bekleyen EN taslakları. **Çeviri değil lokalleştirme** ilkesi (K45/K13): persona sesleri EN'de yeniden YAZILIR.
 
 ---
 
