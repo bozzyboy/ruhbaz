@@ -14,6 +14,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { useSession } from '../hooks/useSession';
@@ -51,16 +53,13 @@ import {
 type Props = NativeStackScreenProps<RootStackParamList, 'Session'>;
 const MAX_HOLD_TO_TALK_SECONDS = 30;
 
-const PHOTO_RETRY_MESSAGE =
-  'Bu fotoğraf bu okuma türü için uygun görünmüyor canım. Kahve yorumu için telveyi gösteren fincan veya tabak, el okuması için avuç içi fotoğrafı yükleyelim.';
-
-function visibleStartupError(raw?: string | null) {
+function visibleStartupError(raw: string | null | undefined, t: TFunction) {
   const text = (raw || '').trim();
-  if (!text) return PHOTO_RETRY_MESSAGE;
+  if (!text) return t('session.photoRetryMessage');
   return /Gemini|HTTP|JSON|RuntimeError|Traceback|candidate|classifier|generateContent|API|token|exception|returned/i.test(
     text,
   )
-    ? PHOTO_RETRY_MESSAGE
+    ? t('session.photoRetryMessage')
     : text;
 }
 
@@ -85,6 +84,7 @@ function mergeDraftWithTranscript(baseText: string, transcriptText: string) {
 }
 
 export function SessionScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { config } = route.params;
   const assistantLabel = getAssistantLabel(config.devSettings.assistantId);
   const { state, startSession, endSession, sendUserTranscript, updateSessionImage, setUserSpeakingActive } =
@@ -159,8 +159,8 @@ export function SessionScreen({ route, navigation }: Props) {
         if (isCancelled) return;
         const retryMessage = isRetryableLlmError(err) ? getRetryLaterMessage(retryKindForSession(config), config.profileId) : null;
         setStartupError({
-          title: retryMessage?.title || 'Fotoğrafı bir daha seçelim',
-          message: retryMessage?.message || visibleStartupError(err?.message),
+          title: retryMessage?.title || t('session.photoRetryTitle'),
+          message: retryMessage?.message || visibleStartupError(err?.message, t),
           isRetry: Boolean(retryMessage),
         });
       });
@@ -173,7 +173,7 @@ export function SessionScreen({ route, navigation }: Props) {
       setUserSpeakingActive(false);
       endSession();
     };
-  }, [config, endSession, navigation, setUserSpeakingActive, startSession]);
+  }, [config, endSession, navigation, setUserSpeakingActive, startSession, t]);
 
   useEffect(() => {
     if (state.status !== 'ended') return;
@@ -233,7 +233,7 @@ export function SessionScreen({ route, navigation }: Props) {
 
   const handleStartRecording = async () => {
     if (state.isAiSpeaking && !isRecording) {
-      setInfoModal({ visible: true, title: 'Sıralı Akış', message: 'Yanıt hazırlanırken konuşma başlatılamaz. Birazdan tekrar dene.' });
+      setInfoModal({ visible: true, title: t('session.turnFlowTitle'), message: t('session.waitResponseBeforeTalk') });
       return;
     }
     if ((isAssistantSpeaking() || isReading) && !isRecording) {
@@ -245,7 +245,7 @@ export function SessionScreen({ route, navigation }: Props) {
     try {
       setSttHint('');
       if (holdRemainingMs <= 0) {
-        setSttHint(`Bu tur için ses limiti doldu (${MAX_HOLD_TO_TALK_SECONDS} sn).`);
+        setSttHint(t('session.voiceLimitReached', { seconds: MAX_HOLD_TO_TALK_SECONDS }));
         return;
       }
       draftBaseRef.current = draftText.trim();
@@ -266,9 +266,9 @@ export function SessionScreen({ route, navigation }: Props) {
         },
         (code, message) => {
           if (code === 'no-speech') {
-            setSttHint('Sessizlik algılandı, dinleme devam ediyor.');
+            setSttHint(t('session.silenceDetected'));
           } else {
-            setSttHint(`STT hata: ${code}${message ? ` - ${message}` : ''}`);
+            setSttHint(t('session.sttError', { detail: `${code}${message ? ` - ${message}` : ''}` }));
           }
         },
       );
@@ -276,7 +276,7 @@ export function SessionScreen({ route, navigation }: Props) {
       isRecordingRef.current = false;
       setIsRecording(false);
       setUserSpeakingActive(false);
-      setInfoModal({ visible: true, title: 'Mikrofon Hatası', message: err?.message || 'Kayıt başlatılamadı' });
+      setInfoModal({ visible: true, title: t('session.micErrorTitle'), message: err?.message || t('session.recordStartFailed') });
     }
   };
 
@@ -306,7 +306,7 @@ export function SessionScreen({ route, navigation }: Props) {
       setRecordElapsedMs(elapsed);
       if (elapsed >= MAX_HOLD_TO_TALK_SECONDS * 1000 && !autoStopLockRef.current) {
         autoStopLockRef.current = true;
-        setSttHint(`Limit: En fazla ${MAX_HOLD_TO_TALK_SECONDS} saniye.`);
+        setSttHint(t('session.holdLimit', { seconds: MAX_HOLD_TO_TALK_SECONDS }));
         void handleStopRecording();
       }
     }, 250);
@@ -317,7 +317,7 @@ export function SessionScreen({ route, navigation }: Props) {
     const rawText = normalizeLimitedInput(draftText, FOLLOW_UP_QUESTION_MAX_CHARS);
     if (rawText.length < FOLLOW_UP_QUESTION_MIN_CHARS) return;
     if (isTurnLocked) {
-      setInfoModal({ visible: true, title: 'Sıralı Akış', message: 'Bu tur tamamlanmadan yeni mesaj gönderemezsin.' });
+      setInfoModal({ visible: true, title: t('session.turnFlowTitle'), message: t('session.turnLockedNewMessage') });
       return;
     }
     const sendResult = await sendUserTranscriptRef.current(rawText).then(
@@ -330,7 +330,7 @@ export function SessionScreen({ route, navigation }: Props) {
         : null;
       setSendErrorModal({
         visible: true,
-        message: retryMessage?.message || sendResult.err?.message || 'Mesaj gönderilemedi canım, bir daha deneyelim.',
+        message: retryMessage?.message || sendResult.err?.message || t('session.sendFailedFallback'),
       });
       return;
     }
@@ -350,7 +350,7 @@ export function SessionScreen({ route, navigation }: Props) {
   const handleSessionImageSelected = async (slot: 'cup' | 'cup2' | 'saucer' | 'palm', uri: string) => {
     setSessionImageUris((prev) => ({ ...prev, [slot]: uri }));
     await updateSessionImage(slot, uri).catch((err: any) => {
-      setInfoModal({ visible: true, title: 'Görsel Hata', message: err?.message || 'Görsel işlenemedi.' });
+      setInfoModal({ visible: true, title: t('session.imageErrorTitle'), message: err?.message || t('session.imageProcessFailed') });
     });
   };
 
@@ -363,7 +363,7 @@ export function SessionScreen({ route, navigation }: Props) {
     }
 
     if (!pendingTurnMessageId) {
-      setInfoModal({ visible: true, title: 'Oku', message: `Henüz okunacak bir ${assistantLabel} mesajı yok.` });
+      setInfoModal({ visible: true, title: t('session.readTitle'), message: t('session.noMessageToRead', { assistant: assistantLabel }) });
       return;
     }
 
@@ -387,7 +387,7 @@ export function SessionScreen({ route, navigation }: Props) {
         setIsReadPaused(false);
       }
     } catch (err: any) {
-      setInfoModal({ visible: true, title: 'TTS Hata', message: err?.message || 'Okuma başlatılamadı' });
+      setInfoModal({ visible: true, title: t('session.ttsErrorTitle'), message: err?.message || t('session.ttsStartFailed') });
     } finally {
       setIsReading(false);
     }
@@ -404,16 +404,16 @@ export function SessionScreen({ route, navigation }: Props) {
   };
 
   const readButtonLabel = (() => {
-    if (isAssistantSpeaking() || isReading) return 'Duraklat';
-    if (isReadPaused) return 'Devam Et';
-    return 'Telefon Okusun';
+    if (isAssistantSpeaking() || isReading) return t('session.pause');
+    if (isReadPaused) return t('session.resume');
+    return t('session.phoneRead');
   })();
   const modeHeaderLabel =
     config.readingType === 'coffee'
       ? config.coffeeMode === 'ai-brew'
-        ? 'Benim Yerime İç Modu'
-        : 'Kahve Yorumu'
-      : 'El Okuması Modu';
+        ? t('session.coffeeModeAiBrewHeader')
+        : t('readings.typeCoffee')
+      : t('session.palmModeHeader');
   const persistReadingAndEnd = async () => {
     if (state.isAiSpeaking) return;
     const transcript = state.messages.map((message) => ({
@@ -481,13 +481,10 @@ export function SessionScreen({ route, navigation }: Props) {
           <Text style={styles.errorTitle}>{startupError.title}</Text>
           <Text style={styles.errorText}>{startupError.message}</Text>
           {!startupError.isRetry ? (
-            <Text style={styles.errorWarning}>
-              Her yanlış yüklenen görsel kredi hesabına dahil edilir. Bu denemeler bir sonraki okumanın açılışına da not
-              düşülür.
-            </Text>
+            <Text style={styles.errorWarning}>{t('session.creditWarningSession')}</Text>
           ) : null}
           <TouchableOpacity style={styles.errorButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.errorButtonText}>Geri Dön</Text>
+            <Text style={styles.errorButtonText}>{t('session.goBack')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -523,7 +520,7 @@ export function SessionScreen({ route, navigation }: Props) {
               <TouchableOpacity onPress={() => setViewerUri(sessionImageUris.cup)}>
                 <View style={styles.previewWrap}>
                   <Image source={{ uri: sessionImageUris.cup }} style={styles.previewImage} />
-                  <Text style={styles.previewHintText}>Büyütmek için dokun</Text>
+                  <Text style={styles.previewHintText}>{t('session.tapToZoom')}</Text>
                 </View>
               </TouchableOpacity>
             ) : (
@@ -531,7 +528,7 @@ export function SessionScreen({ route, navigation }: Props) {
                 <ImageUploader
                   compact
                   hideLabel
-                  label="Kahve görseli 1"
+                  label={t('session.coffeeImageSlot', { num: 1 })}
                   imageUri={sessionImageUris.cup}
                   onImageSelected={(uri) => {
                     void handleSessionImageSelected('cup', uri);
@@ -543,7 +540,7 @@ export function SessionScreen({ route, navigation }: Props) {
               <TouchableOpacity onPress={() => setViewerUri(sessionImageUris.cup2)}>
                 <View style={styles.previewWrap}>
                   <Image source={{ uri: sessionImageUris.cup2 }} style={styles.previewImage} />
-                  <Text style={styles.previewHintText}>Büyütmek için dokun</Text>
+                  <Text style={styles.previewHintText}>{t('session.tapToZoom')}</Text>
                 </View>
               </TouchableOpacity>
             ) : (
@@ -551,7 +548,7 @@ export function SessionScreen({ route, navigation }: Props) {
                 <ImageUploader
                   compact
                   hideLabel
-                  label="Kahve görseli 2"
+                  label={t('session.coffeeImageSlot', { num: 2 })}
                   imageUri={sessionImageUris.cup2}
                   onImageSelected={(uri) => {
                     void handleSessionImageSelected('cup2', uri);
@@ -563,7 +560,7 @@ export function SessionScreen({ route, navigation }: Props) {
               <TouchableOpacity onPress={() => setViewerUri(sessionImageUris.saucer)}>
                 <View style={styles.previewWrap}>
                   <Image source={{ uri: sessionImageUris.saucer }} style={styles.previewImage} />
-                  <Text style={styles.previewHintText}>Büyütmek için dokun</Text>
+                  <Text style={styles.previewHintText}>{t('session.tapToZoom')}</Text>
                 </View>
               </TouchableOpacity>
             ) : (
@@ -571,7 +568,7 @@ export function SessionScreen({ route, navigation }: Props) {
                 <ImageUploader
                   compact
                   hideLabel
-                  label="Kahve görseli 3"
+                  label={t('session.coffeeImageSlot', { num: 3 })}
                   imageUri={sessionImageUris.saucer}
                   onImageSelected={(uri) => {
                     void handleSessionImageSelected('saucer', uri);
@@ -587,7 +584,7 @@ export function SessionScreen({ route, navigation }: Props) {
               <TouchableOpacity onPress={() => setViewerUri(sessionImageUris.palm)}>
                 <View style={styles.previewWrap}>
                   <Image source={{ uri: sessionImageUris.palm }} style={styles.previewImage} />
-                  <Text style={styles.previewHintText}>Büyütmek için dokun</Text>
+                  <Text style={styles.previewHintText}>{t('session.tapToZoom')}</Text>
                 </View>
               </TouchableOpacity>
             ) : (
@@ -595,7 +592,7 @@ export function SessionScreen({ route, navigation }: Props) {
                 <ImageUploader
                   compact
                   hideLabel
-                  label="Avuç İçi"
+                  label={t('session.palmSlot')}
                   imageUri={sessionImageUris.palm}
                   onImageSelected={(uri) => {
                     void handleSessionImageSelected('palm', uri);
@@ -637,15 +634,15 @@ export function SessionScreen({ route, navigation }: Props) {
                   activeOpacity={0.78}
                   onPress={() => handleMessageActions(msg)}
                 >
-                  <Text style={styles.messageActionsText}>Yeniden gönder / düzenle</Text>
+                  <Text style={styles.messageActionsText}>{t('session.resendOrEdit')}</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
           ))}
           {state.isAiSpeaking ? (
             <AssistantLoading
-              label={state.messages.length ? 'Yanıt hazırlanıyor' : 'Okuman hazırlanıyor'}
-              detail={state.messages.length ? undefined : 'Lütfen bekleyiniz. Ekranı kapatmayınız.'}
+              label={state.messages.length ? t('session.responsePreparing') : t('session.readingPreparing')}
+              detail={state.messages.length ? undefined : t('session.pleaseWaitKeepOpen')}
               compact={Boolean(state.messages.length)}
             />
           ) : null}
@@ -663,7 +660,7 @@ export function SessionScreen({ route, navigation }: Props) {
             <Text style={styles.secondaryActionText}>{readButtonLabel}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.secondaryAction, styles.readControlDisabled]} disabled>
-            <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+            <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
           </TouchableOpacity>
         </View>
 
@@ -674,7 +671,7 @@ export function SessionScreen({ route, navigation }: Props) {
             onPress={() => setEditorVisible(true)}
           >
             <Text style={[styles.composePreviewText, !draftText.trim() && styles.composePreviewPlaceholder]}>
-              {draftText.trim() || 'Bu yorumla ilgili ne sormak istersin?'}
+              {draftText.trim() || t('session.askPlaceholder')}
             </Text>
           </TouchableOpacity>
           <View style={styles.quickActions}>
@@ -695,7 +692,7 @@ export function SessionScreen({ route, navigation }: Props) {
               }}
               disabled={!isRecording && isHoldToTalkDisabled}
             >
-              <Text style={styles.holdTalkActionText}>{isRecording ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+              <Text style={styles.holdTalkActionText}>{isRecording ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
             </Pressable>
             <TouchableOpacity
               style={[
@@ -705,17 +702,17 @@ export function SessionScreen({ route, navigation }: Props) {
               onPress={handleSendDraft}
               disabled={isTurnLocked || isRecording || !draftText.trim()}
             >
-              <Text style={styles.primaryActionText}>Sor</Text>
+              <Text style={styles.primaryActionText}>{t('session.ask')}</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.limitInfoText}>Bu tur için ses limitin: {MAX_HOLD_TO_TALK_SECONDS} sn</Text>
+          <Text style={styles.limitInfoText}>{t('session.voiceLimitInfo', { seconds: MAX_HOLD_TO_TALK_SECONDS })}</Text>
           {!!sttHint ? <Text style={styles.sttHint}>{sttHint}</Text> : null}
           <TouchableOpacity
             style={[styles.endButton, state.isAiSpeaking && styles.squareButtonDisabled]}
             onPress={() => void persistReadingAndEnd()}
             disabled={state.isAiSpeaking}
           >
-            <Text style={styles.endButtonText}>Okumayı Bitir</Text>
+            <Text style={styles.endButtonText}>{t('session.endReading')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -728,9 +725,9 @@ export function SessionScreen({ route, navigation }: Props) {
         <BrandedConfirmModal
           visible={pauseWarningVisible}
           title={APP_NAME}
-          message="Yorumcu okumasını bitirip soru sorarak mı devam etmek istiyorsunuz?"
-          confirmLabel="Evet"
-          cancelLabel="Hayır"
+          message={t('session.pauseConfirmMessage')}
+          confirmLabel={t('common.yes')}
+          cancelLabel={t('common.no')}
           onConfirm={() => {
             setPauseWarningVisible(false);
             setHoldToTalkUnlocked(true);
@@ -753,13 +750,13 @@ export function SessionScreen({ route, navigation }: Props) {
             keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
           >
             <View style={styles.editorCard}>
-              <Text style={styles.editorTitle}>Sorunu Düzenle</Text>
+              <Text style={styles.editorTitle}>{t('session.editQuestionTitle')}</Text>
               <TextInput
                 style={styles.editorInput}
                 value={draftText}
                 onChangeText={setDraftText}
                 maxLength={FOLLOW_UP_QUESTION_MAX_CHARS}
-                placeholder="Sorunu buradan düzenleyebilirsin..."
+                placeholder={t('session.editQuestionPlaceholder')}
                 placeholderTextColor="rgba(255,255,255,0.35)"
                 multiline
                 autoFocus
@@ -767,14 +764,14 @@ export function SessionScreen({ route, navigation }: Props) {
               />
               <View style={styles.editorActions}>
                 <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                  <Text style={styles.editorGhostText}>Kapat</Text>
+                  <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.editorSendBtn, (isTurnLocked || isRecording || !draftText.trim()) && styles.squareButtonDisabled]}
                   onPress={handleSendDraft}
                   disabled={isTurnLocked || isRecording || !draftText.trim()}
                 >
-                  <Text style={styles.editorSendText}>Gönder</Text>
+                  <Text style={styles.editorSendText}>{t('session.send')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -785,8 +782,8 @@ export function SessionScreen({ route, navigation }: Props) {
           visible={sendErrorModal.visible}
           title={APP_NAME}
           message={sendErrorModal.message}
-          confirmLabel="Tamam"
-          cancelLabel="Kapat"
+          confirmLabel={t('common.ok')}
+          cancelLabel={t('common.close')}
           onConfirm={() => setSendErrorModal({ visible: false, message: '' })}
           onCancel={() => setSendErrorModal({ visible: false, message: '' })}
         />
@@ -794,18 +791,18 @@ export function SessionScreen({ route, navigation }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
+          confirmLabel={t('common.ok')}
           cancelLabel={null}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         />
         <BrandedConfirmModal
           visible={messageActionModal.visible}
-          title="Mesaj"
-          message="Bu soruyla ne yapmak istersin?"
-          confirmLabel="Yeniden Gönder"
-          cancelLabel="Kapat"
-          extraActionLabel="Düzenle"
+          title={t('session.messageTitle')}
+          message={t('session.messageActionPrompt')}
+          confirmLabel={t('session.resend')}
+          cancelLabel={t('common.close')}
+          extraActionLabel={t('profile.editButton')}
           onExtraAction={() => {
             setDraftText(messageActionModal.text);
             setEditorVisible(true);
@@ -815,7 +812,7 @@ export function SessionScreen({ route, navigation }: Props) {
             const value = messageActionModal.text;
             setMessageActionModal({ visible: false, text: '' });
             if (isTurnLocked || isRecording) {
-              setInfoModal({ visible: true, title: 'Sıralı Akış', message: 'Bu tur tamamlanmadan yeniden gönderemezsin.' });
+              setInfoModal({ visible: true, title: t('session.turnFlowTitle'), message: t('session.turnLockedResend') });
               return;
             }
             void sendUserTranscriptRef.current(value);

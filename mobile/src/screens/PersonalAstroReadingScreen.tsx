@@ -2,6 +2,8 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { getAssistantLabel } from '../config/constants';
@@ -41,12 +43,25 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalAstroReading'>;
 
+// Hafıza temalarına (themeFromReading) yazılan TR etiketler; UI'da gösterim için
+// periodUiLabel (i18n) kullanılır, kalıcı kayıtlar bu sabitten beslenmeye devam eder.
 const PERIOD_LABELS: Record<AstroPeriod, string> = {
   daily: 'Günlük',
   weekly: 'Haftalık',
   monthly: 'Aylık',
   yearly: 'Yıllık',
 };
+
+const PERIOD_UI_KEYS: Record<AstroPeriod, string> = {
+  daily: 'flows.periodDaily',
+  weekly: 'flows.periodWeekly',
+  monthly: 'flows.periodMonthly',
+  yearly: 'flows.periodYearly',
+};
+
+function periodUiLabel(period: AstroPeriod, t: TFunction) {
+  return t(PERIOD_UI_KEYS[period]);
+}
 
 type AstroSelection = AstroPeriod | 'topic';
 
@@ -66,6 +81,7 @@ function themeFromReading(period: AstroPeriod, sign: string, risingSign?: string
 }
 
 export function PersonalAstroReadingScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId } = route.params;
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<AstroPeriod | null>(null);
@@ -98,8 +114,8 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
   const assistantLabel = useMemo(() => getAssistantLabel(assistantId), [assistantId]);
   const normalizedTopicText = normalizeLimitedInput(topicText, OPTIONAL_READING_TOPIC_MAX_CHARS);
   const modeHeaderLabel = useMemo(
-    () => (selection === 'topic' ? 'Konu Odaklı' : period ? PERIOD_LABELS[period] : 'Dönem / konu seç'),
-    [period, selection],
+    () => (selection === 'topic' ? t('flows.topicFocusedHeader') : period ? periodUiLabel(period, t) : t('flows.selectPeriodHeader')),
+    [period, selection, t],
   );
   const isBusy = isLoading || isSendingQuestion;
   const hasPreparedReading = Boolean(text && period);
@@ -218,7 +234,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         setInfoModal({
           visible: true,
           title: APP_NAME,
-          message: 'Profil bulunamadı.',
+          message: t('session.profileNotFound'),
         });
         setText('');
         return;
@@ -228,9 +244,8 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
       if (!hasRequiredAstroBirthInputs(profile)) {
         setInfoModal({
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message:
-            'Kişiye özel astroloji için doğum tarihi, doğum ülkesi ve doğum şehri gerekli. Doğum saati varsa yükselen ve evler de netleşir. Lütfen profil bilgilerini tamamla.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('flows.astroInfoRequired'),
         });
         setText('');
         return;
@@ -280,13 +295,13 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: retryMessage?.title || APP_NAME,
-        message: retryMessage?.message || err?.message || 'Kişiye özel astro yorumu üretilemedi.',
+        message: retryMessage?.message || err?.message || t('flows.astroFailed'),
       });
       setText('');
     } finally {
       setIsLoading(false);
     }
-  }, [applyReadingToScreen, assistantId, assistantLabel, isBusy, normalizedTopicText, period, profileId, selection, text]);
+  }, [applyReadingToScreen, assistantId, assistantLabel, isBusy, normalizedTopicText, period, profileId, selection, t, text]);
 
   useEffect(() => {
     return () => {
@@ -383,12 +398,12 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Soruna şu an yanıt üretilemedi.',
+        message: err?.message || t('session.answerFailed'),
       });
     } finally {
       setIsSendingQuestion(false);
     }
-  }, [assistantId, assistantLabel, followUps, isSendingQuestion, normalizedTopicText, period, profileName, profileId, questionText, selection, text]);
+  }, [assistantId, assistantLabel, followUps, isSendingQuestion, normalizedTopicText, period, profileName, profileId, questionText, selection, t, text]);
 
   const buildTranscript = useCallback(
     () => {
@@ -466,10 +481,10 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Sesli yazma başlatılamadı.',
+        message: err?.message || t('session.voiceTypingStartFailed'),
       });
     }
-  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, speechMode, text]);
+  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, speechMode, t, text]);
 
   const handleQuestionRecordStop = useCallback(async () => {
     await stopNativeRecording().catch(() => {});
@@ -504,7 +519,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
           />
         </View>
         <View style={styles.sessionHeaderRow}>
-          <Text style={styles.sessionHeaderText}>{profileName || 'Profil'}</Text>
+          <Text style={styles.sessionHeaderText}>{profileName || t('session.profileFallback')}</Text>
           <Text style={[styles.sessionHeaderText, styles.modeHeaderText]}>{modeHeaderLabel}</Text>
           <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
         </View>
@@ -514,8 +529,8 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
             activeOpacity={0.82}
             onPress={() => setSelectionCollapsed((current) => !current)}
           >
-            <Text style={styles.sectionTitle}>Dönem / Konu Seç</Text>
-            <Text style={styles.expandButtonText}>{selectionCollapsed ? 'Aç' : 'Kapat'}</Text>
+            <Text style={styles.sectionTitle}>{t('flows.selectPeriodTitle')}</Text>
+            <Text style={styles.expandButtonText}>{selectionCollapsed ? t('common.open') : t('common.close')}</Text>
           </TouchableOpacity>
           {!selectionCollapsed ? (
             <>
@@ -529,14 +544,14 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                       onPress={() => void handleSelectPeriod(item)}
                       onLongPress={() =>
                         showSelectionInfo(
-                          PERIOD_LABELS[item],
-                          'Kişinin doğum haritası ile seçtiği dönemdeki gökyüzü etkileri seçilen profile özel yorumlanır.',
+                          periodUiLabel(item, t),
+                          t('flows.periodInfoMessage'),
                         )
                       }
                       disabled={isBusy}
                     >
                       <Text style={[styles.periodButtonText, selected && styles.periodButtonTextSelected]}>
-                        {PERIOD_LABELS[item]}
+                        {periodUiLabel(item, t)}
                       </Text>
                     </TouchableOpacity>
                   );
@@ -546,40 +561,40 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                   onPress={handleSelectTopic}
                   onLongPress={() =>
                     showSelectionInfo(
-                      'Belli Bir Konu',
-                      'Kişinin doğum haritası ile seçtiği konuya denk gelen gökyüzü etkileri seçilen profile özel yorumlanır.',
+                      t('flows.specificTopic'),
+                      t('flows.topicInfoMessage'),
                     )
                   }
                   disabled={isBusy}
                 >
-                  <Text style={[styles.periodButtonText, selection === 'topic' && styles.periodButtonTextSelected]}>Belli Bir Konu</Text>
+                  <Text style={[styles.periodButtonText, selection === 'topic' && styles.periodButtonTextSelected]}>{t('flows.specificTopic')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.periodButton, isBusy && styles.disabledAction]}
                   onPress={() => navigation.navigate('AstroRelationshipReading', { profileId, assistantId, mode: 'compatibility' })}
                   onLongPress={() =>
-                    showSelectionInfo('İlişki Uyumu', 'İki kişinin doğum verileriyle detaylı sinastri analizi yapılır.')
+                    showSelectionInfo(t('flows.relationshipCompatibility'), t('flows.compatibilityInfoMessage'))
                   }
                   disabled={isBusy}
                 >
-                  <Text style={styles.astroModeTitle}>İlişki Uyumu</Text>
+                  <Text style={styles.astroModeTitle}>{t('flows.relationshipCompatibility')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.periodButton, isBusy && styles.disabledAction]}
                   onPress={() => navigation.navigate('AstroRelationshipReading', { profileId, assistantId, mode: 'family' })}
                   onLongPress={() =>
-                    showSelectionInfo('Aile Okuması', 'Aile bireylerinin doğum verileriyle ortak ritim analizi yapılır.')
+                    showSelectionInfo(t('flows.familyReading'), t('flows.familyInfoMessage'))
                   }
                   disabled={isBusy}
                 >
-                  <Text style={styles.astroModeTitle}>Aile Okuması</Text>
+                  <Text style={styles.astroModeTitle}>{t('flows.familyReading')}</Text>
                 </TouchableOpacity>
               </View>
               {selection === 'topic' ? (
             <TouchableOpacity style={styles.topicPromptBox} activeOpacity={0.9} onPress={() => setTopicEditorVisible(true)}>
-              <Text style={styles.topicPromptLabel}>Yorumlanacak konu</Text>
+              <Text style={styles.topicPromptLabel}>{t('flows.topicToInterpret')}</Text>
               <Text style={[styles.topicPromptText, !normalizedTopicText && styles.topicPromptPlaceholder]}>
-                {normalizedTopicText || 'Aklında yorumlanmasını istediğin konu, soru ya da durum varsa buraya yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin.'}
+                {normalizedTopicText || t('flows.astroTopicPlaceholder')}
               </Text>
             </TouchableOpacity>
               ) : null}
@@ -592,7 +607,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
             onPress={() => void loadReading()}
             disabled={!canPrepareReading}
           >
-            <Text style={styles.floatingPrepareText}>Yorumla</Text>
+            <Text style={styles.floatingPrepareText}>{t('session.interpret')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -602,7 +617,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
             readingPanelYRef.current = event.nativeEvent.layout.y;
           }}
         >
-          <Text style={styles.sectionTitle}>Yorum</Text>
+          <Text style={styles.sectionTitle}>{t('session.interpretation')}</Text>
           <BrandedScrollView
             containerStyle={styles.readingScrollFrame}
             style={styles.readingScroll}
@@ -611,25 +626,29 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
             indicatorMode="box"
           >
             {isLoading ? (
-              <AssistantLoading label="Yorum hazırlanıyor" detail="Lütfen bekleyiniz. Ekranı kapatmayınız." />
+              <AssistantLoading label={t('session.interpretationPreparing')} detail={t('session.pleaseWaitKeepOpen')} />
             ) : text ? (
               <SelectableFormattedText text={text} style={styles.readingText} />
             ) : (
-              <Text style={styles.loading}>Günlük, haftalık, aylık, yıllık dönem seçebilir ya da belli bir konu yazıp yorumu hazırlayabilirsin.</Text>
+              <Text style={styles.loading}>{t('flows.astroEmptyReading')}</Text>
             )}
             {meta ? (
               <Text style={styles.meta}>
-                Güneş: {meta.sign} | Yükselen: {meta.risingSign || 'Doğum saati gerekli'} | Zaman dilimi: {formatTimezoneForDisplay(meta.timezone)}
+                {t('flows.astroMetaLine', {
+                  sign: meta.sign,
+                  rising: meta.risingSign || t('flows.birthTimeRequired'),
+                  timezone: formatTimezoneForDisplay(meta.timezone),
+                })}
               </Text>
             ) : null}
           </BrandedScrollView>
           {text ? (
             <View style={styles.quickActions}>
               <TouchableOpacity style={styles.secondaryAction} onPress={handlePhoneRead}>
-                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? 'Duraklat' : 'Telefon Okusun'}</Text>
+                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? t('session.pause') : t('session.phoneRead')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.secondaryAction, styles.disabledAction]} disabled>
-                <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+                <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -642,14 +661,14 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                 key={message.id}
                 style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
               >
-                <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                 <SelectableFormattedText text={message.text} style={styles.chatText} />
               </View>
             ))}
             {isSendingQuestion ? <AssistantLoading compact /> : null}
             <TouchableOpacity style={styles.questionInput} activeOpacity={0.88} onPress={() => setEditorVisible(true)}>
               <Text style={[styles.composePreviewText, !questionText.trim() && styles.composePreviewPlaceholder]}>
-                {questionText.trim() || 'Bu yorumla ilgili bir soru veya konu yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin.'}
+                {questionText.trim() || t('flows.astroAskPlaceholder')}
               </Text>
             </TouchableOpacity>
             <Modal visible={editorVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setEditorVisible(false)}>
@@ -659,13 +678,13 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                 keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
               >
                 <View style={styles.editorCard}>
-                  <Text style={styles.editorTitle}>Sorunu Düzenle</Text>
+                  <Text style={styles.editorTitle}>{t('session.editQuestionTitle')}</Text>
                   <TextInput
                     style={styles.editorInput}
                     value={questionText}
                     onChangeText={setQuestionText}
                     maxLength={FOLLOW_UP_QUESTION_MAX_CHARS}
-                    placeholder="Sorunu veya konunu buradan düzenleyebilirsin. Aklında bir şey yoksa boş da bırakabilirsin."
+                    placeholder={t('flows.questionEditorPlaceholderOptional')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     multiline
                     autoFocus
@@ -673,14 +692,14 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                   />
                   <View style={styles.editorActions}>
                     <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                      <Text style={styles.editorGhostText}>Kapat</Text>
+                      <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.editorSendBtn, (!questionText.trim() || isSendingQuestion) && styles.disabledAction]}
                       onPress={() => void handleSendQuestion()}
                       disabled={!questionText.trim() || isSendingQuestion}
                     >
-                      <Text style={styles.editorSendText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                      <Text style={styles.editorSendText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -693,14 +712,14 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
                 onPressOut={() => void handleQuestionRecordStop()}
                 onResponderTerminate={() => void handleQuestionRecordStop()}
               >
-                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
               </Pressable>
               <TouchableOpacity
                 style={[styles.primaryAction, (!questionText.trim() || isSendingQuestion) && styles.disabledAction]}
                 onPress={() => void handleSendQuestion()}
                 disabled={!questionText.trim() || isSendingQuestion}
               >
-                <Text style={styles.primaryActionText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                <Text style={styles.primaryActionText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -708,7 +727,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
               onPress={() => void persistReadingAndEnd()}
               disabled={isSendingQuestion}
             >
-              <Text style={styles.endButtonText}>Okumayı Bitir</Text>
+              <Text style={styles.endButtonText}>{t('session.endReading')}</Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -721,13 +740,13 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
           keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
         >
           <View style={styles.editorCard}>
-            <Text style={styles.editorTitle}>Konu / Niyet</Text>
+            <Text style={styles.editorTitle}>{t('flows.topicIntentTitle')}</Text>
             <TextInput
               style={styles.editorInput}
               value={topicText}
               onChangeText={setTopicText}
               maxLength={OPTIONAL_READING_TOPIC_MAX_CHARS}
-              placeholder="Aklında yorumlanmasını istediğin konu, soru ya da durum varsa buraya yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin."
+              placeholder={t('flows.astroTopicPlaceholder')}
               placeholderTextColor="rgba(255,255,255,0.35)"
               multiline
               autoFocus
@@ -735,13 +754,13 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
             />
             <View style={styles.editorActions}>
               <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setTopicEditorVisible(false)}>
-                <Text style={styles.editorGhostText}>Kapat</Text>
+                <Text style={styles.editorGhostText}>{t('common.close')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.editorSendBtn}
                 onPress={() => setTopicEditorVisible(false)}
               >
-                <Text style={styles.editorSendText}>Kaydet</Text>
+                <Text style={styles.editorSendText}>{t('session.save')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -752,10 +771,10 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         visible={infoModal.visible}
         title={infoModal.title}
         message={infoModal.message}
-        confirmLabel="Tamam"
+        confirmLabel={t('common.ok')}
         cancelLabel={null}
-        extraActionLabel={infoModal.title === 'Profil Bilgisi Gerekli' ? 'Profil Ayarlarına Git' : null}
-        onExtraAction={infoModal.title === 'Profil Bilgisi Gerekli' ? openProfileSettings : undefined}
+        extraActionLabel={infoModal.title === t('modals.profileInfoRequiredTitle') ? t('profile.goToProfileSettings') : null}
+        onExtraAction={infoModal.title === t('modals.profileInfoRequiredTitle') ? openProfileSettings : undefined}
         onConfirm={closeInfoModal}
         onCancel={closeInfoModal}
       />

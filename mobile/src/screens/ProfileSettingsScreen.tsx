@@ -339,9 +339,9 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     try {
       const result = await exportBackupToUserFolder();
       if (result.ok) {
-        showDataMessage(`Yedek alındı: ${result.fileName} (${result.fileCount} dosya). Dosya, seçtiğin klasörde.`);
+        showDataMessage(t('profile.backupDoneMessage', { file: result.fileName, count: result.fileCount }));
       } else if (result.reason === 'error') {
-        showDataMessage(`Yedek alınamadı: ${result.message || 'bilinmeyen hata'}`);
+        showDataMessage(t('profile.backupFailedMessage', { error: result.message || t('profile.unknownError') }));
       }
     } finally {
       setDataBusy(false);
@@ -355,7 +355,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
       const result = await listBackupsInUserFolder();
       if (!result.ok) {
         if (result.reason === 'error') {
-          showDataMessage(`Yedekler okunamadı: ${result.message || 'bilinmeyen hata'}`);
+          showDataMessage(t('profile.backupListFailedMessage', { error: result.message || t('profile.unknownError') }));
         }
         return;
       }
@@ -377,11 +377,9 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     try {
       const result = await importBackupFromUri(candidate.uri);
       if (result.ok) {
-        showDataMessage(
-          `Yedek geri yüklendi (${result.fileCount} dosya). Verilerin tutarlı yüklenmesi için lütfen uygulamayı TAMAMEN KAPATIP yeniden aç.`,
-        );
+        showDataMessage(t('profile.restoreDoneMessage', { count: result.fileCount }));
       } else {
-        showDataMessage(`Geri yükleme başarısız: ${result.message || 'geçersiz dosya'}`);
+        showDataMessage(t('profile.restoreFailedMessage', { error: result.message || t('profile.invalidFile') }));
       }
     } finally {
       setDataBusy(false);
@@ -396,7 +394,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
       if (result.ok) {
         showDataMessage(t('profile.wipeDoneMessage'));
       } else {
-        showDataMessage(`Silme tamamlanamadı: ${result.message || 'bilinmeyen hata'}`);
+        showDataMessage(t('profile.wipeFailedMessage', { error: result.message || t('profile.unknownError') }));
       }
     } finally {
       setDataBusy(false);
@@ -568,7 +566,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingWrap}>
-        <Text style={styles.loadingText}>Hazırlanıyor...</Text>
+        <Text style={styles.loadingText}>{t('profile.loadingPreparing')}</Text>
       </SafeAreaView>
     );
   }
@@ -625,7 +623,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     })
                   }
                 >
-                  <Text style={styles.linkButtonText}>Hafıza Özeti</Text>
+                  <Text style={styles.linkButtonText}>{t('profile.memorySummaryButton')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.linkButton}
@@ -636,7 +634,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     })
                   }
                 >
-                  <Text style={styles.linkButtonText}>Son Okumalar</Text>
+                  <Text style={styles.linkButtonText}>{t('profile.recentReadingsButton')}</Text>
                 </TouchableOpacity>
               </View>
             ) : null}

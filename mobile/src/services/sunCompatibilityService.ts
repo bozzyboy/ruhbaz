@@ -1,4 +1,12 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import { getAppLanguage } from '../i18n';
+import {
+  READING_TITLE_SUFFIX_EN,
+  SCORE_TONES_EN,
+  SECTION_LABELS_EN,
+  SECTION_TEMPLATES_EN,
+  ZODIAC_LABELS_EN,
+} from './sunCompatibilityService.en';
 
 export type ZodiacSignId =
   | 'aries'
@@ -52,20 +60,50 @@ const DATA_DIR = `${FileSystem.documentDirectory}falci-data/`;
 const HISTORY_FILE = `${DATA_DIR}sun-compatibility-history.json`;
 const MAX_HISTORY_PER_KEY = 8;
 
-export const ZODIAC_SIGNS: SignMeta[] = [
-  { id: 'aries', label: 'Koç', element: 'fire', modality: 'cardinal', polarity: 'yang' },
-  { id: 'taurus', label: 'Boğa', element: 'earth', modality: 'fixed', polarity: 'yin' },
-  { id: 'gemini', label: 'İkizler', element: 'air', modality: 'mutable', polarity: 'yang' },
-  { id: 'cancer', label: 'Yengeç', element: 'water', modality: 'cardinal', polarity: 'yin' },
-  { id: 'leo', label: 'Aslan', element: 'fire', modality: 'fixed', polarity: 'yang' },
-  { id: 'virgo', label: 'Başak', element: 'earth', modality: 'mutable', polarity: 'yin' },
-  { id: 'libra', label: 'Terazi', element: 'air', modality: 'cardinal', polarity: 'yang' },
-  { id: 'scorpio', label: 'Akrep', element: 'water', modality: 'fixed', polarity: 'yin' },
-  { id: 'sagittarius', label: 'Yay', element: 'fire', modality: 'mutable', polarity: 'yang' },
-  { id: 'capricorn', label: 'Oğlak', element: 'earth', modality: 'cardinal', polarity: 'yin' },
-  { id: 'aquarius', label: 'Kova', element: 'air', modality: 'fixed', polarity: 'yang' },
-  { id: 'pisces', label: 'Balık', element: 'water', modality: 'mutable', polarity: 'yin' },
+// TR burç etiketleri (kanonik; EN karşılıkları sunCompatibilityService.en.ts'te).
+// Burç id'leri lookup/geçmiş anahtarıdır ve dile bağlı DEĞİLDİR.
+const ZODIAC_LABELS_TR: Record<ZodiacSignId, string> = {
+  aries: 'Koç',
+  taurus: 'Boğa',
+  gemini: 'İkizler',
+  cancer: 'Yengeç',
+  leo: 'Aslan',
+  virgo: 'Başak',
+  libra: 'Terazi',
+  scorpio: 'Akrep',
+  sagittarius: 'Yay',
+  capricorn: 'Oğlak',
+  aquarius: 'Kova',
+  pisces: 'Balık',
+};
+
+function signLabel(id: ZodiacSignId): string {
+  return getAppLanguage() === 'en' ? ZODIAC_LABELS_EN[id] : ZODIAC_LABELS_TR[id];
+}
+
+const ZODIAC_SIGN_BASE: Omit<SignMeta, 'label'>[] = [
+  { id: 'aries', element: 'fire', modality: 'cardinal', polarity: 'yang' },
+  { id: 'taurus', element: 'earth', modality: 'fixed', polarity: 'yin' },
+  { id: 'gemini', element: 'air', modality: 'mutable', polarity: 'yang' },
+  { id: 'cancer', element: 'water', modality: 'cardinal', polarity: 'yin' },
+  { id: 'leo', element: 'fire', modality: 'fixed', polarity: 'yang' },
+  { id: 'virgo', element: 'earth', modality: 'mutable', polarity: 'yin' },
+  { id: 'libra', element: 'air', modality: 'cardinal', polarity: 'yang' },
+  { id: 'scorpio', element: 'water', modality: 'fixed', polarity: 'yin' },
+  { id: 'sagittarius', element: 'fire', modality: 'mutable', polarity: 'yang' },
+  { id: 'capricorn', element: 'earth', modality: 'cardinal', polarity: 'yin' },
+  { id: 'aquarius', element: 'air', modality: 'fixed', polarity: 'yang' },
+  { id: 'pisces', element: 'water', modality: 'mutable', polarity: 'yin' },
 ];
+
+// label, okunduğu anda aktif dile göre çözülür (getter); böylece ekran
+// kodu değişmeden seçici etiketleri de dil değişiminde güncellenir.
+export const ZODIAC_SIGNS: SignMeta[] = ZODIAC_SIGN_BASE.map((sign) => ({
+  ...sign,
+  get label() {
+    return signLabel(sign.id);
+  },
+}));
 
 const SECTION_LABELS: Record<SunCompatibilitySectionId, string> = {
   general: 'Genel Uyum',
@@ -189,13 +227,28 @@ function scoreColor(score: number) {
   return '#14B8A6';
 }
 
-function scoreTone(score: number) {
-  if (score < 15) return 'Uyum düşük görünüyor; bu bağda sabır, açık sınır ve beklenti kontrolü çok önemli.';
-  if (score < 30) return 'Uyum zorlayıcı ama tamamen kapalı değil; iki taraf da bilinçli emek verirse denge kurulabilir.';
-  if (score < 45) return 'Uyum dalgalı; bazı alanlar rahat akarken bazı konular özel dikkat ister.';
-  if (score < 60) return 'Uyum orta-iyi seviyede; doğru iletişimle bağ daha dengeli hale gelebilir.';
-  if (score < 75) return 'Uyum güçlü; farklılıklar yönetildiğinde ilişki besleyici ve doğal hissedebilir.';
-  return 'Uyum çok güçlü; iki taraf birbirinin ritmine kolayca eşlik edebilir ve bağ kendiliğinden akabilir.';
+// TR ton cümleleri (kanonik eşik sırası: <15, <30, <45, <60, <75, geri kalan).
+// EN karşılıkları SCORE_TONES_EN ile birebir aynı sıradadır.
+const SCORE_TONES_TR: string[] = [
+  'Uyum düşük görünüyor; bu bağda sabır, açık sınır ve beklenti kontrolü çok önemli.',
+  'Uyum zorlayıcı ama tamamen kapalı değil; iki taraf da bilinçli emek verirse denge kurulabilir.',
+  'Uyum dalgalı; bazı alanlar rahat akarken bazı konular özel dikkat ister.',
+  'Uyum orta-iyi seviyede; doğru iletişimle bağ daha dengeli hale gelebilir.',
+  'Uyum güçlü; farklılıklar yönetildiğinde ilişki besleyici ve doğal hissedebilir.',
+  'Uyum çok güçlü; iki taraf birbirinin ritmine kolayca eşlik edebilir ve bağ kendiliğinden akabilir.',
+];
+
+function toneIndex(score: number) {
+  if (score < 15) return 0;
+  if (score < 30) return 1;
+  if (score < 45) return 2;
+  if (score < 60) return 3;
+  if (score < 75) return 4;
+  return 5;
+}
+
+function scoreTone(score: number, language: 'tr' | 'en') {
+  return (language === 'en' ? SCORE_TONES_EN : SCORE_TONES_TR)[toneIndex(score)];
 }
 
 function compatibilityScore(first: SignMeta, second: SignMeta, section: SunCompatibilitySectionId) {
@@ -242,20 +295,28 @@ function pickTemplateIndex(history: HistoryFile, key: string, templateCount: num
 export async function createSunCompatibilityReading(firstId: ZodiacSignId, secondId: ZodiacSignId): Promise<SunCompatibilityReading> {
   const first = getSign(firstId);
   const second = getSign(secondId);
+  // Dil yalnız kullanıcıya görünen metni etkiler; skor, renk, şablon seçimi
+  // ve geçmiş anahtarları (burç/bölüm id'leri) iki dilde de AYNIDIR.
+  const language = getAppLanguage();
+  const labels = language === 'en' ? SECTION_LABELS_EN : SECTION_LABELS;
+  const allTemplates = language === 'en' ? SECTION_TEMPLATES_EN : SECTION_TEMPLATES;
+  const toneLocale = language === 'en' ? 'en-US' : 'tr-TR';
+  const firstLabel = signLabel(first.id);
+  const secondLabel = signLabel(second.id);
   const history = await readHistory();
   const sections = (Object.keys(SECTION_LABELS) as SunCompatibilitySectionId[]).map((sectionId) => {
     const score = compatibilityScore(first, second, sectionId);
-    const templates = SECTION_TEMPLATES[sectionId];
+    const templates = allTemplates[sectionId];
     const key = `${first.id}:${second.id}:${sectionId}`;
     const template = templates[pickTemplateIndex(history, key, templates.length)];
     const text = template
-      .replace(/\{a\}/g, first.label)
-      .replace(/\{b\}/g, second.label)
-      .replace(/\{toneLower\}/g, scoreTone(score).toLocaleLowerCase('tr-TR'))
-      .replace(/\{tone\}/g, scoreTone(score));
+      .replace(/\{a\}/g, firstLabel)
+      .replace(/\{b\}/g, secondLabel)
+      .replace(/\{toneLower\}/g, scoreTone(score, language).toLocaleLowerCase(toneLocale))
+      .replace(/\{tone\}/g, scoreTone(score, language));
     return {
       id: sectionId,
-      title: SECTION_LABELS[sectionId],
+      title: labels[sectionId],
       score,
       color: scoreColor(score),
       text,
@@ -263,7 +324,10 @@ export async function createSunCompatibilityReading(firstId: ZodiacSignId, secon
   });
   await writeHistory(history);
   return {
-    title: `${first.label} - ${second.label} Güneş Burcu Uyumu`,
+    title:
+      language === 'en'
+        ? `${firstLabel} - ${secondLabel} ${READING_TITLE_SUFFIX_EN}`
+        : `${firstLabel} - ${secondLabel} Güneş Burcu Uyumu`,
     sections,
   };
 }

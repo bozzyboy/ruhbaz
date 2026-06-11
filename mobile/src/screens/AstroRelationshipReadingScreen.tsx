@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME, getAssistantLabel } from '../config/constants';
@@ -71,16 +73,18 @@ const RELATIONSHIP_OPTIONS: RelationshipPrimary[] = [
 ].filter((item): item is RelationshipPrimary => item !== 'is');
 
 const GENDER_OPTIONS: Array<ProfileGender | 'bos'> = ['bos', 'kadin', 'erkek', 'hicbiri', 'belirtmek_istemiyorum'];
-const CONTEXT_OPTIONS: Array<{ value: AstroCompatibilityContext; label: string }> = [
-  { value: 'genel', label: 'Genel uyum' },
-  { value: 'ask', label: 'Aşk / romantik ilişki' },
-  { value: 'is', label: 'İş ortaklığı' },
-  { value: 'ev-arkadasligi', label: 'Ev arkadaşlığı' },
-  { value: 'dostluk', label: 'Dostluk / arkadaşlık' },
-  { value: 'komsuluk', label: 'Komşuluk' },
-  { value: 'aile', label: 'Aile bağı' },
-  { value: 'diger', label: 'Diğer' },
-];
+function contextOptions(t: TFunction): Array<{ value: AstroCompatibilityContext; label: string }> {
+  return [
+    { value: 'genel', label: t('flows.contextGeneral') },
+    { value: 'ask', label: t('flows.contextLove') },
+    { value: 'is', label: t('flows.contextWork') },
+    { value: 'ev-arkadasligi', label: t('flows.contextRoommate') },
+    { value: 'dostluk', label: t('flows.contextFriendship') },
+    { value: 'komsuluk', label: t('flows.contextNeighbor') },
+    { value: 'aile', label: t('flows.contextFamily') },
+    { value: 'diger', label: t('flows.contextOther') },
+  ];
+}
 
 const EMPTY_BIRTH: BirthInfo = {
   date: null,
@@ -128,6 +132,9 @@ function makeDraft(seed: string, profile?: SubjectProfile | null): SubjectDraft 
   };
 }
 
+// DİKKAT: labelForRelationship LLM bağlamına (roleLabel) ve okuma geçmişine
+// (relationshipLabel) yazılır; bu yüzden TR sabit kalır. UI gösterimleri için
+// relationshipUiLabel (i18n) kullanılır.
 function labelForRelationship(value: RelationshipPrimary) {
   const labels: Record<RelationshipPrimary, string> = {
     kendi: 'Kendim',
@@ -147,12 +154,31 @@ function labelForRelationship(value: RelationshipPrimary) {
   return labels[value];
 }
 
-function labelForGender(value: ProfileGender | 'bos') {
-  if (value === 'bos') return 'Boş bırak';
-  if (value === 'kadin') return 'Kadın';
-  if (value === 'erkek') return 'Erkek';
-  if (value === 'hicbiri') return 'Hiçbiri';
-  return 'Belirtmek istemiyorum';
+function relationshipUiLabel(value: RelationshipPrimary, t: TFunction) {
+  const keys: Record<RelationshipPrimary, string> = {
+    kendi: 'profile.relationshipSelf',
+    es: 'profile.relationshipSpouse',
+    sevgili: 'profile.relationshipLover',
+    eski_sevgili: 'flows.relationshipExLoverShort',
+    sevgili_adayi: 'profile.relationshipLoverCandidate',
+    anne: 'profile.relationshipMother',
+    baba: 'profile.relationshipFather',
+    kardes: 'profile.relationshipSibling',
+    cocuk: 'profile.relationshipChild',
+    arkadas: 'profile.relationshipFriend',
+    evcil_hayvan: 'profile.relationshipPet',
+    akraba: 'profile.relationshipRelative',
+    diger: 'profile.relationshipOther',
+  };
+  return t(keys[value]);
+}
+
+function labelForGender(value: ProfileGender | 'bos', t: TFunction) {
+  if (value === 'bos') return t('flows.genderEmptyOption');
+  if (value === 'kadin') return t('profile.genderFemale');
+  if (value === 'erkek') return t('profile.genderMale');
+  if (value === 'hicbiri') return t('profile.genderNone');
+  return t('profile.genderPreferNotToSay');
 }
 
 function compactSummary(text: string) {
@@ -201,21 +227,22 @@ function profileFromDraft(draft: SubjectDraft, accountId: string, fallbackId: st
   };
 }
 
-function validateDrafts(drafts: SubjectDraft[], mode: 'compatibility' | 'family') {
+function validateDrafts(drafts: SubjectDraft[], mode: 'compatibility' | 'family', t: TFunction) {
   const requiredCount = mode === 'compatibility' ? 2 : 2;
-  if (drafts.length < requiredCount) return 'Bu okuma için en az iki kişi ya da aile bireyi gerekli.';
+  if (drafts.length < requiredCount) return t('flows.validationMinTwo');
   const missing = drafts.find((draft) => !draft.displayName.trim() || !draft.birthDate.trim());
-  if (missing) return 'Her kişi için isim ve doğum tarihi gerekli.';
+  if (missing) return t('flows.validationNameBirth');
   const missingPlace = drafts.find((draft) => !draft.birthCountry.trim() || !draft.birthCity.trim());
-  if (missingPlace) return 'Bu astroloji okuması için her kişide doğum ülkesi ve doğum şehri gerekli. Saat bilinmiyorsa boş bırakabilirsin.';
+  if (missingPlace) return t('flows.validationBirthPlace');
   const invalidDate = drafts.find((draft) => draft.birthDate.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(draft.birthDate.trim()));
-  if (invalidDate) return 'Doğum tarihini YYYY-AA-GG biçiminde yazmalısın.';
+  if (invalidDate) return t('flows.validationDateFormat');
   const invalidTime = drafts.find((draft) => draft.birthTime.trim() && !/^\d{2}:\d{2}$/.test(draft.birthTime.trim()));
-  if (invalidTime) return 'Doğum saatini biliyorsan SS:DD biçiminde yazmalısın; bilmiyorsan boş bırak.';
+  if (invalidTime) return t('flows.validationTimeFormat');
   return null;
 }
 
 export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId, mode } = route.params;
   const insets = useSafeAreaInsets();
   const assistantLabel = useMemo(() => getAssistantLabel(assistantId), [assistantId]);
@@ -246,8 +273,8 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
   }, [mode, profileId]);
 
   useEffect(() => {
-    navigation.setOptions({ title: mode === 'family' ? 'Astrolojik Aile Okuması' : 'Astrolojik Uyum Analizi' });
-  }, [mode, navigation]);
+    navigation.setOptions({ title: mode === 'family' ? t('flows.familyNavTitle') : t('flows.compatibilityNavTitle') });
+  }, [mode, navigation, t]);
 
   const updateDraft = useCallback((localId: string, patch: Partial<SubjectDraft>) => {
     setDrafts((current) => current.map((draft) => (draft.localId === localId ? { ...draft, ...patch } : draft)));
@@ -280,9 +307,9 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
 
   const prepareSubjects = useCallback(async (): Promise<AstroRelationshipSubject[] | null> => {
     if (!accountState) return null;
-    const validation = validateDrafts(drafts, mode);
+    const validation = validateDrafts(drafts, mode, t);
     if (validation) {
-      setInfoModal({ visible: true, title: 'Bilgi Eksik', message: validation });
+      setInfoModal({ visible: true, title: t('flows.missingInfoTitle'), message: validation });
       return null;
     }
     let nextState = accountState;
@@ -312,7 +339,7 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
     }
     setAccountState(nextState);
     return subjects;
-  }, [accountState, drafts, mode]);
+  }, [accountState, drafts, mode, t]);
 
   const readyToInterpret = useMemo(() => {
     if (isLoading || text) return false;
@@ -374,12 +401,12 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Astrolojik analiz üretilemedi.',
+        message: err?.message || t('flows.relationshipFailed'),
       });
     } finally {
       setIsLoading(false);
     }
-  }, [assistantId, assistantLabel, context, isLoading, mode, prepareSubjects, profileId, text]);
+  }, [assistantId, assistantLabel, context, isLoading, mode, prepareSubjects, profileId, t, text]);
 
   const handleSendQuestion = useCallback(async () => {
     const question = normalizeLimitedInput(questionText, FOLLOW_UP_QUESTION_MAX_CHARS);
@@ -419,11 +446,11 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
         outputTokens,
       }).catch(() => {});
     } catch (err: any) {
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Soruna yanıt üretilemedi.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('flows.relationshipAnswerFailed') });
     } finally {
       setIsSendingQuestion(false);
     }
-  }, [assistantId, assistantLabel, context, followUps, isSendingQuestion, mode, preparedSubjects, profileId, questionText, text]);
+  }, [assistantId, assistantLabel, context, followUps, isSendingQuestion, mode, preparedSubjects, profileId, questionText, t, text]);
 
   const buildTranscript = useCallback(() => {
     const intro = [
@@ -487,7 +514,7 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
   }, [accountState, assistantId, buildTranscript, context, mode, navigation, preparedSubjects, profileId, text]);
 
   const renderSubjectDraft = (draft: SubjectDraft, index: number) => {
-    const title = mode === 'family' ? `Aile Bireyi ${index + 1}` : index === 0 ? 'Birinci Kişi' : 'İkinci Kişi';
+    const title = mode === 'family' ? t('flows.familyMemberTitle', { num: index + 1 }) : index === 0 ? t('flows.firstPerson') : t('flows.secondPerson');
     const previousDraft = drafts[index - 1];
     const waitsForPrevious =
       !draft.profileId &&
@@ -504,7 +531,7 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
         <Text style={styles.subjectTitle}>{title}</Text>
         {mode === 'family' && drafts.length > 2 ? (
           <TouchableOpacity onPress={() => removeDraft(draft.localId)}>
-            <Text style={styles.removeText}>Kaldır</Text>
+            <Text style={styles.removeText}>{t('flows.remove')}</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -520,51 +547,51 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
             </TouchableOpacity>
           ))}
           <TouchableOpacity style={[styles.profileChip, !draft.profileId && styles.profileChipSelected]} onPress={() => switchToManualDraft(draft.localId)}>
-            <Text style={styles.profileChipText}>Elle gir</Text>
+            <Text style={styles.profileChipText}>{t('flows.manualEntry')}</Text>
           </TouchableOpacity>
         </ScrollView>
       ) : null}
       {draft.profileId ? (
         <View style={styles.selectedSubjectBox}>
-          <Text style={styles.selectedSubjectLabel}>Seçilen profil</Text>
+          <Text style={styles.selectedSubjectLabel}>{t('flows.selectedProfileLabel')}</Text>
           <Text style={styles.selectedSubjectName}>{draft.displayName}</Text>
         </View>
       ) : waitsForPrevious ? (
-        <Text style={styles.miniHelper}>Önce önceki kişiyi ekle; sonra bu kişi için bilgi girişi açılır.</Text>
+        <Text style={styles.miniHelper}>{t('flows.waitPreviousPerson')}</Text>
       ) : manualComplete ? (
         <View style={styles.selectedSubjectBox}>
-          <Text style={styles.selectedSubjectLabel}>Elle girildi</Text>
+          <Text style={styles.selectedSubjectLabel}>{t('flows.manualEntered')}</Text>
           <Text style={styles.selectedSubjectName}>{draft.displayName}</Text>
           <TouchableOpacity onPress={() => setCompletedManualIds((current) => current.filter((id) => id !== draft.localId))}>
-            <Text style={styles.editSubjectText}>Düzenle</Text>
+            <Text style={styles.editSubjectText}>{t('profile.editButton')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
       <>
-      <TextInput style={styles.input} value={draft.displayName} onChangeText={(value) => updateDraft(draft.localId, { displayName: value, profileId: null })} placeholder="İsim veya nick" placeholderTextColor="rgba(255,255,255,0.35)" />
+      <TextInput style={styles.input} value={draft.displayName} onChangeText={(value) => updateDraft(draft.localId, { displayName: value, profileId: null })} placeholder={t('profile.nameLabel')} placeholderTextColor="rgba(255,255,255,0.35)" />
       <BrandedPicker
         selectedValue={draft.relationshipPrimary}
         onValueChange={(value) => updateDraft(draft.localId, { relationshipPrimary: value, profileId: null })}
-        options={RELATIONSHIP_OPTIONS.map((option) => ({ label: labelForRelationship(option), value: option }))}
+        options={RELATIONSHIP_OPTIONS.map((option) => ({ label: relationshipUiLabel(option, t), value: option }))}
       />
       {draft.relationshipPrimary === 'evcil_hayvan' || draft.relationshipPrimary === 'diger' ? (
-        <TextInput style={styles.input} value={draft.relationshipFreeform} onChangeText={(value) => updateDraft(draft.localId, { relationshipFreeform: value, profileId: null })} placeholder={draft.relationshipPrimary === 'evcil_hayvan' ? 'Tür: kedi, köpek...' : 'Yakınlık açıklaması'} placeholderTextColor="rgba(255,255,255,0.35)" />
+        <TextInput style={styles.input} value={draft.relationshipFreeform} onChangeText={(value) => updateDraft(draft.localId, { relationshipFreeform: value, profileId: null })} placeholder={draft.relationshipPrimary === 'evcil_hayvan' ? t('flows.petTypePlaceholderFull') : t('flows.relationshipDescPlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
       ) : null}
       <BrandedPicker
         selectedValue={draft.gender}
         onValueChange={(value) => updateDraft(draft.localId, { gender: value, profileId: null })}
-        options={GENDER_OPTIONS.map((option) => ({ label: labelForGender(option), value: option }))}
+        options={GENDER_OPTIONS.map((option) => ({ label: labelForGender(option, t), value: option }))}
       />
-      <TextInput style={styles.input} value={draft.birthDate} onChangeText={(value) => updateDraft(draft.localId, { birthDate: value, profileId: null })} placeholder="Doğum tarihi: YYYY-AA-GG" placeholderTextColor="rgba(255,255,255,0.35)" />
-      <TextInput style={styles.input} value={draft.birthTime} onChangeText={(value) => updateDraft(draft.localId, { birthTime: value, profileId: null })} placeholder="Doğum saati: SS:DD, bilmiyorsan boş bırak" placeholderTextColor="rgba(255,255,255,0.35)" />
-      <Text style={styles.miniHelper}>Doğum yeri bilinmiyorsa boş bırakabilirsin. Yorum yine yapılır; saat ve yer hassas alanlar temkinli okunur.</Text>
-      <TextInput style={styles.input} value={draft.birthCountry} onChangeText={(value) => updateDraft(draft.localId, { birthCountry: value, profileId: null })} placeholder="Ülke" placeholderTextColor="rgba(255,255,255,0.35)" />
-      <TextInput style={styles.input} value={draft.birthCity} onChangeText={(value) => updateDraft(draft.localId, { birthCity: value, profileId: null })} placeholder="Şehir / il" placeholderTextColor="rgba(255,255,255,0.35)" />
-      <TextInput style={styles.input} value={draft.birthDistrict} onChangeText={(value) => updateDraft(draft.localId, { birthDistrict: value, profileId: null })} placeholder="İlçe, bilmiyorsan boş bırak" placeholderTextColor="rgba(255,255,255,0.35)" />
+      <TextInput style={styles.input} value={draft.birthDate} onChangeText={(value) => updateDraft(draft.localId, { birthDate: value, profileId: null })} placeholder={t('flows.birthDatePlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
+      <TextInput style={styles.input} value={draft.birthTime} onChangeText={(value) => updateDraft(draft.localId, { birthTime: value, profileId: null })} placeholder={t('flows.birthTimePlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
+      <Text style={styles.miniHelper}>{t('flows.birthPlaceHelper')}</Text>
+      <TextInput style={styles.input} value={draft.birthCountry} onChangeText={(value) => updateDraft(draft.localId, { birthCountry: value, profileId: null })} placeholder={t('flows.countryPlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
+      <TextInput style={styles.input} value={draft.birthCity} onChangeText={(value) => updateDraft(draft.localId, { birthCity: value, profileId: null })} placeholder={t('flows.cityPlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
+      <TextInput style={styles.input} value={draft.birthDistrict} onChangeText={(value) => updateDraft(draft.localId, { birthDistrict: value, profileId: null })} placeholder={t('flows.districtPlaceholder')} placeholderTextColor="rgba(255,255,255,0.35)" />
       {!draft.profileId ? (
         <TouchableOpacity style={[styles.saveToggle, draft.saveProfile && styles.saveToggleActive]} onPress={() => updateDraft(draft.localId, { saveProfile: !draft.saveProfile })}>
-          <Text style={styles.saveToggleText}>{draft.saveProfile ? 'Profil olarak saklanacak' : 'Profil olarak sakla'}</Text>
-          <Text style={styles.saveToggleSub}>Daha sonra ayarlardan silebilirsin.</Text>
+          <Text style={styles.saveToggleText}>{draft.saveProfile ? t('flows.saveAsProfileActive') : t('flows.saveAsProfile')}</Text>
+          <Text style={styles.saveToggleSub}>{t('flows.saveAsProfileSub')}</Text>
         </TouchableOpacity>
       ) : null}
       <TouchableOpacity
@@ -572,7 +599,7 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
         onPress={() => markManualDraftComplete(draft.localId)}
         disabled={!canCompleteManual}
       >
-        <Text style={styles.addSubjectButtonText}>Kişiyi Ekle</Text>
+        <Text style={styles.addSubjectButtonText}>{t('flows.addPerson')}</Text>
       </TouchableOpacity>
       </>
       )}
@@ -587,41 +614,39 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
         <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} keyboardShouldPersistTaps="handled" showScrollToTop>
           <TokenUsage usage={tokenUsage} inputPrice={GEMINI_FLASH_LITE_INPUT_PRICE_USD_PER_M} outputPrice={GEMINI_FLASH_LITE_OUTPUT_PRICE_USD_PER_M} />
           <View style={styles.headerRow}>
-            <Text style={styles.headerText}>{mode === 'family' ? 'Aile Okuması' : 'İlişki Uyumu'}</Text>
+            <Text style={styles.headerText}>{mode === 'family' ? t('flows.familyReading') : t('flows.relationshipCompatibility')}</Text>
             <Text style={styles.headerText}>{assistantLabel}</Text>
           </View>
           {!text ? (
             <View style={styles.panel}>
-              <Text style={styles.panelTitle}>{mode === 'family' ? 'Aile Bireyleri' : 'Kimlerin Uyumuna Bakılacak?'}</Text>
-              <Text style={styles.helperText}>
-                Kayıtlı profillerden seçebilir ya da yalnız bu analiz için kişi/pet bilgisi girebilirsin.
-              </Text>
+              <Text style={styles.panelTitle}>{mode === 'family' ? t('flows.familyMembersTitle') : t('flows.whoCompatibilityTitle')}</Text>
+              <Text style={styles.helperText}>{t('flows.relationshipHelper')}</Text>
               {mode === 'compatibility' ? (
                 <View style={styles.contextBox}>
-                  <Text style={styles.contextLabel}>Uyum türü</Text>
-                  <BrandedPicker selectedValue={context} onValueChange={setContext} options={CONTEXT_OPTIONS} />
+                  <Text style={styles.contextLabel}>{t('flows.compatibilityContextLabel')}</Text>
+                  <BrandedPicker selectedValue={context} onValueChange={setContext} options={contextOptions(t)} />
                 </View>
               ) : null}
               {drafts.map(renderSubjectDraft)}
               {mode === 'family' ? (
                 <TouchableOpacity style={styles.secondaryButton} onPress={addFamilyMember}>
-                  <Text style={styles.secondaryButtonText}>Aile Bireyi Ekle</Text>
+                  <Text style={styles.secondaryButtonText}>{t('flows.addFamilyMember')}</Text>
                 </TouchableOpacity>
               ) : null}
               <TouchableOpacity style={[styles.primaryButton, !readyToInterpret && styles.disabled]} onPress={() => void loadReading()} disabled={!readyToInterpret}>
-                <Text style={styles.primaryButtonText}>{isLoading ? 'Hazırlanıyor...' : 'Yorumla'}</Text>
+                <Text style={styles.primaryButtonText}>{isLoading ? t('flows.preparing') : t('session.interpret')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <>
               <View style={styles.panel}>
-                <Text style={styles.panelTitle}>Yorum</Text>
+                <Text style={styles.panelTitle}>{t('session.interpretation')}</Text>
                 <SelectableFormattedText text={text} style={styles.readingText} />
               </View>
               <View style={styles.panel}>
                 {followUps.map((message) => (
                   <View key={message.id} style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
-                    <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                    <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                     <SelectableFormattedText text={message.text} style={styles.chatText} />
                   </View>
                 ))}
@@ -631,16 +656,16 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
                   value={questionText}
                   onChangeText={setQuestionText}
                   maxLength={FOLLOW_UP_QUESTION_MAX_CHARS}
-                  placeholder="Bu yorumla ilgili ne sormak istersin?"
+                  placeholder={t('session.askPlaceholder')}
                   placeholderTextColor="rgba(255,255,255,0.35)"
                   multiline
                 />
                 <View style={styles.actionRow}>
                   <TouchableOpacity style={[styles.primaryButton, (!questionText.trim() || isSendingQuestion) && styles.disabled]} onPress={() => void handleSendQuestion()} disabled={!questionText.trim() || isSendingQuestion}>
-                    <Text style={styles.primaryButtonText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                    <Text style={styles.primaryButtonText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.secondaryButton, isSendingQuestion && styles.disabled]} onPress={() => void persistReadingAndEnd()} disabled={isSendingQuestion}>
-                    <Text style={styles.secondaryButtonText}>Yorumu Bitir</Text>
+                    <Text style={styles.secondaryButtonText}>{t('session.endInterpretation')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -651,8 +676,8 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
-          cancelLabel="Kapat"
+          confirmLabel={t('common.ok')}
+          cancelLabel={t('common.close')}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         />

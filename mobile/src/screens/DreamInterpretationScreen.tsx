@@ -3,6 +3,7 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME, getAssistantLabel } from '../config/constants';
@@ -81,6 +82,7 @@ function dreamThemeFromText(dreamText: string) {
 }
 
 export function DreamInterpretationScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId } = route.params;
   const assistantLabel = useMemo(() => getAssistantLabel(assistantId), [assistantId]);
   const [profileName, setProfileName] = useState('');
@@ -127,7 +129,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
         if (!mounted) return;
         const profile = state.profiles.find((item) => item.profileId === profileId) || null;
         if (!profile) {
-          setInfoModal({ visible: true, title: APP_NAME, message: 'Profil bulunamadı.' });
+          setInfoModal({ visible: true, title: APP_NAME, message: t('session.profileNotFound') });
           return;
         }
         setProfileName(profile.displayName);
@@ -137,7 +139,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
         setMessages([makeMessage('assistant', opening)]);
       })
       .catch((err: any) => {
-        if (mounted) setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Profil yüklenemedi.' });
+        if (mounted) setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.profileLoadFailed') });
       })
       .finally(() => {
         if (mounted) setIsLoadingProfile(false);
@@ -147,7 +149,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
       stopAssistantSpeech();
       void stopNativeRecording();
     };
-  }, [assistantId, profileId]);
+  }, [assistantId, profileId, t]);
 
   useEffect(() => {
     const t1 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 0);
@@ -211,13 +213,13 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
     setIsSending(true);
     try {
       if (await shouldBlockForDailyMemoryWriterMaintenance()) {
-        setInfoModal({ visible: true, title: 'Hafıza Bakımı', message: DAILY_MEMORY_WRITER_BUSY_MESSAGE });
+        setInfoModal({ visible: true, title: t('flows.memoryMaintenanceTitle'), message: DAILY_MEMORY_WRITER_BUSY_MESSAGE });
         return;
       }
       await appendUserConversationMemory(profileId, text).catch(() => {});
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
-      if (!profile) throw new Error('Profil bulunamadı.');
+      if (!profile) throw new Error(t('session.profileNotFound'));
       const memorySnippet = await loadProfileMemorySnippet(state, profileId, { semanticQuery: text }).catch(() => null);
       if (!hasInterpretation) {
         const result = await createDreamInterpretation({
@@ -255,7 +257,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
       }
       setSpeechMode('idle');
     } catch (err: any) {
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Rüya yorumu üretilemedi.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('flows.dreamFailed') });
     } finally {
       setIsSending(false);
     }
@@ -272,6 +274,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
     profileId,
     profileName,
     questionText,
+    t,
     usedClosings,
   ]);
 
@@ -337,9 +340,9 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
       });
     } catch (err: any) {
       setIsRecordingQuestion(false);
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Sesli yazma başlatılamadı.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.voiceTypingStartFailed') });
     }
-  }, [isRecordingQuestion, isSending, mergeQuestionTranscript, questionText, speechMode]);
+  }, [isRecordingQuestion, isSending, mergeQuestionTranscript, questionText, speechMode, t]);
 
   const handleQuestionRecordStop = useCallback(async () => {
     await stopNativeRecording().catch(() => {});
@@ -365,8 +368,8 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
             />
           </View>
           <View style={styles.sessionHeaderRow}>
-            <Text style={styles.sessionHeaderText}>{profileName || 'Profil'}</Text>
-            <Text style={[styles.sessionHeaderText, styles.modeHeaderText]}>{isAnimalProfileSelected ? 'Uyku/Rüya Yorumu' : 'Rüya Yorumu'}</Text>
+            <Text style={styles.sessionHeaderText}>{profileName || t('session.profileFallback')}</Text>
+            <Text style={[styles.sessionHeaderText, styles.modeHeaderText]}>{isAnimalProfileSelected ? t('flows.sleepDreamHeader') : t('readings.typeDream')}</Text>
             <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
           </View>
 
@@ -381,14 +384,14 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
               onContentSizeChange={() => readingScrollRef.current?.scrollToEnd({ animated: true })}
             >
               {isLoadingProfile ? (
-                <AssistantLoading label={isAnimalProfileSelected ? 'Uyku yorumu açılıyor' : 'Rüya yorumu açılıyor'} detail="Lütfen bekleyiniz." />
+                <AssistantLoading label={isAnimalProfileSelected ? t('flows.sleepOpeningLoading') : t('flows.dreamOpeningLoading')} detail={t('session.pleaseWait')} />
               ) : (
                 messages.map((message) => (
                   <View
                     key={message.id}
                     style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
                   >
-                    <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                    <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                     <SelectableFormattedText text={message.text} style={styles.chatText} />
                   </View>
                 ))
@@ -399,10 +402,10 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
 
           <View style={styles.readActionsBar}>
             <TouchableOpacity style={styles.secondaryAction} onPress={handlePhoneRead} disabled={!latestReadableText.trim()}>
-              <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? 'Duraklat' : 'Telefon Okusun'}</Text>
+              <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? t('session.pause') : t('session.phoneRead')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.secondaryAction, styles.disabledAction]} disabled>
-              <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+              <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
             </TouchableOpacity>
           </View>
 
@@ -412,11 +415,11 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
                 {questionText.trim() ||
                   (hasInterpretation
                     ? isAnimalProfileSelected
-                      ? 'Bu uyku yorumuyla ilgili ne sormak istersin?'
-                      : 'Bu rüya yorumuyla ilgili ne sormak istersin?'
+                      ? t('flows.sleepAskPlaceholder')
+                      : t('flows.dreamAskPlaceholder')
                     : isAnimalProfileSelected
-                      ? 'Uykusunda, hareketlerinde veya küçük dünyasında ne fark ettin?'
-                      : 'Rüyanda ne gördün? Sahneyi, kişileri ve hislerini anlat.')}
+                      ? t('flows.sleepInitialPlaceholder')
+                      : t('flows.dreamInitialPlaceholder'))}
               </Text>
             </TouchableOpacity>
             <Modal visible={editorVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setEditorVisible(false)}>
@@ -426,7 +429,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
                 keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
               >
                 <View style={styles.editorCard}>
-                  <Text style={styles.editorTitle}>{hasInterpretation ? 'Sorunu Düzenle' : isAnimalProfileSelected ? 'Uyku Notunu Düzenle' : 'Rüyanı Düzenle'}</Text>
+                  <Text style={styles.editorTitle}>{hasInterpretation ? t('session.editQuestionTitle') : isAnimalProfileSelected ? t('flows.editSleepNoteTitle') : t('flows.editDreamTitle')}</Text>
                   <TextInput
                     style={styles.editorInput}
                     value={questionText}
@@ -434,10 +437,10 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
                     maxLength={hasInterpretation ? FOLLOW_UP_QUESTION_MAX_CHARS : DREAM_DESCRIPTION_MAX_CHARS}
                     placeholder={
                       hasInterpretation
-                        ? 'Sorunu buradan düzenleyebilirsin...'
+                        ? t('session.editQuestionPlaceholder')
                         : isAnimalProfileSelected
-                          ? 'Uykusunu, minik hareketlerini, seslerini veya aklına gelen sahneyi anlatabilirsin...'
-                          : 'Rüyanı buradan detaylıca anlatabilirsin...'
+                          ? t('flows.sleepEditorPlaceholder')
+                          : t('flows.dreamEditorPlaceholder')
                     }
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     multiline
@@ -446,14 +449,14 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
                   />
                   <View style={styles.editorActions}>
                     <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                      <Text style={styles.editorGhostText}>Kapat</Text>
+                      <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.editorSendBtn, (!questionText.trim() || isSending || isLoadingProfile) && styles.disabledAction]}
                       onPress={() => void handleSend()}
                       disabled={!questionText.trim() || isSending || isLoadingProfile}
                     >
-                      <Text style={styles.editorSendText}>{isSending ? 'Yorumlanıyor...' : hasInterpretation ? 'Sor' : 'Yorumla'}</Text>
+                      <Text style={styles.editorSendText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -466,14 +469,14 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
                 onPressOut={() => void handleQuestionRecordStop()}
                 disabled={isSending || isLoadingProfile}
               >
-                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.primaryAction, (!questionText.trim() || isSending || isLoadingProfile) && styles.disabledAction]}
                 onPress={() => void handleSend()}
                 disabled={!questionText.trim() || isSending || isLoadingProfile}
               >
-                <Text style={styles.primaryActionText}>{isSending ? 'Yorumlanıyor...' : hasInterpretation ? 'Sor' : 'Yorumla'}</Text>
+                <Text style={styles.primaryActionText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -481,7 +484,7 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
               onPress={() => void persistReadingAndEnd()}
               disabled={isSending || !hasInterpretation}
             >
-              <Text style={styles.endButtonText}>Yorumu Bitir</Text>
+              <Text style={styles.endButtonText}>{t('session.endInterpretation')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -490,8 +493,8 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
-          cancelLabel="Kapat"
+          confirmLabel={t('common.ok')}
+          cancelLabel={t('common.close')}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         />

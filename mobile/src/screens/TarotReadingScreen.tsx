@@ -2,6 +2,7 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME, getAssistantLabel } from '../config/constants';
@@ -80,6 +81,7 @@ function readingTheme(spreadTitle: string, deckLabel: string, cards: DrawnTarotC
 }
 
 export function TarotReadingScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId, spreadId, deckId = DEFAULT_TAROT_DECK_ID } = route.params;
   const spread = useMemo(() => getTarotSpread(spreadId), [spreadId]);
   const assistantLabel = useMemo(() => getAssistantLabel(assistantId), [assistantId]);
@@ -172,11 +174,11 @@ export function TarotReadingScreen({ route, navigation }: Props) {
       .then((state) => {
         if (!mounted) return;
         const profile = state.profiles.find((item) => item.profileId === profileId) || null;
-        if (!profile) throw new Error('Profil bulunamadı.');
+        if (!profile) throw new Error(t('session.profileNotFound'));
         setProfileName(profile.displayName);
       })
       .catch((err: any) => {
-        if (mounted) setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Profil yüklenemedi.' });
+        if (mounted) setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.profileLoadFailed') });
       })
       .finally(() => {
         if (mounted) setIsProfileLoading(false);
@@ -184,7 +186,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     return () => {
       mounted = false;
     };
-  }, [profileId]);
+  }, [profileId, t]);
 
   const loadReading = useCallback(async (question?: string) => {
     const initialIntent = question?.replace(/\s+/g, ' ').trim() || '';
@@ -192,7 +194,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     try {
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
-      if (!profile) throw new Error('Profil bulunamadı.');
+      if (!profile) throw new Error(t('session.profileNotFound'));
       setProfileName(profile.displayName);
       if (initialIntent) {
         await appendUserReadingIntentMemory({
@@ -226,11 +228,11 @@ export function TarotReadingScreen({ route, navigation }: Props) {
       if (result.closingSentence) setUsedClosings((current) => [...current, result.closingSentence]);
       await addUsage(`Tarot - ${spread.title}`, result);
     } catch (err: any) {
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Tarot yorumu üretilemedi.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('flows.tarotFailed') });
     } finally {
       setIsLoading(false);
     }
-  }, [addUsage, assistantId, assistantLabel, cards, deck.label, profileId, spread, usedClosings]);
+  }, [addUsage, assistantId, assistantLabel, cards, deck.label, profileId, spread, t, usedClosings]);
 
   useEffect(() => {
     if (isProfileLoading || wantsInitialQuestion || readingText || isLoading) return;
@@ -317,7 +319,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
       await addUsage(`Tarot - ${spread.title} - Soru`, result);
       setSpeechMode('idle');
     } catch (err: any) {
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Soruna şu an yanıt üretilemedi.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.answerFailed') });
     } finally {
       setIsSendingQuestion(false);
     }
@@ -334,6 +336,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     questionText,
     readingText,
     spread,
+    t,
     usedClosings,
   ]);
 
@@ -405,9 +408,9 @@ export function TarotReadingScreen({ route, navigation }: Props) {
       });
     } catch (err: any) {
       setIsRecordingQuestion(false);
-      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || 'Sesli yazma başlatılamadı.' });
+      setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.voiceTypingStartFailed') });
     }
-  }, [isRecordingQuestion, isSendingQuestion, mergeQuestionTranscript, questionText, readingText, speechMode]);
+  }, [isRecordingQuestion, isSendingQuestion, mergeQuestionTranscript, questionText, readingText, speechMode, t]);
 
   const handleQuestionRecordStop = useCallback(async () => {
     await stopNativeRecording().catch(() => {});
@@ -447,13 +450,13 @@ export function TarotReadingScreen({ route, navigation }: Props) {
             />
           </View>
           <View style={styles.sessionHeaderRow}>
-            <Text style={styles.sessionHeaderText}>{profileName || 'Profil'}</Text>
+            <Text style={styles.sessionHeaderText}>{profileName || t('session.profileFallback')}</Text>
             <Text style={[styles.sessionHeaderText, styles.modeHeaderText]}>{spread.title}</Text>
             <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
           </View>
 
           <TouchableOpacity style={[styles.panel, styles.spreadPanel]} activeOpacity={0.9} onPress={() => setSpreadModalVisible(true)}>
-            <Text style={styles.spreadHint}>{deck.label} - Açılımı büyütmek için dokun</Text>
+            <Text style={styles.spreadHint}>{t('flows.deckZoomHint', { deck: deck.label })}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} scrollEnabled={false}>
               <View style={[styles.spreadCanvas, { width: spreadCanvasWidth, height: canvasHeight }]}>
                 {cards.map((card) => {
@@ -493,12 +496,12 @@ export function TarotReadingScreen({ route, navigation }: Props) {
 
           {!readingText && wantsInitialQuestion ? (
             <View style={[styles.panel, styles.intentPanel]}>
-              <Text style={styles.intentTitle}>Aklında bir soru var mı?</Text>
+              <Text style={styles.intentTitle}>{t('flows.initialQuestionTitle')}</Text>
               <TextInput
                 style={styles.intentInput}
                 value={initialQuestion}
                 onChangeText={setInitialQuestion}
-                placeholder="Aklında bir soru, açılımda yorumlanmasını istediğin bir konu, durum vb. varsa buraya yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin."
+                placeholder={t('flows.tarotTopicPlaceholder')}
                 placeholderTextColor="rgba(255,255,255,0.38)"
                 maxLength={OPTIONAL_READING_TOPIC_MAX_CHARS}
                 multiline
@@ -508,7 +511,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                 onPress={handleStartReading}
                 disabled={isLoading || isProfileLoading}
               >
-                <Text style={styles.primaryActionText}>{isLoading ? 'Yorumlanıyor...' : 'Açılımı Yorumla'}</Text>
+                <Text style={styles.primaryActionText}>{isLoading ? t('session.interpreting') : t('flows.interpretSpread')}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -526,18 +529,16 @@ export function TarotReadingScreen({ route, navigation }: Props) {
               }}
             >
               {isLoading || isProfileLoading ? (
-                <AssistantLoading label="Tarot açılımın yorumlanıyor" detail="Lütfen bekleyiniz. Ekranı kapatmayınız." />
+                <AssistantLoading label={t('flows.tarotLoading')} detail={t('session.pleaseWaitKeepOpen')} />
               ) : !readingText && wantsInitialQuestion ? (
-                <Text style={styles.emptyReadingText}>
-                  Yorumunuz buraya gelecek. Sonrasında aşağıya kaydırıp her zamanki gibi yorum üzerinden tartışabileceğiniz alanı da görebilirsiniz.
-                </Text>
+                <Text style={styles.emptyReadingText}>{t('flows.tarotEmptyReading')}</Text>
               ) : (
                 messages.map((message) => (
                   <View
                     key={message.id}
                     style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
                   >
-                    <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                    <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                     <SelectableFormattedText text={message.text} style={styles.chatText} />
                   </View>
                 ))
@@ -548,17 +549,17 @@ export function TarotReadingScreen({ route, navigation }: Props) {
 
           <View style={styles.readActionsBar}>
             <TouchableOpacity style={styles.secondaryAction} onPress={handlePhoneRead} disabled={!latestReadableText.trim()}>
-              <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? 'Duraklat' : 'Telefon Okusun'}</Text>
+              <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? t('session.pause') : t('session.phoneRead')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.secondaryAction, styles.disabledAction]} disabled>
-              <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+              <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
             </TouchableOpacity>
           </View>
 
           <View style={[styles.panel, styles.questionPanel]}>
             <TouchableOpacity style={styles.questionInput} activeOpacity={0.88} onPress={() => readingText && setEditorVisible(true)}>
               <Text style={[styles.composePreviewText, !questionText.trim() && styles.composePreviewPlaceholder]}>
-                {questionText.trim() || 'Bu tarot açılımıyla ilgili bir soru veya konu yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin.'}
+                {questionText.trim() || t('flows.tarotAskPlaceholder')}
               </Text>
             </TouchableOpacity>
             <Modal visible={editorVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setEditorVisible(false)}>
@@ -568,13 +569,13 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                 keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
               >
                 <View style={styles.editorCard}>
-                  <Text style={styles.editorTitle}>Sorunu Düzenle</Text>
+                  <Text style={styles.editorTitle}>{t('session.editQuestionTitle')}</Text>
                   <TextInput
                     style={styles.editorInput}
                     value={questionText}
                     onChangeText={setQuestionText}
                     maxLength={FOLLOW_UP_QUESTION_MAX_CHARS}
-                    placeholder="Sorunu veya konunu buradan düzenleyebilirsin. Aklında bir şey yoksa boş da bırakabilirsin."
+                    placeholder={t('flows.questionEditorPlaceholderOptional')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     multiline
                     autoFocus
@@ -582,14 +583,14 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                   />
                   <View style={styles.editorActions}>
                     <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                      <Text style={styles.editorGhostText}>Kapat</Text>
+                      <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.editorSendBtn, (!questionText.trim() || isSendingQuestion || isLoading || !readingText) && styles.disabledAction]}
                       onPress={() => void handleSendQuestion()}
                       disabled={!questionText.trim() || isSendingQuestion || isLoading || !readingText}
                     >
-                      <Text style={styles.editorSendText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                      <Text style={styles.editorSendText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -602,14 +603,14 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                 onPressOut={() => void handleQuestionRecordStop()}
                 disabled={isSendingQuestion || isLoading || !readingText}
               >
-                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.primaryAction, (!questionText.trim() || isSendingQuestion || isLoading || !readingText) && styles.disabledAction]}
                 onPress={() => void handleSendQuestion()}
                 disabled={!questionText.trim() || isSendingQuestion || isLoading || !readingText}
               >
-                <Text style={styles.primaryActionText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                <Text style={styles.primaryActionText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -617,7 +618,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
               onPress={() => void persistReadingAndEnd()}
               disabled={isSendingQuestion || isLoading || !readingText}
             >
-              <Text style={styles.endButtonText}>Okumayı Bitir</Text>
+              <Text style={styles.endButtonText}>{t('session.endReading')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -674,7 +675,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                 </View>
               </ScrollView>
               <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setSpreadModalVisible(false)}>
-                <Text style={styles.modalCloseText}>Kapat</Text>
+                <Text style={styles.modalCloseText}>{t('common.close')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -694,12 +695,12 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                     {selectedCard.positionNo}. {selectedCard.positionTitle}
                   </Text>
                   <Text style={styles.modalMeta}>
-                    {selectedCard.cardNameTr} / {selectedCard.cardName} ({selectedCard.orientation === 'reversed' ? 'Ters' : 'Düz'})
+                    {selectedCard.cardNameTr} / {selectedCard.cardName} ({selectedCard.orientation === 'reversed' ? t('flows.orientationReversed') : t('flows.orientationUpright')})
                   </Text>
                   <Text style={styles.modalText}>{selectedCard.positionMeaning}</Text>
                   <Text style={styles.modalText}>{selectedCard.guideQuestion}</Text>
                   <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setSelectedCard(null)}>
-                    <Text style={styles.modalCloseText}>Kapat</Text>
+                    <Text style={styles.modalCloseText}>{t('common.close')}</Text>
                   </TouchableOpacity>
                 </>
               ) : null}
@@ -711,8 +712,8 @@ export function TarotReadingScreen({ route, navigation }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
-          cancelLabel="Kapat"
+          confirmLabel={t('common.ok')}
+          cancelLabel={t('common.close')}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         />

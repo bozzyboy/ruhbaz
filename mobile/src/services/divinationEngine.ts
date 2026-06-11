@@ -14,11 +14,26 @@ import {
 } from '../data/divinationDataI18n';
 import { getAppLanguage } from '../i18n';
 import { TAROT_TR_NAMES } from '../data/tarotNamesTR';
-import { 
+import {
   AFFIRMATION_OPENERS,
   AFFIRMATION_MIDDLES,
-  AFFIRMATION_CLOSERS 
+  AFFIRMATION_CLOSERS
 } from '../data/affirmationsData';
+import {
+  AFFIRMATION_OPENERS_EN,
+  AFFIRMATION_MIDDLES_EN,
+  AFFIRMATION_CLOSERS_EN,
+} from '../data/affirmationsData.en';
+import {
+  COOKIE_OPENERS_EN,
+  COOKIE_ACTIONS_EN,
+  COOKIE_BLESSINGS_EN,
+  SPHERE_OMENS_EN,
+  SPHERE_WINDOWS_EN,
+  SPHERE_ADVICE_EN,
+  SPHERE_CLOSERS_EN,
+  SIGN_WORDS_EN,
+} from '../data/cookieSphereData.en';
 
 export type GeneralDivinationType =
   | 'fortune-cookie'
@@ -141,16 +156,21 @@ const SIGN_WORDS = [
   'sevda', 'bereket', 'uğur', 'yankı', 'eser'
 ];
 
+// Dil-duyarlı uğur işareti: kelime listesi aktif dile göre seçilir, ancak
+// dizin matematiği (sequence -> index) iki dilde AYNIDIR (SIGN_WORDS ve
+// SIGN_WORDS_EN aynı uzunlukta = 32). Böylece dil değişiminde aynı sequence
+// aynı kelime sıralarına denk gelir ve önbellek yeniden kurulumu tutarlıdır.
 function buildUniqueSign(sequence: number) {
-  const base = SIGN_WORDS.length;
+  const words = getAppLanguage() === 'en' ? SIGN_WORDS_EN : SIGN_WORDS;
+  const base = words.length;
   let value = Math.max(0, sequence);
   const parts: string[] = [];
   do {
-    parts.push(SIGN_WORDS[value % base]);
+    parts.push(words[value % base]);
     value = Math.floor(value / base);
   } while (value > 0);
   while (parts.length < 3) {
-    parts.push(SIGN_WORDS[(sequence + parts.length * 7) % base]);
+    parts.push(words[(sequence + parts.length * 7) % base]);
   }
   return parts.join(', ');
 }
@@ -272,38 +292,56 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
   meta?: DailyGeneralReadingResult['meta'];
 } {
   if (type === 'fortune-cookie') {
-    const a = pick(COOKIE_OPENERS, sequence, 1);
-    const b = pick(COOKIE_ACTIONS, sequence, 2);
-    const c = pick(COOKIE_BLESSINGS, sequence, 3);
+    // Dil-duyarlı havuz seçimi: TR/EN dizileri aynı uzunlukta olduğu için
+    // pick() ve indexOf aynı sequence'ta iki dilde de AYNI indeksleri üretir
+    // (parmak izi/önbellek dil değişiminde tutarlı kalır).
+    const enCookie = getAppLanguage() === 'en';
+    const openers = enCookie ? COOKIE_OPENERS_EN : COOKIE_OPENERS;
+    const actions = enCookie ? COOKIE_ACTIONS_EN : COOKIE_ACTIONS;
+    const blessings = enCookie ? COOKIE_BLESSINGS_EN : COOKIE_BLESSINGS;
+    const a = pick(openers, sequence, 1);
+    const b = pick(actions, sequence, 2);
+    const c = pick(blessings, sequence, 3);
     const sign = buildUniqueSign(sequence);
     const fullText = `${a} ${b} ${c}`;
-    return { 
-      text: `${fullText}\n\nBugünün uğur işareti: ${sign}`,
-      fingerprint: `cookie:${COOKIE_OPENERS.indexOf(a)}-${COOKIE_ACTIONS.indexOf(b)}-${COOKIE_BLESSINGS.indexOf(c)}`,
+    const signLabel = enCookie ? "Today's lucky charm" : 'Bugünün uğur işareti';
+    return {
+      text: `${fullText}\n\n${signLabel}: ${sign}`,
+      fingerprint: `cookie:${openers.indexOf(a)}-${actions.indexOf(b)}-${blessings.indexOf(c)}`,
       meta: { fortuneCookie: { text: fullText, sign: sign } }
     };
   }
-  
+
   if (type === 'magic-ball') {
-    const a = pick(SPHERE_OMENS, sequence, 4);
-    const b = pick(SPHERE_WINDOWS, sequence, 5);
-    const c = pick(SPHERE_ADVICE, sequence, 6);
-    const d = pick(SPHERE_CLOSERS, sequence, 7);
+    const enBall = getAppLanguage() === 'en';
+    const omens = enBall ? SPHERE_OMENS_EN : SPHERE_OMENS;
+    const windows = enBall ? SPHERE_WINDOWS_EN : SPHERE_WINDOWS;
+    const advices = enBall ? SPHERE_ADVICE_EN : SPHERE_ADVICE;
+    const closers = enBall ? SPHERE_CLOSERS_EN : SPHERE_CLOSERS;
+    const a = pick(omens, sequence, 4);
+    const b = pick(windows, sequence, 5);
+    const c = pick(advices, sequence, 6);
+    const d = pick(closers, sequence, 7);
     const sign = buildUniqueSign(sequence);
     const fullText = `${a} ${b} ${c} ${d}`;
-    return { 
-      text: `${fullText}\n\nKürenin işareti: ${sign}`,
-      fingerprint: `ball:${SPHERE_OMENS.indexOf(a)}-${SPHERE_WINDOWS.indexOf(b)}-${SPHERE_ADVICE.indexOf(c)}-${SPHERE_CLOSERS.indexOf(d)}`,
+    const signLabel = enBall ? "The sphere's sign" : 'Kürenin işareti';
+    return {
+      text: `${fullText}\n\n${signLabel}: ${sign}`,
+      fingerprint: `ball:${omens.indexOf(a)}-${windows.indexOf(b)}-${advices.indexOf(c)}-${closers.indexOf(d)}`,
       meta: { magicBall: { text: fullText, sign: sign } }
     };
   }
   if (type === 'daily-affirmation') {
-    const a = pick(AFFIRMATION_OPENERS, sequence, 8);
-    const b = pick(AFFIRMATION_MIDDLES, sequence, 9);
-    const c = pick(AFFIRMATION_CLOSERS, sequence, 10);
-    return { 
+    const enAff = getAppLanguage() === 'en';
+    const affOpeners = enAff ? AFFIRMATION_OPENERS_EN : AFFIRMATION_OPENERS;
+    const affMiddles = enAff ? AFFIRMATION_MIDDLES_EN : AFFIRMATION_MIDDLES;
+    const affClosers = enAff ? AFFIRMATION_CLOSERS_EN : AFFIRMATION_CLOSERS;
+    const a = pick(affOpeners, sequence, 8);
+    const b = pick(affMiddles, sequence, 9);
+    const c = pick(affClosers, sequence, 10);
+    return {
       text: `${a} ${b} ${c}`,
-      fingerprint: `aff:${AFFIRMATION_OPENERS.indexOf(a)}-${AFFIRMATION_MIDDLES.indexOf(b)}-${AFFIRMATION_CLOSERS.indexOf(c)}`,
+      fingerprint: `aff:${affOpeners.indexOf(a)}-${affMiddles.indexOf(b)}-${affClosers.indexOf(c)}`,
       meta: { affirmation: { opener: a, middle: b, closer: c } }
     };
   }

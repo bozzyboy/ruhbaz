@@ -2,6 +2,7 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME } from '../config/constants';
@@ -81,6 +82,7 @@ function makeMessage(role: 'user' | 'assistant', text: string): BirthChartFollow
 }
 
 export function BirthChartInterpretationScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId } = route.params;
   const [session, setSession] = useState<BirthChartInterpretationSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,15 +120,14 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
       const account = await loadAccountState();
       const profile = account.profiles.find((item) => item.profileId === profileId) || null;
       if (!profile) {
-        setInfoModal({ visible: true, title: APP_NAME, message: 'Profil bulunamadı.' });
+        setInfoModal({ visible: true, title: APP_NAME, message: t('session.profileNotFound') });
         return;
       }
       if (!hasRequiredAstroBirthInputs(profile)) {
         setInfoModal({
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message:
-            'Doğum haritası yorumu için doğum tarihi, ülke ve şehir bilgilerini tamamlamalısın. Doğum saati yoksa yükselen ve evler net okunamaz.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('flows.chartInterpretInfoRequired'),
         });
         return;
       }
@@ -169,12 +170,12 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Doğum haritası yorumu üretilemedi.',
+        message: err?.message || t('flows.chartInterpretFailed'),
       });
     } finally {
       setIsLoading(false);
     }
-  }, [profileId]);
+  }, [profileId, t]);
 
   useEffect(() => {
     void loadOrCreateSession();
@@ -212,11 +213,10 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
     contextWarningShownRef.current = true;
     setInfoModal({
       visible: true,
-      title: 'Bağlam Penceresi Doldu',
-      message:
-        'Bu doğum haritası yorumunda konuşma bağlamı modelin input penceresine yaklaştı. Haritan ve mevcut yorumun saklı kalacak; bu ekranda artık yeni soru eklenemez.',
+      title: t('flows.contextFullTitle'),
+      message: t('flows.contextFullMessage'),
     });
-  }, [isContextLocked, session]);
+  }, [isContextLocked, session, t]);
 
   const latestReadableText = useMemo(() => {
     const lastAssistant = [...(session?.followUps || [])].reverse().find((message) => message.role === 'assistant');
@@ -252,9 +252,8 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
     if (estimateBirthChartContextTokens(session, question) >= BIRTH_CHART_CONTEXT_LOCK_TOKENS) {
       setInfoModal({
         visible: true,
-        title: 'Bağlam Penceresi Doldu',
-        message:
-          'Bu doğum haritası yorumunda konuşma bağlamı modelin input penceresine yaklaştı. Haritan ve mevcut yorumun saklı kalacak; bu ekranda artık yeni soru eklenemez.',
+        title: t('flows.contextFullTitle'),
+        message: t('flows.contextFullMessage'),
       });
       return;
     }
@@ -305,12 +304,12 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Soruna şu an yanıt üretilemedi.',
+        message: err?.message || t('session.answerFailed'),
       });
     } finally {
       setIsSendingQuestion(false);
     }
-  }, [isSendingQuestion, questionText, session]);
+  }, [isSendingQuestion, questionText, session, t]);
 
   const mergeQuestionTranscript = useCallback((transcript: string) => {
     const cleaned = transcript.replace(/\s+/g, ' ').trim();
@@ -339,10 +338,10 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Sesli yazma başlatılamadı.',
+        message: err?.message || t('session.voiceTypingStartFailed'),
       });
     }
-  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, session, speechMode]);
+  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, session, speechMode, t]);
 
   const handleQuestionRecordStop = useCallback(async () => {
     await stopNativeRecording().catch(() => {});
@@ -368,15 +367,19 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
             />
           </View>
           <View style={styles.sessionHeaderRow}>
-            <Text style={styles.sessionHeaderText}>{session?.profileName || 'Profil'}</Text>
+            <Text style={styles.sessionHeaderText}>{session?.profileName || t('session.profileFallback')}</Text>
             <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
           </View>
           {session ? (
           <View style={[styles.panel, styles.metaPanel]}>
             <View style={styles.metaRow}>
               <Text style={[styles.meta, styles.metaText]}>
-                  Güneş: {session.chart.sign} | Ay: {session.chart.moonSign || 'Hesaplanamadı'} | Yükselen:{' '}
-                  {session.chart.ascendant || 'Doğum saati gerekli'} | Zaman dilimi: {formatTimezoneForDisplay(session.chart.timezoneUsed)}
+                  {t('flows.chartMetaLine', {
+                    sun: session.chart.sign,
+                    moon: session.chart.moonSign || t('flows.moonUnavailable'),
+                    rising: session.chart.ascendant || t('flows.birthTimeRequired'),
+                    timezone: formatTimezoneForDisplay(session.chart.timezoneUsed),
+                  })}
                 </Text>
               <View style={styles.contextMeters}>
                 <View style={styles.contextWrap}>
@@ -392,7 +395,7 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                   />
                   <Text style={styles.contextPercent}>{contextPercent}%</Text>
                 </View>
-                <Text style={styles.contextLabel}>Giriş</Text>
+                <Text style={styles.contextLabel}>{t('flows.meterInput')}</Text>
                 </View>
                 <View style={styles.contextWrap}>
                   <View style={styles.contextCircle}>
@@ -407,14 +410,12 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                     />
                     <Text style={styles.contextPercent}>{outputPercent}%</Text>
                   </View>
-                  <Text style={styles.contextLabel}>Çıkış</Text>
+                  <Text style={styles.contextLabel}>{t('flows.meterOutput')}</Text>
                 </View>
               </View>
             </View>
             {isContextLocked ? (
-              <Text style={styles.contextLockedText}>
-                Bağlam penceresi dolduğu için bu doğum haritasına yeni soru eklenemez.
-              </Text>
+              <Text style={styles.contextLockedText}>{t('flows.contextLockedNote')}</Text>
             ) : null}
           </View>
           ) : null}
@@ -435,8 +436,8 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
             >
               {isLoading ? (
                 <AssistantLoading
-                  label="Doğum haritası yorumun hazırlanıyor"
-                  detail="Lütfen bekleyiniz. Ekranı kapatmayınız."
+                  label={t('flows.chartInterpretLoading')}
+                  detail={t('session.pleaseWaitKeepOpen')}
                 />
               ) : session?.interpretationText ? (
                 <View style={[styles.chatBubble, styles.assistantBubble]}>
@@ -444,7 +445,7 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                   <SelectableFormattedText text={session.interpretationText} style={styles.chatText} />
                 </View>
               ) : (
-                <Text style={styles.loading}>Yorum hazırlanamadı. Profil bilgilerini kontrol edip tekrar deneyebilirsin.</Text>
+                <Text style={styles.loading}>{t('flows.chartInterpretEmpty')}</Text>
               )}
               {session?.followUps.length ? (
                 <>
@@ -453,7 +454,7 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                       key={message.id}
                       style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
                     >
-                      <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                      <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                       <SelectableFormattedText text={message.text} style={styles.chatText} />
                     </View>
                   ))}
@@ -467,10 +468,10 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
           {session ? (
             <View style={styles.readActionsBar}>
               <TouchableOpacity style={styles.secondaryAction} onPress={handlePhoneRead}>
-                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? 'Duraklat' : 'Telefon Okusun'}</Text>
+                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? t('session.pause') : t('session.phoneRead')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.secondaryAction, styles.disabledAction]} disabled>
-                <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+                <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -479,7 +480,7 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
             <View style={[styles.panel, styles.questionPanel]}>
               <TouchableOpacity style={styles.questionInput} activeOpacity={0.88} onPress={() => setEditorVisible(true)}>
                 <Text style={[styles.composePreviewText, !questionText.trim() && styles.composePreviewPlaceholder]}>
-                  {questionText.trim() || 'Bu doğum haritası yorumuyla ilgili ne sormak istersin?'}
+                  {questionText.trim() || t('flows.chartAskPlaceholder')}
                 </Text>
               </TouchableOpacity>
               <Modal visible={editorVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setEditorVisible(false)}>
@@ -489,12 +490,12 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                   keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
                 >
                   <View style={styles.editorCard}>
-                    <Text style={styles.editorTitle}>Sorunu Düzenle</Text>
+                    <Text style={styles.editorTitle}>{t('session.editQuestionTitle')}</Text>
                     <TextInput
                       style={styles.editorInput}
                       value={questionText}
                       onChangeText={setQuestionText}
-                      placeholder="Sorunu buradan düzenleyebilirsin..."
+                      placeholder={t('session.editQuestionPlaceholder')}
                       placeholderTextColor="rgba(255,255,255,0.35)"
                       multiline
                       autoFocus
@@ -502,14 +503,14 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                     />
                     <View style={styles.editorActions}>
                       <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                        <Text style={styles.editorGhostText}>Kapat</Text>
+                        <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.editorSendBtn, (!questionText.trim() || isSendingQuestion || isContextLocked) && styles.disabledAction]}
                         onPress={() => void handleSendQuestion()}
                         disabled={!questionText.trim() || isSendingQuestion || isContextLocked}
                       >
-                        <Text style={styles.editorSendText}>{isSendingQuestion ? 'Soruluyor...' : isContextLocked ? 'Bağlam Doldu' : 'Sor'}</Text>
+                        <Text style={styles.editorSendText}>{isSendingQuestion ? t('session.asking') : isContextLocked ? t('flows.contextFullButton') : t('session.ask')}</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -521,14 +522,14 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                   onPressIn={() => void handleQuestionRecordStart()}
                   onPressOut={() => void handleQuestionRecordStop()}
                 >
-                  <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+                  <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.primaryAction, (!questionText.trim() || isSendingQuestion || isContextLocked) && styles.disabledAction]}
                   onPress={() => void handleSendQuestion()}
                   disabled={!questionText.trim() || isSendingQuestion || isContextLocked}
                 >
-                  <Text style={styles.primaryActionText}>{isSendingQuestion ? 'Soruluyor...' : isContextLocked ? 'Bağlam Doldu' : 'Sor'}</Text>
+                  <Text style={styles.primaryActionText}>{isSendingQuestion ? t('session.asking') : isContextLocked ? t('flows.contextFullButton') : t('session.ask')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -539,12 +540,12 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
-          cancelLabel="Kapat"
+          confirmLabel={t('common.ok')}
+          cancelLabel={t('common.close')}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
-          extraActionLabel={infoModal.title === 'Profil Bilgisi Gerekli' ? 'Profil Ayarlarına Git' : null}
-          onExtraAction={infoModal.title === 'Profil Bilgisi Gerekli' ? openProfileSettings : undefined}
+          extraActionLabel={infoModal.title === t('modals.profileInfoRequiredTitle') ? t('profile.goToProfileSettings') : null}
+          onExtraAction={infoModal.title === t('modals.profileInfoRequiredTitle') ? openProfileSettings : undefined}
         />
       </SafeAreaView>
     </KeyboardAvoidingView>

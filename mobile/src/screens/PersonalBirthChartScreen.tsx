@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { createBirthChartSnapshot, formatTimezoneForDisplay, hasRequiredAstroBirthInputs, type BirthChartSnapshot } from '../services/astroEngine';
@@ -13,6 +14,7 @@ import { birthChartProfileFingerprint, loadBirthChartInterpretationSession } fro
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalBirthChart'>;
 
 export function PersonalBirthChartScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId } = route.params;
   const insets = useSafeAreaInsets();
   const [state, setState] = React.useState<{
@@ -43,15 +45,14 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
         ...prev,
         modal: {
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message:
-            'Doğum haritanı yorumlamadan önce doğum tarihi, ülke ve şehir bilgilerini tamamlamalısın. Doğum saati yoksa yükselen ve evler net okunamaz.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('flows.chartBeforeInterpretInfo'),
         },
       }));
       return;
     }
     navigation.navigate('BirthChartInterpretation', { profileId });
-  }, [navigation, profileId]);
+  }, [navigation, profileId, t]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -64,7 +65,7 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
             setState((prev) => ({
               ...prev,
               loading: false,
-              modal: { visible: true, title: 'Hata', message: 'Profil bulunamadı.' },
+              modal: { visible: true, title: t('flows.errorTitle'), message: t('session.profileNotFound') },
             }));
           }
           return;
@@ -77,8 +78,8 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
               loading: false,
               modal: {
                 visible: true,
-                title: 'Profil Bilgisi Gerekli',
-                message: 'Doğum haritası için doğum tarihi, doğum ülkesi ve doğum şehri bilgilerini tamamlamalısın. Doğum saati varsa yükselen ve evler de netleşir.',
+                title: t('modals.profileInfoRequiredTitle'),
+                message: t('flows.chartInfoRequired'),
               },
             }));
           }
@@ -141,7 +142,7 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
           setState((prev) => ({
             ...prev,
             loading: false,
-            title: `${profile.displayName} - Doğum Haritası`,
+            title: t('flows.chartTitle', { name: profile.displayName }),
             lines,
             chart,
             interpretationExists: Boolean(interpretation),
@@ -152,7 +153,7 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
           setState((prev) => ({
             ...prev,
             loading: false,
-            modal: { visible: true, title: 'Hata', message: err?.message || 'Doğum haritası üretilemedi.' },
+            modal: { visible: true, title: t('flows.errorTitle'), message: err?.message || t('flows.chartFailed') },
           }));
         }
       }
@@ -160,26 +161,26 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [profileId]);
+  }, [profileId, t]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.title}>{state.title || 'Doğum Haritası'}</Text>
-          <BirthChartWheel chart={state.chart} />
+          <Text style={styles.title}>{state.title || t('nav.personalBirthChart')}</Text>
+          <BirthChartWheel chart={state.chart} housesHint={t('flows.housesNeedBirthTime')} />
           <TouchableOpacity
             style={[styles.interpretButton, state.loading && styles.interpretButtonDisabled]}
             onPress={() => void openInterpretation()}
             disabled={state.loading}
           >
-            <Text style={styles.interpretButtonText}>{state.interpretationExists ? 'Yorum Hakkında Soru Sor' : 'Yorumla'}</Text>
+            <Text style={styles.interpretButtonText}>{state.interpretationExists ? t('flows.askAboutInterpretation') : t('session.interpret')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.panel}>
           {state.loading ? (
-            <Text style={styles.text}>Hazırlanıyor...</Text>
+            <Text style={styles.text}>{t('flows.preparing')}</Text>
           ) : (
             state.lines.map((line, idx) => (
               <Text key={`${idx}-${line}`} style={line.startsWith('- ') ? styles.bullet : styles.text}>
@@ -194,12 +195,12 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
         visible={state.modal.visible}
         title={state.modal.title}
         message={state.modal.message}
-        confirmLabel="Tamam"
-        cancelLabel="Kapat"
+        confirmLabel={t('common.ok')}
+        cancelLabel={t('common.close')}
         onConfirm={() => setState((prev) => ({ ...prev, modal: { visible: false, title: '', message: '' } }))}
         onCancel={() => setState((prev) => ({ ...prev, modal: { visible: false, title: '', message: '' } }))}
-        extraActionLabel={state.modal.title === 'Profil Bilgisi Gerekli' ? 'Profil Ayarlarına Git' : null}
-        onExtraAction={state.modal.title === 'Profil Bilgisi Gerekli' ? openProfileSettings : undefined}
+        extraActionLabel={state.modal.title === t('modals.profileInfoRequiredTitle') ? t('profile.goToProfileSettings') : null}
+        onExtraAction={state.modal.title === t('modals.profileInfoRequiredTitle') ? openProfileSettings : undefined}
       />
     </SafeAreaView>
   );
@@ -227,7 +228,7 @@ function point(cx: number, cy: number, radius: number, longitude: number) {
   return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
 }
 
-function BirthChartWheel({ chart }: { chart: BirthChartSnapshot | null }) {
+function BirthChartWheel({ chart, housesHint }: { chart: BirthChartSnapshot | null; housesHint: string }) {
   const size = 280;
   const cx = size / 2;
   const cy = size / 2;
@@ -270,7 +271,7 @@ function BirthChartWheel({ chart }: { chart: BirthChartSnapshot | null }) {
         })}
         {!chart?.ascendant ? (
           <SvgText x={cx} y={cy + 4} fill="rgba(255,255,255,0.62)" fontSize="10" textAnchor="middle">
-            Evler için doğum saati gerekli
+            {housesHint}
           </SvgText>
         ) : (
           <SvgText x={cx} y={cy + 4} fill="#F6C38B" fontSize="11" fontWeight="700" textAnchor="middle">

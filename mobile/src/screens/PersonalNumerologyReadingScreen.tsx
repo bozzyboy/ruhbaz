@@ -2,6 +2,8 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -44,6 +46,8 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalNumerologyReading'>;
 
+// Hafıza temalarına, token defterine ve semantik sorgulara yazılan TR etiketler;
+// UI gösterimi için modeUiLabel (i18n) kullanılır, kalıcı kayıtlar bu sabitten beslenir.
 const MODE_LABELS: Record<PersonalNumerologyMode, string> = {
   core: 'Temel Sayı Haritası',
   daily: 'Günlük Numeroloji',
@@ -51,13 +55,24 @@ const MODE_LABELS: Record<PersonalNumerologyMode, string> = {
   monthly: 'Aylık Numeroloji',
 };
 
+const MODE_UI_KEYS: Record<PersonalNumerologyMode, string> = {
+  core: 'flows.numerologyModeCore',
+  daily: 'flows.numerologyModeDaily',
+  weekly: 'flows.numerologyModeWeekly',
+  monthly: 'flows.numerologyModeMonthly',
+};
+
+function modeUiLabel(mode: PersonalNumerologyMode, t: TFunction) {
+  return t(MODE_UI_KEYS[mode]);
+}
+
 const CORE_LABELS: Array<[keyof PersonalNumerologyCore, string]> = [
-  ['lifePath', 'Yaşam Yolu'],
-  ['destiny', 'Kader / İfade'],
-  ['soulUrge', 'Ruh Arzusu'],
-  ['personality', 'Kişilik'],
-  ['birthday', 'Doğum Günü'],
-  ['maturity', 'Olgunluk'],
+  ['lifePath', 'flows.coreLifePath'],
+  ['destiny', 'flows.coreDestiny'],
+  ['soulUrge', 'flows.coreSoulUrge'],
+  ['personality', 'flows.corePersonality'],
+  ['birthday', 'flows.coreBirthday'],
+  ['maturity', 'flows.coreMaturity'],
 ];
 
 type FollowUpMessage = {
@@ -71,6 +86,7 @@ function compactSummary(text: string) {
 }
 
 export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId, initialMode } = route.params;
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<PersonalNumerologyMode | null>(initialMode || null);
@@ -98,11 +114,11 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
     () => (initialMode === 'core' ? ['core'] : ['daily', 'weekly', 'monthly']),
     [initialMode],
   );
-  const modeHeaderLabel = useMemo(() => (mode ? MODE_LABELS[mode] : 'Bölüm seç'), [mode]);
+  const modeHeaderLabel = useMemo(() => (mode ? modeUiLabel(mode, t) : t('flows.selectSectionHeader')), [mode, t]);
   const isBusy = isLoading || isSendingQuestion;
   const hasPreparedReading = Boolean(text && mode);
   const canPrepareReading = Boolean(mode && !isBusy && !hasPreparedReading);
-  const actionLabel = hasPreparedReading ? 'Yorum Hazır' : mode ? 'Yorumu Hazırla' : 'Önce Bölüm Seç';
+  const actionLabel = hasPreparedReading ? t('flows.readingReady') : mode ? t('flows.prepareReading') : t('flows.selectSectionFirst');
 
   useEffect(() => {
     navigation.setOptions({
@@ -179,7 +195,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
       if (!profile) {
-        setInfoModal({ visible: true, title: APP_NAME, message: 'Profil bulunamadı.' });
+        setInfoModal({ visible: true, title: APP_NAME, message: t('session.profileNotFound') });
         setText('');
         setSpecificityUsage(null);
         return;
@@ -188,8 +204,8 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       if (!hasRequiredNumerologyInputs(profile)) {
         setInfoModal({
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message: 'Kişisel numeroloji için profil adı ve doğum tarihi gerekli. Doğum saati veya doğum yeri kullanılmıyor.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('flows.numerologyInfoRequired'),
         });
         setText('');
         setSpecificityUsage(null);
@@ -228,14 +244,14 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: retryMessage?.title || APP_NAME,
-        message: retryMessage?.message || err?.message || 'Kişisel numeroloji yorumu üretilemedi.',
+        message: retryMessage?.message || err?.message || t('flows.numerologyFailed'),
       });
       setText('');
       setSpecificityUsage(null);
     } finally {
       setIsLoading(false);
     }
-  }, [applyReadingToScreen, assistantId, assistantLabel, isBusy, mode, profileId, text]);
+  }, [applyReadingToScreen, assistantId, assistantLabel, isBusy, mode, profileId, t, text]);
 
   useEffect(() => {
     return () => {
@@ -326,12 +342,12 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Soruna şu an yanıt üretilemedi.',
+        message: err?.message || t('session.answerFailed'),
       });
     } finally {
       setIsSendingQuestion(false);
     }
-  }, [assistantId, assistantLabel, followUps, isSendingQuestion, mode, profileName, questionText, text]);
+  }, [assistantId, assistantLabel, followUps, isSendingQuestion, mode, profileName, questionText, t, text]);
 
   const buildTranscript = useCallback(
     () => [
@@ -415,10 +431,10 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: err?.message || 'Sesli yazma başlatılamadı.',
+        message: err?.message || t('session.voiceTypingStartFailed'),
       });
     }
-  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, speechMode, text]);
+  }, [isRecordingQuestion, mergeQuestionTranscript, questionText, speechMode, t, text]);
 
   const handleQuestionRecordStop = useCallback(async () => {
     await stopNativeRecording().catch(() => {});
@@ -453,7 +469,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
           />
         </View>
         <View style={styles.sessionHeaderRow}>
-          <Text style={styles.sessionHeaderText}>{profileName || 'Profil'}</Text>
+          <Text style={styles.sessionHeaderText}>{profileName || t('session.profileFallback')}</Text>
           <Text style={[styles.sessionHeaderText, styles.modeHeaderText]}>{modeHeaderLabel}</Text>
           <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
         </View>
@@ -468,7 +484,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
                   onPress={() => void handleSelectMode(item)}
                   disabled={isBusy}
                 >
-                  <Text style={[styles.modeButtonText, selected && styles.modeButtonTextSelected]}>{MODE_LABELS[item]}</Text>
+                  <Text style={[styles.modeButtonText, selected && styles.modeButtonTextSelected]}>{modeUiLabel(item, t)}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -485,9 +501,9 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
 
         {core && mode === 'core' ? (
           <View style={styles.grid}>
-            {CORE_LABELS.map(([key, label]) => (
+            {CORE_LABELS.map(([key, labelKey]) => (
               <View key={key} style={styles.numberTile}>
-                <Text style={styles.numberLabel}>{label}</Text>
+                <Text style={styles.numberLabel}>{t(labelKey)}</Text>
                 <Text style={styles.numberValue}>{core[key]}</Text>
               </View>
             ))}
@@ -495,7 +511,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
         ) : null}
 
         <View style={styles.panel}>
-          <Text style={styles.sectionTitle}>Yorum</Text>
+          <Text style={styles.sectionTitle}>{t('session.interpretation')}</Text>
           <BrandedScrollView
             containerStyle={styles.readingScrollFrame}
             style={styles.readingScroll}
@@ -504,24 +520,24 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
             indicatorMode="box"
           >
             {isLoading ? (
-              <AssistantLoading label="Yorum hazırlanıyor" detail="Lütfen bekleyiniz. Ekranı kapatmayınız." />
+              <AssistantLoading label={t('session.interpretationPreparing')} detail={t('session.pleaseWaitKeepOpen')} />
             ) : text ? (
               <SelectableFormattedText text={text} style={styles.readingText} />
             ) : (
               <Text style={styles.loading}>
                 {initialMode === 'core'
-                  ? 'Temel sayı haritasını hazırlayabilir veya kayıtlı yorumun geldiyse üzerinden soru sorabilirsin.'
-                  : 'Günlük, haftalık veya aylık numeroloji seçip yorumu hazırlayabilirsin.'}
+                  ? t('flows.numerologyCoreEmpty')
+                  : t('flows.numerologyPeriodEmpty')}
               </Text>
             )}
           </BrandedScrollView>
           {text ? (
             <View style={styles.quickActions}>
               <TouchableOpacity style={styles.secondaryAction} onPress={handlePhoneRead}>
-                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? 'Duraklat' : 'Telefon Okusun'}</Text>
+                <Text style={styles.secondaryActionText}>{speechMode === 'playing' ? t('session.pause') : t('session.phoneRead')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.secondaryAction, styles.disabledAction]} disabled>
-                <Text style={styles.secondaryActionText}>{assistantLabel} Okusun</Text>
+                <Text style={styles.secondaryActionText}>{t('session.assistantRead', { assistant: assistantLabel })}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -534,14 +550,14 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
                 key={message.id}
                 style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
               >
-                <Text style={styles.chatRole}>{message.role === 'user' ? 'Sen' : assistantLabel}</Text>
+                <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                 <SelectableFormattedText text={message.text} style={styles.chatText} />
               </View>
             ))}
             {isSendingQuestion ? <AssistantLoading compact /> : null}
             <TouchableOpacity style={styles.questionInput} activeOpacity={0.88} onPress={() => setEditorVisible(true)}>
               <Text style={[styles.composePreviewText, !questionText.trim() && styles.composePreviewPlaceholder]}>
-                {questionText.trim() || 'Bu yorumla ilgili ne sormak istersin?'}
+                {questionText.trim() || t('session.askPlaceholder')}
               </Text>
             </TouchableOpacity>
             <Modal visible={editorVisible} transparent animationType="fade" statusBarTranslucent onRequestClose={() => setEditorVisible(false)}>
@@ -551,13 +567,13 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
                 keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
               >
                 <View style={styles.editorCard}>
-                  <Text style={styles.editorTitle}>Sorunu Düzenle</Text>
+                  <Text style={styles.editorTitle}>{t('session.editQuestionTitle')}</Text>
                   <TextInput
                     style={styles.editorInput}
                     value={questionText}
                     onChangeText={setQuestionText}
                     maxLength={FOLLOW_UP_QUESTION_MAX_CHARS}
-                    placeholder="Sorunu buradan düzenleyebilirsin..."
+                    placeholder={t('session.editQuestionPlaceholder')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     multiline
                     autoFocus
@@ -565,14 +581,14 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
                   />
                   <View style={styles.editorActions}>
                     <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setEditorVisible(false)}>
-                      <Text style={styles.editorGhostText}>Kapat</Text>
+                      <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.editorSendBtn, (!questionText.trim() || isSendingQuestion) && styles.disabledAction]}
                       onPress={() => void handleSendQuestion()}
                       disabled={!questionText.trim() || isSendingQuestion}
                     >
-                      <Text style={styles.editorSendText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                      <Text style={styles.editorSendText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -584,14 +600,14 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
                 onPressIn={() => void handleQuestionRecordStart()}
                 onPressOut={() => void handleQuestionRecordStop()}
               >
-                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? 'Bırakınca Yaz' : 'Basılı Tut Konuş'}</Text>
+                <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.primaryAction, (!questionText.trim() || isSendingQuestion) && styles.disabledAction]}
                 onPress={() => void handleSendQuestion()}
                 disabled={!questionText.trim() || isSendingQuestion}
               >
-                <Text style={styles.primaryActionText}>{isSendingQuestion ? 'Soruluyor...' : 'Sor'}</Text>
+                <Text style={styles.primaryActionText}>{isSendingQuestion ? t('session.asking') : t('session.ask')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -599,7 +615,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
               onPress={() => void persistReadingAndEnd()}
               disabled={isSendingQuestion}
             >
-              <Text style={styles.endButtonText}>Okumayı Bitir</Text>
+              <Text style={styles.endButtonText}>{t('session.endReading')}</Text>
             </TouchableOpacity>
           </View>
         ) : null}
@@ -609,8 +625,8 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
         visible={infoModal.visible}
         title={infoModal.title}
         message={infoModal.message}
-        confirmLabel="Tamam"
-        cancelLabel="Kapat"
+        confirmLabel={t('common.ok')}
+        cancelLabel={t('common.close')}
         onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
       />

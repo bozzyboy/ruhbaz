@@ -1,6 +1,7 @@
 ﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { ImageUploader } from '../components/ImageUploader';
@@ -22,6 +23,7 @@ import type { DevSettings } from '../types';
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalReadingSetup'>;
 
 export function PersonalReadingSetupScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const readingType = route.params?.preselectedReadingType || 'coffee';
   const assistantId = route.params?.preselectedAssistantId || DEFAULT_DEV_SETTINGS.assistantId;
   const baseDevSettings = route.params?.preselectedDevSettings || DEFAULT_DEV_SETTINGS;
@@ -106,17 +108,17 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
 
   const startSession = useCallback(async () => {
     if (!state || !selectedProfile) {
-      setInfoModal({ visible: true, title: 'Eksik', message: 'Profil bulunamadı. Lütfen akış adımlarını tekrar tamamla.' });
+      setInfoModal({ visible: true, title: t('flows.missingTitle'), message: t('flows.setupProfileNotFound') });
       return;
     }
 
     if (readingType === 'coffee' && coffeeMode === 'upload' && !imageState.cup && !imageState.cup2 && !imageState.saucer) {
-      setInfoModal({ visible: true, title: 'Eksik', message: 'Kahve yorumunda en az bir telveli kahve görseli gerekli.' });
+      setInfoModal({ visible: true, title: t('flows.missingTitle'), message: t('flows.coffeeImageRequired') });
       return;
     }
 
     if (readingType === 'palm' && !imageState.palm) {
-      setInfoModal({ visible: true, title: 'Eksik', message: 'El okuması için uygun el ya da pati fotoğrafı gerekli.' });
+      setInfoModal({ visible: true, title: t('flows.missingTitle'), message: t('flows.palmImageRequired') });
       return;
     }
 
@@ -150,12 +152,12 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
         devSettings,
       },
     });
-  }, [coffeeMode, devSettings, imageState, navigation, normalizedTopicText, readingType, selectedProfile, state]);
+  }, [coffeeMode, devSettings, imageState, navigation, normalizedTopicText, readingType, selectedProfile, state, t]);
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingWrap}>
-        <Text style={styles.loadingText}>Hazırlanıyor...</Text>
+        <Text style={styles.loadingText}>{t('flows.preparing')}</Text>
       </SafeAreaView>
     );
   }
@@ -171,13 +173,15 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
           showScrollToTop
         >
           <Text style={styles.title}>{APP_NAME}</Text>
-          <Text style={styles.subtitle}>Seçimlerin tamamlandı. Şimdi okumayı başlatabilirsin.</Text>
+          <Text style={styles.subtitle}>{t('flows.setupSubtitle')}</Text>
 
           <View style={styles.summaryPanel}>
-            <Text style={styles.summaryText}>Profil: {selectedProfile?.displayName || '-'}</Text>
-            <Text style={styles.summaryText}>Okuma Tipi: {readingType === 'coffee' ? 'Kahve Yorumu' : 'El / Pati Okuması'}</Text>
-            <Text style={styles.summaryText}>Yorumcu: {assistantLabel}</Text>
-            <Text style={styles.summaryText}>Model: Gemini 2.5 Flash Lite</Text>
+            <Text style={styles.summaryText}>{t('flows.summaryProfile', { name: selectedProfile?.displayName || '-' })}</Text>
+            <Text style={styles.summaryText}>
+              {t('flows.summaryReadingType', { type: readingType === 'coffee' ? t('readings.typeCoffee') : t('readings.typePalm') })}
+            </Text>
+            <Text style={styles.summaryText}>{t('flows.summaryAssistant', { name: assistantLabel })}</Text>
+            <Text style={styles.summaryText}>{t('flows.summaryModel')}</Text>
           </View>
 
           {(pendingRejectedUploads > 0 ||
@@ -212,33 +216,32 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
           )}
 
           <View style={styles.panel}>
-            <Text style={styles.panelTitle}>{readingType === 'coffee' ? 'Kahve Yorumuna Başla' : 'El Okumasına Başla'}</Text>
+            <Text style={styles.panelTitle}>{readingType === 'coffee' ? t('flows.startCoffeeTitle') : t('flows.startPalmTitle')}</Text>
             <Text style={styles.assistantBlurb}>{assistantPreset.tagline}</Text>
-            <Text style={styles.inlineLabel}>Konu / soru</Text>
+            <Text style={styles.inlineLabel}>{t('flows.topicLabel')}</Text>
             <TouchableOpacity style={styles.topicPromptBox} activeOpacity={0.88} onPress={() => setTopicEditorVisible(true)}>
               <Text style={[styles.topicPromptText, !normalizedTopicText && styles.topicPromptPlaceholder]}>
-                {normalizedTopicText ||
-                  'Aklında bir soru, yorumlanmasını istediğin bir konu, durum vb. varsa buraya yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin.'}
+                {normalizedTopicText || t('flows.topicPlaceholder')}
               </Text>
             </TouchableOpacity>
 
             {readingType === 'coffee' ? (
               <>
-                <Text style={styles.inlineLabel}>Kahve modu</Text>
+                <Text style={styles.inlineLabel}>{t('flows.coffeeModeLabel')}</Text>
                 <View style={styles.modeRow}>
                   <TouchableOpacity
                     style={[styles.modeCard, coffeeMode === 'upload' && styles.modeCardSelected]}
                     onPress={() => setCoffeeMode('upload')}
                   >
-                    <Text style={styles.modeTitle}>Fotoğraf yükle</Text>
-                    <Text style={styles.modeText}>Fincan ve tabak görselleriyle klasik yorum.</Text>
+                    <Text style={styles.modeTitle}>{t('flows.coffeeModeUploadTitle')}</Text>
+                    <Text style={styles.modeText}>{t('flows.coffeeModeUploadDesc')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.modeCard, coffeeMode === 'ai-brew' && styles.modeCardSelected]}
                     onPress={() => setCoffeeMode('ai-brew')}
                   >
-                    <Text style={styles.modeTitle}>Benim yerime iç</Text>
-                    <Text style={styles.modeText}>senin niyetine içip bakıyoruz</Text>
+                    <Text style={styles.modeTitle}>{t('flows.coffeeModeAiBrewTitle')}</Text>
+                    <Text style={styles.modeText}>{t('flows.coffeeModeAiBrewDesc')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -252,10 +255,10 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
                         );
                         return (
                           <View key={slot} style={styles.imageSlot}>
-                            <Text style={styles.imageSlotLabel}>{`Kahve görseli ${index + 1}`}</Text>
+                            <Text style={styles.imageSlotLabel}>{t('session.coffeeImageSlot', { num: index + 1 })}</Text>
                             <ImageUploader
                               hideLabel
-                              label={`Kahve görseli ${index + 1}`}
+                              label={t('session.coffeeImageSlot', { num: index + 1 })}
                               imageUri={imageState[slot]}
                               onImageSelected={(uri) => setImageState((prev) => ({ ...prev, [slot]: uri }))}
                               multiSelectLimit={1 + emptyOthers.length}
@@ -277,40 +280,32 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
                         );
                       })}
                     </View>
-                    <Text style={styles.helperText}>
-                      Her slot fincan, tabak veya fincan+tabak olabilir. Aynı kahvenin farklı açılardan çekilmiş karelerini yükleyebilirsin; galeriden tek seferde birden fazla kare seçebilirsin.
-                    </Text>
-                    <Text style={styles.creditWarning}>
-                      Her yanlış yüklenen görsel kredi hesabına dahil edilir. Yanlış denemeler bir sonraki okumanın açılışına da not düşülür.
-                    </Text>
+                    <Text style={styles.helperText}>{t('flows.coffeeSlotsHelper')}</Text>
+                    <Text style={styles.creditWarning}>{t('flows.creditWarningSetup')}</Text>
                   </>
                 ) : (
-                  <Text style={styles.helperText}>
-                    Bu modda görsel yüklemiyorsun. Seçili profilin hafızası ve önceki okumalardan sezgisel destek alınır.
-                  </Text>
+                  <Text style={styles.helperText}>{t('flows.aiBrewHelper')}</Text>
                 )}
               </>
             ) : (
               <>
                 <View style={styles.singleImageWrap}>
                   <Text style={styles.imageSlotLabel}>
-                    {selectedProfile?.relationshipPrimary === 'evcil_hayvan' ? 'Pati ya da ayak' : 'El ya da pati'}
+                    {selectedProfile?.relationshipPrimary === 'evcil_hayvan' ? t('flows.pawOrFootLabel') : t('flows.palmOrPawLabel')}
                   </Text>
                   <ImageUploader
                     hideLabel
-                    label="El ya da pati"
+                    label={t('flows.palmOrPawLabel')}
                     imageUri={imageState.palm}
                     onImageSelected={(uri) => setImageState((prev) => ({ ...prev, palm: uri }))}
                   />
                 </View>
-                <Text style={styles.creditWarning}>
-                  Yanlış türde yüklenen her görsel kredi hesabına dahil edilir. Doğru okuma açıldığında bu deneme sayısı yeni okumaya taşınır.
-                </Text>
+                <Text style={styles.creditWarning}>{t('flows.creditWarningPalm')}</Text>
               </>
             )}
 
             <TouchableOpacity style={styles.primaryButton} onPress={() => void startSession()}>
-              <Text style={styles.primaryButtonText}>Okumamı Başlat</Text>
+              <Text style={styles.primaryButtonText}>{t('flows.startMyReading')}</Text>
             </TouchableOpacity>
           </View>
         </BrandedScrollView>
@@ -321,13 +316,13 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
             keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
           >
             <View style={styles.editorCard}>
-              <Text style={styles.editorTitle}>Konu / Soru</Text>
+              <Text style={styles.editorTitle}>{t('flows.topicEditorTitle')}</Text>
               <TextInput
                 style={styles.editorInput}
                 value={topicText}
                 onChangeText={setTopicText}
                 maxLength={OPTIONAL_READING_TOPIC_MAX_CHARS}
-                placeholder="Aklında bir soru, yorumlanmasını istediğin bir konu, durum vb. varsa buraya yazabilirsin. Aklında bir şey yoksa boş da bırakabilirsin."
+                placeholder={t('flows.topicPlaceholder')}
                 placeholderTextColor="rgba(255,255,255,0.35)"
                 multiline
                 autoFocus
@@ -335,10 +330,10 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
               />
               <View style={styles.editorActions}>
                 <TouchableOpacity style={styles.editorGhostBtn} onPress={() => setTopicEditorVisible(false)}>
-                  <Text style={styles.editorGhostText}>Kapat</Text>
+                  <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.editorSendBtn} onPress={() => setTopicEditorVisible(false)}>
-                  <Text style={styles.editorSendText}>Kaydet</Text>
+                  <Text style={styles.editorSendText}>{t('session.save')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -348,7 +343,7 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
           visible={infoModal.visible}
           title={infoModal.title}
           message={infoModal.message}
-          confirmLabel="Tamam"
+          confirmLabel={t('common.ok')}
           cancelLabel={null}
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}

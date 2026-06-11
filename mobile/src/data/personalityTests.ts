@@ -1,3 +1,6 @@
+import { getAppLanguage } from '../i18n';
+import { PERSONALITY_TESTS_EN } from './personalityTests.en';
+
 export type PersonalityTestId = 'compatibility' | 'big-five' | 'attachment' | 'values' | 'coping-style';
 
 export type PersonalityTestQuestion = {
@@ -432,3 +435,10 @@ export const PERSONALITY_TESTS: Record<PersonalityTestId, PersonalityTestDefinit
     },
   },
 };
+
+// Faz 4: aktif uygulama diline gore test tanim setini dondurur.
+// Test id'leri ve boyut anahtarlari iki dilde AYNIDIR; yalniz kullaniciya
+// gorunen metin degisir. EN icerik ./personalityTests.en dosyasindadir.
+export function getPersonalityTests(): Record<PersonalityTestId, PersonalityTestDefinition> {
+  return getAppLanguage() === 'en' ? PERSONALITY_TESTS_EN : PERSONALITY_TESTS;
+}
