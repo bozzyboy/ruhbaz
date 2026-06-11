@@ -8,6 +8,7 @@ import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { getAssistantLabel } from '../config/constants';
 import { deleteReading, getReadingTypeLabel } from '../services/profileMemoryService';
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReadingDetail'>;
 
@@ -39,6 +40,7 @@ export function ReadingDetailScreen({ route, navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.metaCard}>
           <Text style={styles.assistant}>

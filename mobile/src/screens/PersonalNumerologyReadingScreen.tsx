@@ -1,3 +1,4 @@
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -433,6 +434,7 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
       keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
     >
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView
         ref={pageScrollRef}
         showScrollToTop

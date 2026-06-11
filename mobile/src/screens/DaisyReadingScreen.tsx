@@ -6,6 +6,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { createDaisyReadingSession, daisyAnswerForPetal, type DaisyReadingSession } from '../services/daisyReadingService';
 import { BrandedScrollView } from '../components/BrandedScrollView';
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'DaisyReading'>;
 
@@ -48,6 +49,7 @@ export function DaisyReadingScreen({}: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.cardWrap}>
           <ImageBackground source={require('../../assets/angel_bg.jpg')} style={styles.backgroundImage} imageStyle={{ borderRadius: 20 }}>

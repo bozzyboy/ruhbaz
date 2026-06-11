@@ -2,7 +2,7 @@
 // Ruhbaz Konağı - App.tsx (Entry Point)
 // ============================================================
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BackHandler, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -34,6 +34,9 @@ import { MbtiTestScreen } from './src/screens/MbtiTestScreen';
 import { AstroRelationshipReadingScreen } from './src/screens/AstroRelationshipReadingScreen';
 import { SunCompatibilityScreen } from './src/screens/SunCompatibilityScreen';
 import { DaisyReadingScreen } from './src/screens/DaisyReadingScreen';
+import { LegalConsentScreen } from './src/screens/LegalConsentScreen';
+import { LegalInfoScreen } from './src/screens/LegalInfoScreen';
+import { hasAcceptedLegalConsent } from './src/services/legalConsentService';
 import { APP_NAME } from './src/config/constants';
 import type { TarotDeckId } from './src/data/tarotImageMap';
 import type { DevSettings, SessionConfig } from './src/types';
@@ -43,6 +46,7 @@ import type { ReadingSummary } from './src/types/memory';
 export type RootStackParamList = {
   Home: { freshStartToken?: number } | undefined;
   ProfileSettings: { profileId?: string } | undefined;
+  LegalInfo: undefined;
   GeneralReadings: undefined;
   SelfKnowledge: { devSettings: DevSettings } | undefined;
   SimyaLab: { devSettings: DevSettings } | undefined;
@@ -154,6 +158,34 @@ function useAndroidImmersiveNavigation() {
 export default function App() {
   useAndroidImmersiveNavigation();
 
+  // Yasal onay kapısı: null = kontrol sürüyor, false = onay ekranı, true = konak açık.
+  const [consentAccepted, setConsentAccepted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void hasAcceptedLegalConsent().then((accepted) => {
+      if (!cancelled) {
+        setConsentAccepted(accepted);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (consentAccepted === null) {
+    // Kısa dosya kontrolü; boş karanlık ekran yeterli (flash önleme).
+    return <SafeAreaProvider><View style={styles.bootScreen} /></SafeAreaProvider>;
+  }
+
+  if (!consentAccepted) {
+    return (
+      <SafeAreaProvider>
+        <LegalConsentScreen onAccepted={() => setConsentAccepted(true)} />
+      </SafeAreaProvider>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -204,6 +236,7 @@ export default function App() {
         >
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: APP_NAME }} />
           <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ title: 'Profil Ayarları' }} />
+          <Stack.Screen name="LegalInfo" component={LegalInfoScreen} options={{ title: 'Yasal Bilgilendirme' }} />
           <Stack.Screen name="GeneralReadings" component={GeneralReadingsScreen} options={{ title: 'İkram Masası' }} />
           <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: 'Genel Okuma' }} />
           <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: 'Genel Burç Uyumu' }} />
@@ -301,6 +334,10 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  bootScreen: {
+    flex: 1,
+    backgroundColor: '#14141E',
+  },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',

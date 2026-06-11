@@ -545,6 +545,15 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 </TouchableOpacity>
               </View>
             ) : null}
+
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Yasal Bilgilendirme"
+              style={styles.legalLinkButton}
+              onPress={() => navigation.navigate('LegalInfo')}
+            >
+              <Text style={styles.legalLinkButtonText}>Yasal Bilgilendirme</Text>
+            </TouchableOpacity>
           </View>
         </BrandedScrollView>
       </SafeAreaView>
@@ -920,6 +929,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212,165,116,0.12)',
   },
   linkButtonText: { color: '#E8C49A', fontSize: 13, fontWeight: '700' },
+  legalLinkButton: {
+    marginTop: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(212,165,116,0.45)',
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+    backgroundColor: 'rgba(212,165,116,0.06)',
+  },
+  legalLinkButtonText: { color: 'rgba(232,196,154,0.85)', fontSize: 13, fontWeight: '700' },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.52)', justifyContent: 'flex-end' },
   modalSheet: {
     width: '100%',

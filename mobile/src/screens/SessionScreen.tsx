@@ -1,3 +1,4 @@
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Image,
@@ -496,6 +497,7 @@ export function SessionScreen({ route, navigation }: Props) {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <SafeAreaView style={styles.safeArea} edges={['left', 'right', 'bottom']}>
+        <SymbolicDisclaimer />
         <View style={styles.tokenAckRow}>
           <View style={styles.tokenWrap}>
             <TokenUsage

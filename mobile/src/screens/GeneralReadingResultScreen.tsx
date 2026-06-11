@@ -21,6 +21,7 @@ import { createDailyGeneralReading, type GeneralDivinationType } from '../servic
 import { fetchGeneralAstroDirect } from '../services/generalAstroApiService';
 import { loadAccountState } from '../services/profileMemoryService';
 import { getRetryLaterMessage, isRetryableLlmError } from '../services/llmRetryMessages';
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GeneralReadingResult'>;
 
@@ -170,6 +171,7 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
           <Text style={styles.title}>{title}</Text>

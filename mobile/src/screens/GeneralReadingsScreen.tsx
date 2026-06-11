@@ -32,6 +32,7 @@ import { APP_NAME, DEFAULT_DEV_SETTINGS } from '../config/constants';
 import { getRetryLaterMessage, isRetryableLlmError } from '../services/llmRetryMessages';
 import type { AngelCard, AngelNumber } from '../data/divinationData';
 import GeneralAstroCard from '../components/GeneralAstroCard';
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GeneralReadings'>;
 
@@ -555,6 +556,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Kimin İçin Okuyoruz?</Text>

@@ -1,3 +1,4 @@
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -422,6 +423,7 @@ export function TarotReadingScreen({ route, navigation }: Props) {
       keyboardVerticalOffset={Platform.OS === 'android' ? 24 : 0}
     >
       <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <SymbolicDisclaimer />
         <ScrollView
           ref={pageScrollRef}
           style={styles.pageScroll}

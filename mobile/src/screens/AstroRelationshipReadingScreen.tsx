@@ -30,6 +30,7 @@ import {
 import { addPersonalTokenUsage, GEMINI_FLASH_LITE_INPUT_PRICE_USD_PER_M, GEMINI_FLASH_LITE_OUTPUT_PRICE_USD_PER_M } from '../services/tokenLedgerService';
 import type { AccountState, BirthInfo, ProfileGender, RelationshipPrimary, SubjectProfile } from '../types/memory';
 import type { TokenUsageData } from '../types';
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AstroRelationshipReading'>;
 
@@ -582,6 +583,7 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <SymbolicDisclaimer />
         <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} keyboardShouldPersistTaps="handled" showScrollToTop>
           <TokenUsage usage={tokenUsage} inputPrice={GEMINI_FLASH_LITE_INPUT_PRICE_USD_PER_M} outputPrice={GEMINI_FLASH_LITE_OUTPUT_PRICE_USD_PER_M} />
           <View style={styles.headerRow}>

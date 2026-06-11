@@ -1,3 +1,4 @@
+import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,6 +29,7 @@ export function SunCompatibilityScreen({}: Props) {
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Genel Burç Uyumu</Text>
