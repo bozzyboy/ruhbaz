@@ -31,6 +31,8 @@
 | F0-A2 | Aynı seansta sohbete devam et (1-2 takip mesajı yaz) | Yanıtlar gelir, hafıza bağlamı çalışır (embedding `/gemini-embed` yolu sağlam, header'lı) | ☐ |
 | F0-A3 | İkram Masası → Genel Astro Günlük aç | Yorum gelir (server cache yoksa cihazdan üretim/fallback'e düşer — `/general-astro` isteği artık header'lı ama endpoint opsiyonel, davranış değişmemeli) | ☐ |
 | F0-A4 | (Regresyon, isteğe bağlı) PC tarayıcısından `http://<PC-IP>:8080/gemini-generate`'e POST atmayı dene veya sadece `http://<PC-IP>:8080/health` aç | health açılır; generate tarayıcıdan/headersiz 401 döner (yabancı erişim kapalı) | ☐ |
+| F0-A5 | **B-5 doğrulaması:** Her şey kapalıyken PC'nin IP'sini umursamadan sırayla aç: token server → `npx expo start` → telefonda app → herhangi bir yorum başlat | Yorum gelir. App, server adresini artık Expo bağlantısından kendisi buluyor; `.env.local`'daki eski IP satırı SİLİNSE BİLE çalışır (o satır artık yalnız production yedeği) | ☐ |
+| F0-A6 | (Regresyon) Wi-Fi yönlendiricin IP'yi değiştirmişse (veya hotspot'a geçersen): server + expo start'ı yeni ağda aç, app'i reload et | Eskiden kopardı; artık yorum yine gelir — IP türetmesi otomatik | ☐ |
 
 **Değişen dosya → test eşlemesi (F0-A, şimdiye dek):**
 
@@ -42,6 +44,9 @@
 | `agent/token_server.py` | Dinleme adresi env'e bağlandı: varsayılan 127.0.0.1; `agent/.env`'de HOST=0.0.0.0 (telefon LAN erişimi için, Claude ekledi); localhost-dışı dinleme secret'sız BAŞLAMAZ | F0-A1 (telefonun LAN'dan bağlanabilmesi bunu zaten test eder) + Claude doğrulaması (server 0.0.0.0'da kalktı, health=200) |
 | `agent/.env.example` | Yeni örnek dosya (doküman) | Cihaz testi gerekmez |
 | `mobile/src/config/constants.ts` | `AGENT_SHARED_SECRET` + `agentAuthHeaders()` eklendi | F0-A1, F0-A2, F0-A3 |
+| `mobile/src/config/constants.ts` | B-5: `AGENT_API_URL` artık Expo `hostUri`'den türetiliyor (env → yalnız production yedeği) | F0-A5, F0-A6 |
+| `mobile/package.json` | `expo-constants` doğrudan bağımlılık yapıldı (JS-only; native modül her Expo build'inde zaten var → YENİ APK GEREKMEZ) | F0-A5 |
+| `mobile/scripts/sync-agent-url.js` | Dokunulmadı ama artık GEREKSİZ (IP yazma derdi bitti); ileride kaldırılabilir | — |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |

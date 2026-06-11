@@ -2,15 +2,33 @@
 // FALCI - Configuration Constants
 // ============================================================
 
+import Constants from 'expo-constants';
+
 import type { DevSettings } from '../types';
 
 export const APP_NAME = 'Ruhbaz';
 
 declare const process: { env?: Record<string, string | undefined> } | undefined;
 
+const AGENT_API_PORT = 8080;
+
+/**
+ * B-5: Server adresi Expo dev bağlantısından (hostUri) türetilir — token server
+ * Expo dev server ile aynı PC'de koştuğu için PC'nin IP'si değişse bile adres
+ * kendiliğinden doğru kalır (.env.local'a IP yazma derdi bitti).
+ * hostUri yoksa (production build) EXPO_PUBLIC_AGENT_API_URL, o da yoksa localhost.
+ */
+function deriveAgentApiUrl(): string {
+  const hostUri = Constants.expoConfig?.hostUri;
+  const host = hostUri?.split('/')[0]?.split(':')[0]?.trim();
+  if (host) return `http://${host}:${AGENT_API_PORT}`;
+  const fromEnv = process?.env?.EXPO_PUBLIC_AGENT_API_URL?.replace(/\/+$/, '');
+  if (fromEnv) return fromEnv;
+  return `http://127.0.0.1:${AGENT_API_PORT}`;
+}
+
 /** Agent backend API base URL */
-export const AGENT_API_URL =
-  process?.env?.EXPO_PUBLIC_AGENT_API_URL?.replace(/\/+$/, '') || 'http://127.0.0.1:8080';
+export const AGENT_API_URL = deriveAgentApiUrl();
 
 /**
  * Token server ile paylaşılan gizli (mobile/.env.local → EXPO_PUBLIC_AGENT_SHARED_SECRET).
