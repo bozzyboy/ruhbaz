@@ -59,7 +59,7 @@ Aşağıdaki akışlar özellikle korunmalıdır. Yeni özellik eklerken, refact
 - Okuma ekranında yüklenen kahve görselleri yan yana gösterilmeli ve her biri tıklanınca büyütülebilmeli.
 - Kahve ve el falında kamera açılıyorsa varsayılan kamera arka kamera olmalı; selfie/ön kamera varsayılan olmamalı.
 - Kahve yorumunda galeriden TEK SEFERDE çoklu kare seçilebilmeli (3'e kadar, seçim sırası korunur; ilk kare dokunulan slota, kalanlar boş slotlara). Kamera tek kare çeker — bu davranışı bozma.
-- Birden fazla kahve karesi yüklendiyse prompt bunları AYNI fincanın/tabağın farklı açılardan kareleri olarak okutur (ayrı kahveler değil) — fortunePromptBuilder'daki bu kural korunmalı (bekçi kontrol eder).
+- Birden fazla kahve karesi yüklendiyse prompt bunları AYNI fincanın/tabağın farklı açılardan kareleri olarak okutur (ayrı kahveler değil) — readingPromptBuilder'daki bu kural korunmalı (bekçi kontrol eder).
 - Kamera/mikrofon/galeri izin uyarıları MARKALI modallarla verilir (BrandedConfirmModal): sistem izni öncesi açıklama + kalıcı redde "Ayarları Aç" yönlendirmesi. Çıplak Alert.alert veya beyaz sistem uyarısı üstüne yazı KULLANMA; uyarı metinlerinde emoji KULLANMA.
 - LLM'e gönderilen görseller okunabilir çözünürlükte olmalı; gereksiz sıkıştırma, görseli modelin okuyamayacağı hale getirmemeli.
 - Mikro life events seçimi, tekrar etmeme hafızası ve guardrail/prompt güvenlik kuralları korunmalı.
@@ -84,4 +84,4 @@ Aşağıdaki akışlar özellikle korunmalıdır. Yeni özellik eklerken, refact
 - Sınıflandırma çağrılarında dar `maxOutputTokens` KULLANMA (≥250 olmalı) — JSON kırpılırsa parse düşer ve fallback sahte "uygun değil" reddi üretir (2026-06-11'de yaşandı ve düzeltildi).
 - El okumasında insan avuç içi + parmakların göründüğü fotoğraf kabul edilir; el sırtı/dış yüz, yüz, obje, ekran görüntüsü veya alakasız görsel reddedilir. Katı `isInnerPalm === true` kontrolü YASAK (`!== false` kullan — alan gelmezse sahte red üretir).
 - Pati okumasında hayvan uzvu YETERLİDİR: patinin altı da üstü/sırtı da, pençe, tırnaklı ayak, kuş/sürüngen ayağı — hayvan türü fark etmez. İnsan eli, hayvan yüzü/bedeni, obje veya alakasız görsel reddedilir.
-- **Bekçi script:** `npm run check:image:contract` — yukarıdaki kuralların kod karşılığını statik doğrular; Claude'un PostToolUse hook'u her .ts/.tsx değişikliğinde, pre-commit her commit'te otomatik koşar. `fortuneApiService.ts` içindeki `SÖZLEŞME-GÖRSEL-1..4` işaretlerini SİLME; akışı bilinçli değiştiriyorsan bekçiyi de aynı commit'te güncelle.
+- **Bekçi script:** `npm run check:image:contract` — yukarıdaki kuralların kod karşılığını statik doğrular; Claude'un PostToolUse hook'u her .ts/.tsx değişikliğinde, pre-commit her commit'te otomatik koşar. `readingApiService.ts` içindeki `SÖZLEŞME-GÖRSEL-1..4` işaretlerini SİLME; akışı bilinçli değiştiriyorsan bekçiyi de aynı commit'te güncelle.
