@@ -21,7 +21,7 @@ export const en: TranslationResource = {
     wait: 'Please wait...',
   },
   nav: {
-    home: 'Ruhbaz Konağı',
+    home: 'Ruhbaz',
     profileSettings: 'Profile Settings',
     legalInfo: 'Legal Information',
     generalReadings: 'Treat Table',

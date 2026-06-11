@@ -315,11 +315,11 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     visible: false,
     message: '',
   });
-  // Dil tercihi (Faz 4 i18n)
-  const [appLanguage, setAppLanguageState] = useState<AppLanguage>(getAppLanguage());
+  // Dil tercihi (Faz 4 i18n): vurgu doğrudan i18n.language'dan türetilir;
+  // useTranslation languageChanged'de zaten yeniden render eder.
+  const appLanguage: AppLanguage = getAppLanguage();
   const handleLanguageChange = useCallback(async (language: AppLanguage) => {
     await setAppLanguage(language);
-    setAppLanguageState(language);
   }, []);
 
   // K40 veri taşınabilirliği + KVKK silme akış durumları

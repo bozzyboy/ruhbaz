@@ -19,7 +19,7 @@ export const tr = {
     wait: 'Bekle...',
   },
   nav: {
-    home: 'Ruhbaz Konağı',
+    home: 'Ruhbaz',
     profileSettings: 'Profil Ayarları',
     legalInfo: 'Yasal Bilgilendirme',
     generalReadings: 'İkram Masası',
