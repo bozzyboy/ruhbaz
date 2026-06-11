@@ -262,7 +262,13 @@ const DREAM_RULES: Rule[] = FULL_RULES.filter((rule) =>
  * boşluk tamponuyla (120) birleştirilir; tüm desenler bu probe üzerinde koşar.
  */
 function buildProbe(text: string): string {
-  return `${text.toLocaleLowerCase('tr-TR')}${' '.repeat(120)}${text.toLowerCase()}`;
+  // Akıllı kesme işareti normalize edilir (iOS/Android otomatik ’ üretir; desenler ' bekler).
+  const cleaned = text.replace(/’/g, "'");
+  // Tampon ortasina harf/bosluk olmayan sentinel (U+0001): \s+ koprulu desenlerin
+  // (örn. RELIGION "allah\s+yalan") kopyalar ARASINI köprülemesini keser;
+  // kopyalar arası minimum mesafe 121 kalır (yakınlık penceresi 80).
+  const buffer = `${' '.repeat(60)}\u0001${' '.repeat(60)}`;
+  return `${cleaned.toLocaleLowerCase('tr-TR')}${buffer}${cleaned.toLowerCase()}`;
 }
 
 export function moderateUserInput(

@@ -231,10 +231,12 @@ const HEALTH_CONCERN_TERMS =
   /\b(sağlık|saglik|hasta|hastalık|hastalik|rahatsız|rahatsiz|ağrı|agri|acı|aci|sancı|sanci|ateş|ates|kusma|ishal|kan|nefes|öksür|oksur|uyku|uykusuz|yemiyor|içmiyor|icmiyor|iyileş|iyiles|tedavi|ilaç|ilac|doz|veteriner|doktor|psikolog|psikiyatrist|terapi|anksiyete|depresyon)\b/iu;
 
 // EN saglik terimleri (Faz 4 bosluk-kapama): tespit dil-bagimsiz birlesik calisir.
+// NOT: \b sinirlari sart ('pain' -> 'Spain' yanlis-pozitifi); 'breath' tek basina
+// YOK ('a breath of fresh air' deyimi) - yalniz solunum-sorunu kaliplari.
 const HEALTH_CONCERN_TERMS_EN =
-  /(health|sick|illness|disease|pain|ache|fever|vomit|nausea|bleeding|breath(ing)?|cough|insomnia|sleepless|not eating|won'?t eat|medicat\w*|medicine|dosage|treatment|therapy|anxiety|depress\w*|doctor|vet(erinarian)?|psychologist|psychiatrist)/i;
+  /\b(health|sick|illness|disease|pain|ache|fever|vomit(ing)?|nausea|bleeding|breathing problem|short of breath|can'?t breathe|cough(ing)?|insomnia|sleepless|not eating|won'?t eat|medication|medicine|dosage|treatment|therapy|anxiety|depressed|depression|doctor|vet|veterinarian|psychologist|psychiatrist)\b/i;
 
-const ANIMAL_HEALTH_TERMS_EN = /(cat|dog|kitten|puppy|bird|rabbit|pet|animal|paw|vet(erinarian)?)/i;
+const ANIMAL_HEALTH_TERMS_EN = /\b(cat|dog|kitten|puppy|bird|rabbit|pet|animal|paw|vet|veterinarian)\b/i;
 
 const ANIMAL_HEALTH_TERMS =
   /\b(kedi|kedim|köpek|kopek|köpeğim|kopegim|kuş|kus|kuşum|kusum|tavşan|tavsan|hayvan|pati|veteriner)\b/iu;

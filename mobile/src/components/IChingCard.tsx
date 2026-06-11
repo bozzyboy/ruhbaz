@@ -118,7 +118,7 @@ const IChingCard: React.FC<IChingCardProps> = ({
                 .map((para) => para.trim())
                 .filter(Boolean)
                 .map((para, idx) => {
-                  const isHeader = /^(Şimdiki Durum|Gelecek Potansiyeli|Yol Gösterici Mesaj|Tavsiye|Present State|Unfolding Potential|Guiding Message|Guidance)/.test(para);
+                  const isHeader = /^(Şimdiki Durum|Gelecek Potansiyeli|Yol Gösterici Mesaj|Tavsiye|Present State|Unfolding Potential|Guiding Message|Guidance)\b/.test(para);
                   return (
                     <Text key={idx} style={isHeader ? styles.headerText : styles.messageText}>
                       {isHeader ? para : formatReadableText(para)}

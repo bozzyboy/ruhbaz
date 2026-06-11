@@ -138,6 +138,27 @@ function looksLikeInternalToken(text) {
   return false;
 }
 
+// C0 kontrol karakterleri (tab/LF/CR hariç) kaynak dosyada ASLA bulunmamalı.
+// Gerekçe: '\b' yazayım derken gerçek U+0008 backspace sızması bir kez EN sağlık
+// regex'ini sessizce öldürdü (2026-06-12 öz-review bulgusu); tsc/eslint yakalamaz.
+// eslint-disable-next-line no-control-regex
+const controlCharRegex = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/;
+
+function checkControlChars(filePath, content) {
+  const issues = [];
+  content.split('\n').forEach((line, idx) => {
+    if (controlCharRegex.test(line)) {
+      issues.push({
+        type: 'control-char',
+        filePath,
+        line: idx + 1,
+        sample: "gizli C0 kontrol karakteri (charCode: " + line.match(controlCharRegex)[0].charCodeAt(0) + ")",
+      });
+    }
+  });
+  return issues;
+}
+
 function checkMojibake(filePath, content) {
   const issues = [];
   const lines = content.split('\n');
@@ -232,6 +253,7 @@ function run() {
 
   for (const filePath of mojibakeFiles) {
     const content = fs.readFileSync(filePath, 'utf8');
+    findings.push(...checkControlChars(filePath, content));
     findings.push(...checkMojibake(filePath, content));
   }
 
