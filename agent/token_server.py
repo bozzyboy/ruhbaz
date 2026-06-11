@@ -1,3 +1,4 @@
+import hmac
 import json
 import os
 import threading
@@ -10,16 +11,17 @@ from typing import Any
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 load_dotenv()
 
+# CORS bilinçli olarak YOK: istemci React Native (CORS'a tabi değil); tarayıcı
+# istemcisi desteklenmiyor. Tarayıcıdan gelen istekler böylece en baştan engellenir.
 app = Flask(__name__, static_folder=None)
-CORS(app)
 
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+AGENT_SHARED_SECRET = (os.getenv("AGENT_SHARED_SECRET") or "").strip()
 GEMINI_MODEL = os.getenv("GEMINI_MODEL") or "gemini-2.5-flash-lite"
 GEMINI_EMBEDDING_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL") or "gemini-embedding-2"
 GEMINI_RPM_LIMIT = int(os.getenv("GEMINI_RPM_LIMIT") or "10000")
@@ -33,6 +35,26 @@ MIN_RETRY_AFTER_SECONDS = 8
 
 quota_lock = threading.Lock()
 quota_entries: deque[dict[str, Any]] = deque()
+
+
+PROTECTED_PATHS = {"/gemini-generate", "/gemini-embed"}
+
+
+@app.before_request
+def _require_shared_secret():
+    # Maliyetli endpoint'ler paylaşılan gizli olmadan ÇALIŞMAZ (güvenli varsayılan):
+    # LAN'da proxy'nin adresini bulan yabancı, anahtar üzerinden harcama yapamasın.
+    if request.path not in PROTECTED_PATHS:
+        return None
+    if not AGENT_SHARED_SECRET:
+        return (
+            jsonify({"ok": False, "error": "Sunucu yapılandırması eksik: AGENT_SHARED_SECRET tanımlı değil (agent/.env)."}),
+            503,
+        )
+    provided = (request.headers.get("X-Agent-Secret") or "").strip()
+    if not provided or not hmac.compare_digest(provided, AGENT_SHARED_SECRET):
+        return jsonify({"ok": False, "error": "Yetkisiz istek."}), 401
+    return None
 
 
 def _now() -> float:

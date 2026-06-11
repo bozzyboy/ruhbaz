@@ -1,4 +1,4 @@
-import { AGENT_API_URL } from '../config/constants';
+import { AGENT_API_URL, agentAuthHeaders } from '../config/constants';
 
 type GeminiProxyResponse = {
   ok?: boolean;
@@ -57,6 +57,7 @@ async function postGeminiProxy(payload: Record<string, unknown>, timeoutMs: numb
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        ...agentAuthHeaders(),
       },
       body: JSON.stringify(payload),
       signal: controller.signal,

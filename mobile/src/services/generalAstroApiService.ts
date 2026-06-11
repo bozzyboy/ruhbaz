@@ -4,7 +4,7 @@ import type { AstroPeriod, AstroReadingResult } from './astroEngine';
 import { buildGeneralAstroSkyContext } from './astroEngine';
 import { buildAnimalProfileInstructionFromProfile, isAnimalProfile } from './animalProfilePrompt';
 import { sanitizePublicReadingLanguage } from './personaClosingService';
-import { AGENT_API_URL } from '../config/constants';
+import { AGENT_API_URL, agentAuthHeaders } from '../config/constants';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import { appendReadingSummary, loadAccountState } from './profileMemoryService';
 import { addPersonalTokenUsage } from './tokenLedgerService';
@@ -408,7 +408,9 @@ async function fetchServerGeneralAstroCached(params: {
     periodKey: params.periodKey,
     timezone: params.timezone,
   });
-  const response = await fetch(`${AGENT_API_URL}/general-astro?${query.toString()}`);
+  const response = await fetch(`${AGENT_API_URL}/general-astro?${query.toString()}`, {
+    headers: agentAuthHeaders(),
+  });
   if (!response.ok) {
     throw new Error(`Genel astro cache okunamadı: ${response.status}`);
   }

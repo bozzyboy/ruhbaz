@@ -1,4 +1,4 @@
-import { AGENT_API_URL } from '../config/constants';
+import { AGENT_API_URL, agentAuthHeaders } from '../config/constants';
 
 export const GEMINI_EMBEDDING_MODEL = 'gemini-embedding-2';
 
@@ -46,6 +46,7 @@ export async function embedGeminiText(text: string, timeoutMs = 30000, taskType 
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        ...agentAuthHeaders(),
       },
       body: JSON.stringify({
         text: trimmed,

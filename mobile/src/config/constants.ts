@@ -12,6 +12,18 @@ declare const process: { env?: Record<string, string | undefined> } | undefined;
 export const AGENT_API_URL =
   process?.env?.EXPO_PUBLIC_AGENT_API_URL?.replace(/\/+$/, '') || 'http://127.0.0.1:8080';
 
+/**
+ * Token server ile paylaşılan gizli (mobile/.env.local → EXPO_PUBLIC_AGENT_SHARED_SECRET).
+ * Server bu değer olmadan /gemini-generate ve /gemini-embed isteklerini reddeder;
+ * LAN'da proxy'yi bulan yabancıların anahtar üzerinden harcama yapmasını engeller.
+ */
+export const AGENT_SHARED_SECRET = process?.env?.EXPO_PUBLIC_AGENT_SHARED_SECRET?.trim() || '';
+
+/** Token server'a giden her isteğe eklenecek kimlik başlıkları. */
+export function agentAuthHeaders(): Record<string, string> {
+  return AGENT_SHARED_SECRET ? { 'X-Agent-Secret': AGENT_SHARED_SECRET } : {};
+}
+
 /** Image compression settings */
 export const IMAGE_MAX_DIMENSION = 768;
 export const IMAGE_QUALITY = 0.5; // JPEG quality 0-1

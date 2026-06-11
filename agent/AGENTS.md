@@ -44,6 +44,8 @@ Backend prompt üretmez; mobil uygulama promptu cihazda kurar. `token_server.py`
 
 API anahtarını dışarı veren bir endpoint YOKTUR ve eklenmemelidir (`/gemini-api-key` Faz 0'da güvenlik nedeniyle kaldırıldı; anahtar yalnızca server içinde kalır).
 
+**Kimlik doğrulama sözleşmesi (Faz 0):** `/gemini-generate` ve `/gemini-embed` istekleri `X-Agent-Secret` header'ı ister; değer `agent/.env` içindeki `AGENT_SHARED_SECRET` ile (sabit-zamanlı karşılaştırmayla) eşleşmek zorundadır. Aynı değer mobil tarafta `mobile/.env.local` → `EXPO_PUBLIC_AGENT_SHARED_SECRET` olarak durur ve `mobile/src/config/constants.ts` içindeki `agentAuthHeaders()` ile her isteğe eklenir. CORS bilinçli olarak yoktur (istemci React Native; tarayıcı istemcisi desteklenmez) — geri EKLEME. `/health` açıktır (bağlantı teşhisi).
+
 `/general-astro` şu an zorunlu backend endpoint'i değildir. Mobil taraf bunu opsiyonel server cache olarak dener; endpoint yoksa Gemini üretimi veya lokal fallback akışına düşer.
 
 ## Doğrulama
