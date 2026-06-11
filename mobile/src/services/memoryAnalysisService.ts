@@ -1,3 +1,4 @@
+import { filterModeratedFollowUps } from './inputModerationService';
 import type {
   MemoryCategoryCandidate,
   MemoryEdge,
@@ -264,6 +265,9 @@ function buildMemoryPayload(body: MemoryAnalysisRequest) {
 }
 
 export async function analyzeMemoryTranscript(body: MemoryAnalysisRequest): Promise<MemoryAnalysisResult> {
+  // K42: bloklanmış kullanıcı metni ve moderasyon yanıtları hafıza analizine
+  // (yani LLM'e ve kalıcı hafızaya) taşınmaz.
+  body = { ...body, transcript: filterModeratedFollowUps(body.transcript) };
   const data = await generateGeminiTextDirect(buildMemoryPayload(body), 45000);
   try {
     const parsed = JSON.parse(stripJsonFence(data.text));

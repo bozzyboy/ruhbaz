@@ -160,6 +160,13 @@ export async function importBackupFromUri(backupFileUri: string): Promise<Import
     if (bundle.marker !== BACKUP_MARKER || !Array.isArray(bundle.files)) {
       return { ok: false, reason: 'invalid', message: 'Bu dosya bir Ruhbaz Konağı yedeği değil.' };
     }
+    // GERÇEK "üzerine yazma": önce mevcut veri tamamen temizlenir. Aksi halde
+    // (a) yedekte olmayan yerel dosyalar karışır, (b) yedekte -wal yokken cihazda
+    // kalan eski -wal restart sonrası geri yüklenen DB'nin üstüne oynar (bozulma).
+    const wipeResult = await wipeAllLocalData();
+    if (!wipeResult.ok) {
+      return { ok: false, reason: 'error', message: `Mevcut veri temizlenemedi: ${wipeResult.message || ''}` };
+    }
     for (const file of bundle.files) {
       if (!file?.relPath || file.relPath.includes('..')) continue;
       await ensureParentDirs(file.relPath);

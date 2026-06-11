@@ -1,4 +1,4 @@
-import { moderateUserInput } from './inputModerationService';
+import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
 import type { SubjectProfile, ProfileMemorySnippet } from '../types/memory';
 import {
   PERSONAL_FOLLOW_UP_MAX_OUTPUT_TOKENS,
@@ -380,6 +380,16 @@ export async function createDreamFollowUp(params: {
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
     };
   }
+  // K42 süreklilik: bloklanmış rüya metni takip turunda da modele gitmez.
+  const dreamModeration = moderateUserInput(params.dreamText, 'dream');
+  if (dreamModeration.verdict !== 'allow') {
+    return {
+      text: dreamModeration.replyText,
+      closingSentence: '',
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const systemText = buildBaseSystem({
     assistantId: params.assistantId,
     assistantLabel: params.assistantLabel,
@@ -389,7 +399,7 @@ export async function createDreamFollowUp(params: {
     isAnimalProfile: params.memorySnippet?.relationshipPrimary === 'evcil_hayvan',
   });
   const isAnimalDream = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
-  const conversation = (params.previousFollowUps || [])
+  const conversation = filterModeratedFollowUps(params.previousFollowUps)
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text}`)
     .join('\n');
   const userText = [

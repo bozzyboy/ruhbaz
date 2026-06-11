@@ -1,3 +1,4 @@
+import { isAllowedUserText } from './inputModerationService';
 import * as FileSystem from 'expo-file-system/legacy';
 import type {
   AccountState,
@@ -2307,6 +2308,8 @@ function sanitizeObservationForPrompt(item: MemoryObservation): MemoryObservatio
 export async function appendUserConversationMemory(profileId: string, text: string): Promise<void> {
   const trimmed = text.trim();
   if (!trimmed) return;
+  // K42: bloklanan içerik kalıcı profil hafızasına da yazılmaz.
+  if (!isAllowedUserText(trimmed)) return;
   const socialOnly = /^(teşekkürler|teşekkür ederim|sağ ol|sağol|harika|tamam|ok|anladım|rica ederim|eyvallah)[.!?\s]*$/iu.test(trimmed);
   if (socialOnly) return;
   const state = await loadAccountState();

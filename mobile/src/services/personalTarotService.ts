@@ -1,4 +1,4 @@
-import { moderateUserInput } from './inputModerationService';
+import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
 import type { SubjectProfile, ProfileMemorySnippet } from '../types/memory';
 import { TAROT_CARDS, type TarotCard } from '../data/divinationData';
 import { TAROT_TR_NAMES } from '../data/tarotNamesTR';
@@ -403,7 +403,7 @@ export async function createPersonalTarotFollowUp(params: {
     }),
     FOLLOW_UP_CHAT_CONTRACT,
   ].join('\n');
-  const conversation = (params.previousFollowUps || [])
+  const conversation = filterModeratedFollowUps(params.previousFollowUps)
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text}`)
     .join('\n');
   const userText = [

@@ -1,4 +1,4 @@
-import { moderateUserInput } from './inputModerationService';
+import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
 import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
 import {
@@ -1064,7 +1064,7 @@ export async function createPersonalNumerologyFollowUp(params: {
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question);
   const addressPolicy = addressPolicyFromMemory(params.profileName, params.memorySnippet);
   const personaContext = assistantPersonaContext(params.assistantId);
-  const previousFollowUpText = (params.previousFollowUps || [])
+  const previousFollowUpText = filterModeratedFollowUps(params.previousFollowUps)
     .filter((message) => message.text.trim())
     .slice(-8)
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text.trim()}`)

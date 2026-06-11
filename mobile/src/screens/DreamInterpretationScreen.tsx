@@ -1,3 +1,4 @@
+import { isModerationReplyText } from '../services/inputModerationService';
 import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -276,6 +277,13 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
 
   const persistReadingAndEnd = useCallback(async () => {
     if (!dreamText || !interpretationText) {
+      navigation.goBack();
+      return;
+    }
+    // K42: bloklanan rüya denemesi okuma geçmişine/temalara yazılmaz.
+    if (isModerationReplyText(interpretationText)) {
+      stopAssistantSpeech();
+      await stopNativeRecording().catch(() => {});
       navigation.goBack();
       return;
     }

@@ -20,7 +20,7 @@ import {
   stripPersonaSelfIntroduction,
 } from './personaClosingService';
 import { cleanFollowUpReply, getSimpleFollowUpReply } from './followUpResponseService';
-import { moderateUserInput } from './inputModerationService';
+import { filterModeratedFollowUps, isAllowedUserText, moderateUserInput } from './inputModerationService';
 
 export type ReadingMessage = BuilderReadingMessage;
 
@@ -655,17 +655,24 @@ export async function getReadingReply(body: ReadingRequest): Promise<ReadingRepl
   const usage = emptyUsage();
   const images = body.images || {};
   // K42: kullanıcı kaynaklı serbest metin modele gitmeden denetlenir.
-  // İlk okumadaki mesajlar app üretimi olduğundan yalnız focusQuestion +
-  // takip turundaki son kullanıcı mesajı denetlenir (yanlış-pozitif önleme).
-  const lastUserText = body.isFollowUp
-    ? [...body.messages].reverse().find((message) => message.role === 'user')?.text || ''
-    : '';
-  const moderation = moderateUserInput(
-    [body.focusQuestion || '', lastUserText].filter(Boolean).join('\n'),
-    body.isFollowUp ? 'chat' : 'question',
-  );
+  // İlk turda yalnız focusQuestion (mesajlar app üretimi); takip turunda yalnız
+  // SON kullanıcı mesajı — focusQuestion ilk turda denetlendiği için tekrar
+  // denetlenmez (bloklu focusQuestion oturumu kalıcı kilitlemesin; aşağıda süzülür).
+  const moderation = body.isFollowUp
+    ? moderateUserInput([...body.messages].reverse().find((message) => message.role === 'user')?.text || '', 'chat')
+    : moderateUserInput(body.focusQuestion || '', 'question');
   if (moderation.verdict !== 'allow') {
     return { text: moderation.replyText, modelName: 'local-input-moderation', usage };
+  }
+  // K42 süreklilik garantisi: geçmişte bloklanmış mesajlar ve moderasyon yanıtları
+  // sonraki prompt'lara TAŞINMAZ; bloklu focusQuestion da düşürülür.
+  if (body.isFollowUp) {
+    body = {
+      ...body,
+      messages: filterModeratedFollowUps(body.messages),
+      focusQuestion:
+        body.focusQuestion && isAllowedUserText(body.focusQuestion, 'question') ? body.focusQuestion : undefined,
+    };
   }
   try {
     let validatedSurfaces: Array<'cup' | 'saucer' | 'palm'> | null = null;

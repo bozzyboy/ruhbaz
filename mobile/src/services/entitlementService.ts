@@ -63,7 +63,7 @@ async function readState(): Promise<EntitlementState> {
     const raw = JSON.parse(await FileSystem.readAsStringAsync(ENTITLEMENT_FILE)) as Partial<EntitlementState>;
     return {
       schemaVersion: 1,
-      credits: Math.max(0, raw.credits || 0),
+      credits: Number.isFinite(raw.credits as number) ? Math.max(0, Number(raw.credits)) : 0,
       freeIntroGranted: Boolean(raw.freeIntroGranted),
       events: Array.isArray(raw.events) ? raw.events.slice(-MAX_EVENTS) : [],
     };

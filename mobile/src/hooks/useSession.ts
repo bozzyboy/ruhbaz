@@ -226,13 +226,15 @@ export function useSession() {
             textInputTokens: (s.tokenUsage.textInputTokens || 0) + textInputTokens,
           },
         }));
-        await addPersonalTokenUsage({
-          modelName: modelNameForConfig(text.modelName),
-          readingName: readingNameForConfig(config),
-          imageInputTokens,
-          textInputTokens,
-          outputTokens: text.usage.outputTokens || 0,
-        }).catch(() => {});
+        if (text.modelName !== 'local-input-moderation') {
+          await addPersonalTokenUsage({
+            modelName: modelNameForConfig(text.modelName),
+            readingName: readingNameForConfig(config),
+            imageInputTokens,
+            textInputTokens,
+            outputTokens: text.usage.outputTokens || 0,
+          }).catch(() => {});
+        }
       } catch (err: any) {
         const pendingInput = Number(err?.tokenUsage?.totalTokens || err?.tokenUsage?.inputTokens || 0);
         const failedInputTokens = Number(err?.tokenUsage?.inputTokens || 0);

@@ -1,4 +1,4 @@
-import { moderateUserInput } from './inputModerationService';
+import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Astronomy from 'astronomy-engine';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
@@ -1403,7 +1403,7 @@ export async function createBirthChartFollowUp(params: {
     };
   }
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'doğum haritası takip sorusu');
-  const previousFollowUpText = (params.previousFollowUps || [])
+  const previousFollowUpText = filterModeratedFollowUps(params.previousFollowUps)
     .filter((message) => message.text.trim())
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text.trim()}`)
     .join('\n');
@@ -1815,7 +1815,7 @@ export async function createPersonalAstroFollowUp(params: {
   } catch {
     currentAstroContext = '';
   }
-  const previousFollowUpText = (params.previousFollowUps || [])
+  const previousFollowUpText = filterModeratedFollowUps(params.previousFollowUps)
     .filter((message) => message.text.trim())
     .slice(-8)
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text.trim()}`)
@@ -1978,7 +1978,7 @@ export async function createAstroRelationshipFollowUp(params: {
   const subjectContext = buildRelationshipAstroContext(params.subjects);
   const personaContext = assistantPersonaContext(params.assistantId);
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'astro ilişki/aile takip sorusu');
-  const previousFollowUpText = (params.previousFollowUps || [])
+  const previousFollowUpText = filterModeratedFollowUps(params.previousFollowUps)
     .filter((message) => message.text.trim())
     .slice(-8)
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text.trim()}`)
