@@ -1,3 +1,4 @@
+import { moderateUserInput } from './inputModerationService';
 import type { SubjectProfile, ProfileMemorySnippet } from '../types/memory';
 import {
   PERSONAL_FOLLOW_UP_MAX_OUTPUT_TOKENS,
@@ -286,6 +287,16 @@ export async function createDreamInterpretation(params: {
   memorySnippet?: ProfileMemorySnippet | null;
   usedClosings?: string[];
 }) {
+  // K42: rüya metni daraltılmış sette denetlenir (kâbus imgeleri okumayı bloklamaz).
+  const moderation = moderateUserInput(params.dreamText, 'dream');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      closingSentence: '',
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const systemText = buildBaseSystem({
     assistantId: params.assistantId,
     assistantLabel: params.assistantLabel,
@@ -357,6 +368,15 @@ export async function createDreamFollowUp(params: {
       text: simpleReply,
       closingSentence: '',
       modelName: 'local-follow-up-reply',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
+  const moderation = moderateUserInput(params.question, 'question');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      closingSentence: '',
+      modelName: 'local-input-moderation',
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
     };
   }

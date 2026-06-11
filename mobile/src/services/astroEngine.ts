@@ -1,3 +1,4 @@
+import { moderateUserInput } from './inputModerationService';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Astronomy from 'astronomy-engine';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
@@ -1393,6 +1394,14 @@ export async function createBirthChartFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const birthChartFollowUpModeration = moderateUserInput(params.question, 'question');
+  if (birthChartFollowUpModeration.verdict !== 'allow') {
+    return {
+      text: birthChartFollowUpModeration.replyText,
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'doğum haritası takip sorusu');
   const previousFollowUpText = (params.previousFollowUps || [])
     .filter((message) => message.text.trim())
@@ -1773,6 +1782,14 @@ export async function createPersonalAstroFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const astroFollowUpModeration = moderateUserInput(params.question, 'question');
+  if (astroFollowUpModeration.verdict !== 'allow') {
+    return {
+      text: astroFollowUpModeration.replyText,
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'kişisel astroloji takip sorusu');
   let currentAstroContext = '';
   try {
@@ -1950,6 +1967,14 @@ export async function createAstroRelationshipFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const relationshipFollowUpModeration = moderateUserInput(params.question, 'question');
+  if (relationshipFollowUpModeration.verdict !== 'allow') {
+    return {
+      text: relationshipFollowUpModeration.replyText,
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const subjectContext = buildRelationshipAstroContext(params.subjects);
   const personaContext = assistantPersonaContext(params.assistantId);
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'astro ilişki/aile takip sorusu');

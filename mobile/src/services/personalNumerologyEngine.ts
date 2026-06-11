@@ -1,3 +1,4 @@
+import { moderateUserInput } from './inputModerationService';
 import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
 import {
@@ -1052,6 +1053,14 @@ export async function createPersonalNumerologyFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const moderation = moderateUserInput(params.question, 'question');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question);
   const addressPolicy = addressPolicyFromMemory(params.profileName, params.memorySnippet);
   const personaContext = assistantPersonaContext(params.assistantId);

@@ -1,3 +1,4 @@
+import { moderateUserInput } from './inputModerationService';
 import type { SubjectProfile, ProfileMemorySnippet } from '../types/memory';
 import { TAROT_CARDS, type TarotCard } from '../data/divinationData';
 import { TAROT_TR_NAMES } from '../data/tarotNamesTR';
@@ -382,6 +383,15 @@ export async function createPersonalTarotFollowUp(params: {
   memorySnippet?: ProfileMemorySnippet | null;
   usedClosings?: string[];
 }) {
+  const moderation = moderateUserInput(params.question, 'question');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      closingSentence: '',
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const systemText = [
     buildBaseSystem({
       assistantId: params.assistantId,

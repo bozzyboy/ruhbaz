@@ -20,6 +20,7 @@ import {
   stripPersonaSelfIntroduction,
 } from './personaClosingService';
 import { cleanFollowUpReply, getSimpleFollowUpReply } from './followUpResponseService';
+import { moderateUserInput } from './inputModerationService';
 
 export type ReadingMessage = BuilderReadingMessage;
 
@@ -653,6 +654,19 @@ function buildContents(params: {
 export async function getReadingReply(body: ReadingRequest): Promise<ReadingReplyResult> {
   const usage = emptyUsage();
   const images = body.images || {};
+  // K42: kullanıcı kaynaklı serbest metin modele gitmeden denetlenir.
+  // İlk okumadaki mesajlar app üretimi olduğundan yalnız focusQuestion +
+  // takip turundaki son kullanıcı mesajı denetlenir (yanlış-pozitif önleme).
+  const lastUserText = body.isFollowUp
+    ? [...body.messages].reverse().find((message) => message.role === 'user')?.text || ''
+    : '';
+  const moderation = moderateUserInput(
+    [body.focusQuestion || '', lastUserText].filter(Boolean).join('\n'),
+    body.isFollowUp ? 'chat' : 'question',
+  );
+  if (moderation.verdict !== 'allow') {
+    return { text: moderation.replyText, modelName: 'local-input-moderation', usage };
+  }
   try {
     let validatedSurfaces: Array<'cup' | 'saucer' | 'palm'> | null = null;
     let coffeeImageAnalyses: CoffeeImageAnalysis[] | null = null;
