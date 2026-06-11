@@ -57,7 +57,7 @@
 ### Grup F0-B: K10 yerel LLM (Gemma) sökümü
 
 > **📦 KURULUM KUTUSU (F0-B):**
-> 1. ⚠️ **YENİ APK GEREKİR** — native değişiklik var (LiteRT modülü + gradle bağımlılığı söküldü). **Claude derledi ✅ — APK yolu:** `mobile\android\app\build\outputs\apk\debug\app-debug.apk` (~78MB). Telefona kopyala (USB/Drive) ve kur; ya da telefon USB'deyken `cd mobile\android` → `..\..\platform-tools yoksa` Android Studio'dan `adb install app-debug.apk`.
+> 1. ⚠️ **YENİ APK GEREKİR** — native değişiklik var (LiteRT modülü + gradle bağımlılığı söküldü). **Claude derledi ✅ — kolay yol: MASAÜSTÜNDE `RuhbazKonagi-faz0-debug.apk` (~78MB).** (Asıl konum: `mobile\android\app\build\outputs\apk\debug\app-debug.apk` — DİKKAT: `android\build` değil, `android\app\build`.) Telefona kopyala (USB/Drive/WhatsApp-kendine-gönder) ve üzerine kur; "bilinmeyen kaynak" sorarsa izin ver.
 > 2. Yeni APK kurulduktan sonra: token server + `npx expo start` (F0-A kutusundaki gibi).
 >
 > Not: F0-A ve F0-B'yi TEK oturumda koşacaksan önce yeni APK'yı kur, sonra hepsini sırayla in — iki kez kurulum yapma.
