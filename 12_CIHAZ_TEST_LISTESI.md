@@ -102,6 +102,33 @@
 | `mobile/scripts/check-turkish-utf8.js` | Tek-dosya argüman desteği (hook hız yolu); tam tarama davranışı değişmedi | Cihaz testi gerekmez — Claude iki modda da koştu ✅ |
 | `.claude/hooks/post-edit-check.js` | BOM düzeltmesi (kontroller gerçekten koşuyor artık), artımlı tsc (11.5s→4.3s), stderr yakalama, agent/*.py desteği | Cihaz testi gerekmez — Claude geçti/kaldı senaryolarıyla test etti ✅ |
 | `mobile/package.json` | `npm run typecheck` script'i eklendi | Cihaz testi gerekmez |
+
+### Grup EK-1: Görsel uygunluk düzeltmesi (kahve/el/pati — "uygun değil" gınası)
+
+> **📦 KURULUM KUTUSU (EK-1):** Yalnız JS değişikliği — yeni APK GEREKMEZ. `npx expo start` + token server açıkken app'te reload (r) yeter. (F0 gruplarıyla aynı oturumda koşuyorsan zaten hazırsın.)
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| EK1-1 | Kahve yorumu → TEK telveli fincan fotoğrafı yükle → başlat | Okuma başlar ("uygun değil" YOK) | ☐ |
+| EK1-2 | Kahve yorumu → 2 kare yükle: 1 telveli fincan + 1 telveli tabak (sıra fark etmez, hangi kutuya olduğu fark etmez) | Okuma başlar; iki yüzey de yoruma girer | ☐ |
+| EK1-3 | Kahve yorumu → 1 telveli fincan + 1 telvesiz/temiz tabak yükle | Okuma TELVELİ kareyle yine BAŞLAR (eskiden tek temiz kare her şeyi düşürüyordu — düzeltildi) | ☐ |
+| EK1-4 | Kahve yorumu → yalnız telvesiz/temiz fincan yükle | Nazik red: telve izi görünen fotoğraf istenir (bu red DOĞRU davranış) | ☐ |
+| EK1-5 | Kahve yorumu → fincan+tabak AYNI karede tek fotoğraf | Okuma başlar | ☐ |
+| EK1-6 | El okuması → avuç içi + parmaklar görünen fotoğraf | Okuma başlar | ☐ |
+| EK1-7 | El okuması → el SIRTI fotoğrafı | Nazik red: avuç içi istenir (DOĞRU davranış) | ☐ |
+| EK1-8 | Pati okuması (evcil hayvan profili) → patinin ÜSTÜNDEN/sırtından çekilmiş fotoğraf | Okuma başlar (eskiden reddedebiliyordu — prompt'a alt/üst/pençe esnekliği eklendi) | ☐ |
+| EK1-9 | Pati okuması → pati altı veya pençe fotoğrafı | Okuma başlar | ☐ |
+| EK1-10 | (Regresyon) Kahve yorumu → alakasız görsel (ör. ekran görüntüsü) TEK başına | Nazik red (DOĞRU davranış — alakasız görsel hâlâ reddediliyor) | ☐ |
+
+**Değişen dosya → test eşlemesi (EK-1):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/services/fortuneApiService.ts` | Sınıflandırma token bütçesi 100/120→320 (JSON kırpılması = sahte red'in kök nedeni) | EK1-1, EK1-6 |
+| `mobile/src/services/fortuneApiService.ts` | "En az 1 telveli yeter" — tek telvesiz/alakasız kare artık okumayı düşürmüyor | EK1-3, EK1-4, EK1-10 |
+| `mobile/src/services/fortuneApiService.ts` | Pati prompt'u: alt/üst/pençe/ayak, tür fark etmez; el: avuç içi+parmaklar, `isInnerPalm !== false` | EK1-6..EK1-9 |
+| `mobile/scripts/check-image-contract.js` (yeni) | Sözleşme bekçisi — her değişiklikte otomatik (hook+pre-commit) | Cihaz testi gerekmez — Claude geçti/KALDI senaryolarıyla doğruladı ✅ |
+| `AGENTS.md` + `mobile/AGENTS.md` | Sözleşme metni netleştirildi (doküman) | Cihaz testi gerekmez |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |

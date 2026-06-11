@@ -3,3 +3,6 @@ set -e
 
 echo "UTF-8/Türkçe kontrolü çalışıyor..."
 npm run check:turkish:utf8
+
+echo "Görsel uygunluk sözleşmesi kontrolü çalışıyor..."
+npm run check:image:contract

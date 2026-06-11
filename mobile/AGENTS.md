@@ -73,12 +73,12 @@ Aşağıdaki akışlar özellikle korunmalıdır. Yeni özellik eklerken, refact
 - Genel astro okumaları `general-astro` reading type ile hafızaya yazılmalı ve sonraki genel astro üretimlerinde tekrar etmeme bağlamı olarak kullanılmalıdır.
 - Token hedefleri korunmalıdır: günlük 520 max output token ve 110-150 kelime, haftalık 720 max output token ve 150-210 kelime, aylık 820 max output token ve 170-230 kelime.
 
-## Görsel Uygunluk Analizi Sözleşmesi
+## Görsel Uygunluk Analizi Sözleşmesi (Ozan kuralı — 2026-06-11 netleştirildi)
 
-- Kahve, el ve pati okumalarında görsel uygunluk analizi yalnızca API/LLM sınıflandırmasıyla yapılır; deterministik kod, dosya adı, slot adı, OCR, renk analizi veya sabit heuristikle uygunluk kararı verilmez.
-- Kahve yorumunda 1, 2 veya 3 görsel yüklenebilir. Görsellerin sırası önemli değildir. Her slotta telveli fincan, telveli tabak veya telveli fincan+tabak aynı fotoğrafta olabilir.
-- Kahve yorumunda bütün yüklenen görseller API/LLM sınıflandırmasından geçmelidir. Telvesiz fincan/tabak, fincan veya tabak içermeyen görsel, kod ekranı, ekran görüntüsü ya da alakasız görsel reddedilir.
-- Kahve yorumunun başlaması için en az 1 görselde gerçek kahve telvesi görünen fincan veya tabak bulunmalıdır. Uygun değilse kullanıcıdan telve içeren fincan veya tabak fotoğrafını yeniden yüklemesi istenir.
-- El okumasında görsel uygunluk analizi yalnızca API/LLM sınıflandırmasıyla yapılır. Yalnızca insan avuç içi fotoğrafı kabul edilir; el sırtı, yüz, obje, ekran görüntüsü veya alakasız görsel reddedilir.
-- Pati okumasında görsel uygunluk analizi yalnızca API/LLM sınıflandırmasıyla yapılır. Yalnızca hayvan patisi fotoğrafı kabul edilir; insan eli, hayvan yüzü/bedeni, obje, ekran görüntüsü veya alakasız görsel reddedilir.
-- Kod değişikliği sonrası `rg "validateCoffeeImages\(|validatePalmImage\(|classifyCoffeeImage\(|classifyPalmImage\(" mobile/src` çıktısında kahve ve el/pati ana okuma başlatma yolunda bu API/LLM sınıflandırmasının korunduğunu kontrol et.
+- Kahve, el ve pati okumalarında görsel uygunluk analizi YALNIZCA API/LLM sınıflandırmasıyla yapılır; deterministik kod, dosya adı, slot adı, OCR, renk analizi veya sabit heuristikle uygunluk kararı verilmez. Analiz adımları arasına deterministik kontrol EKLENMEZ.
+- Kahve yorumunda 1, 2 veya 3 görsel yüklenebilir. Sıra ve yükleme alanı ÖNEMSİZ; her karede telveli fincan, telveli tabak veya telveli fincan+tabak olabilir (her karışım geçerli).
+- Tek kriter TELVE: en az 1 karede telveli fincan/tabak varsa okuma BAŞLAR; telvesiz veya alakasız ek kareler okumayı DÜŞÜRMEZ (dışarıda kalırlar). Hiçbir karede telve yoksa kullanıcıdan yeniden yükleme istenir.
+- Sınıflandırma çağrılarında dar `maxOutputTokens` KULLANMA (≥250 olmalı) — JSON kırpılırsa parse düşer ve fallback sahte "uygun değil" reddi üretir (2026-06-11'de yaşandı ve düzeltildi).
+- El okumasında insan avuç içi + parmakların göründüğü fotoğraf kabul edilir; el sırtı/dış yüz, yüz, obje, ekran görüntüsü veya alakasız görsel reddedilir. Katı `isInnerPalm === true` kontrolü YASAK (`!== false` kullan — alan gelmezse sahte red üretir).
+- Pati okumasında hayvan uzvu YETERLİDİR: patinin altı da üstü/sırtı da, pençe, tırnaklı ayak, kuş/sürüngen ayağı — hayvan türü fark etmez. İnsan eli, hayvan yüzü/bedeni, obje veya alakasız görsel reddedilir.
+- **Bekçi script:** `npm run check:image:contract` — yukarıdaki kuralların kod karşılığını statik doğrular; Claude'un PostToolUse hook'u her .ts/.tsx değişikliğinde, pre-commit her commit'te otomatik koşar. `fortuneApiService.ts` içindeki `SÖZLEŞME-GÖRSEL-1..4` işaretlerini SİLME; akışı bilinçli değiştiriyorsan bekçiyi de aynı commit'te güncelle.

@@ -166,7 +166,7 @@ async function classifyCoffeeImage(imageData: string) {
           parts: [
             {
               text:
-                'Bu görseli kahve yorumu yüzeyi olarak sınıflandır. Görsel hangi teknik yükleme alanından gelirse gelsin fincan, tabak veya fincan+tabak olabilir; yükleme alanı adına göre karar verme. containsCup = fincanın içi, fincan kenarı veya fincan gövdesi yorumlanabilir biçimde görünüyorsa true. containsSaucer = kahve tabağı veya tabak yüzeyi görünüyorsa true; tabakta desen, baskı, marka, çiçek veya süs olması containsSaucer değerini false yapmaz. Aynı görselde fincan ve tabak birlikte varsa ikisini de true yap. hasCoffeeGrounds = fincan veya tabakta kahve telvesi/kalıntısı/leke/akıntı/damla varsa true; bir damla telve bile true. groundsAmount = none, trace, light, visible veya heavy. Işık, açı, gölge, kadraj veya hafif bulanıklık yüzünden tamamen emin olamasan bile fincan/tabak/telve seçiliyorsa kahveye uygun kabul et ve en yakın yüzeyi seç. Desen, baskı veya süsleri telve sayma ama tabak yüzeyi olarak kabul et. Tamamen temiz, telvesiz fincan veya tabakta hasCoffeeGrounds false ve groundsAmount none. isCoffeeRelevant = fincan, tabak veya telve görüyorsan true. confidence = sınıflandırma güvenin 0 ile 1 arasında. suggestedReadingType = görsel açıkça avuç içi ise palm, kahve yüzeyi varsa coffee, hiçbiri değilse none.',
+                'Bu görseli kahve yorumu yüzeyi olarak sınıflandır. Görsel hangi teknik yükleme alanından gelirse gelsin fincan, tabak veya fincan+tabak olabilir; yükleme alanı adına göre karar verme. containsCup = fincanın içi, fincan kenarı veya fincan gövdesi yorumlanabilir biçimde görünüyorsa true. containsSaucer = kahve tabağı veya tabak yüzeyi görünüyorsa true; tabakta desen, baskı, marka, çiçek veya süs olması containsSaucer değerini false yapmaz. Aynı görselde fincan ve tabak birlikte varsa ikisini de true yap. hasCoffeeGrounds = fincan veya tabakta kahve telvesi/kalıntısı/leke/akıntı/damla varsa true; bir damla telve bile true. groundsAmount = none, trace, light, visible veya heavy. Işık, açı, gölge, kadraj veya hafif bulanıklık yüzünden tamamen emin olamasan bile fincan/tabak/telve seçiliyorsa kahveye uygun kabul et ve en yakın yüzeyi seç. Desen, baskı veya süsleri telve sayma ama tabak yüzeyi olarak kabul et. Tamamen temiz, telvesiz fincan veya tabakta hasCoffeeGrounds false ve groundsAmount none. isCoffeeRelevant = fincan, tabak veya telve görüyorsan true. confidence = sınıflandırma güvenin 0 ile 1 arasında. suggestedReadingType = görsel açıkça avuç içi ise palm, kahve yüzeyi varsa coffee, hiçbiri değilse none. reason alanını en fazla 6 kelimeyle kısa tut.',
             },
             inlineImage(imageData),
           ],
@@ -174,7 +174,9 @@ async function classifyCoffeeImage(imageData: string) {
       ],
       generationConfig: {
         temperature: 0,
-        maxOutputTokens: 100,
+        // 100 token'da JSON kırpılıp parse patlıyor ve fallback sahte red üretiyordu
+        // ("uygun değil" gınasının kök nedeni) — bütçeyi geniş tut.
+        maxOutputTokens: 320,
         responseMimeType: 'application/json',
         responseJsonSchema: schema,
       },
@@ -201,6 +203,12 @@ function addSurfaceFromCode(surfaces: Array<'cup' | 'saucer'>, surfaceCode: Coff
   if ((surfaceCode === 'tabak' || surfaceCode === 'fincan+tabak') && !surfaces.includes('saucer')) surfaces.push('saucer');
 }
 
+// SÖZLEŞME-GÖRSEL-1: Uygunluk kararını YALNIZ LLM sınıflandırması verir; slot adı,
+// dosya adı, OCR, renk analizi veya başka deterministik kontrol KULLANILMAZ.
+// SÖZLEŞME-GÖRSEL-2: Görseller sıra/slot bağımsızdır; 1-3 görsel herhangi bir
+// karışımda (fincan / tabak / fincan+tabak) olabilir. EN AZ 1 telveli görsel
+// yeterlidir — telvesiz/alakasız ek kareler okumayı DÜŞÜRMEZ, sadece dışarıda kalır.
+// (Bekçi: mobile/scripts/check-image-contract.js — bu işaretleri ve yapıyı doğrular.)
 async function validateCoffeeImages(images: FortuneImages) {
   const surfaces: Array<'cup' | 'saucer'> = [];
   const analyses: CoffeeImageAnalysis[] = [];
@@ -208,8 +216,6 @@ async function validateCoffeeImages(images: FortuneImages) {
   let suggestedPalm = false;
   const rejectedLabels: string[] = [];
   const groundlessLabels: string[] = [];
-  const clearlyGroundlessLabels: string[] = [];
-  let invalidReason = '';
   let loadedCoffeeImageCount = 0;
   for (const slot of ['cup', 'cup2', 'saucer'] as const) {
     const image = images[slot];
@@ -231,20 +237,17 @@ async function validateCoffeeImages(images: FortuneImages) {
     if (!isCoffeeRelevant) {
       suggestedPalm = suggestedPalm || result.suggestedReadingType === 'palm';
       rejectedLabels.push(COFFEE_SLOT_LABELS[slot]);
-      invalidReason ||= `${COFFEE_SLOT_LABELS[slot]} kahve yorumu için uygun görünmedi.`;
       continue;
     }
-    if (!surfaceCode && hasGrounds && isCoffeeRelevant && result.suggestedReadingType !== 'palm') {
+    if (!surfaceCode && hasGrounds && result.suggestedReadingType !== 'palm') {
       surfaceCode = 'fincan+tabak';
     }
     if (!surfaceCode) {
       rejectedLabels.push(COFFEE_SLOT_LABELS[slot]);
-      invalidReason ||= `${COFFEE_SLOT_LABELS[slot]} fincan, tabak veya fincan+tabak olarak okunamadı.`;
       continue;
     }
     if (!hasGrounds) {
       groundlessLabels.push(COFFEE_SLOT_LABELS[slot]);
-      clearlyGroundlessLabels.push(COFFEE_SLOT_LABELS[slot]);
       continue;
     }
     analyses.push({
@@ -259,41 +262,27 @@ async function validateCoffeeImages(images: FortuneImages) {
   if (!loadedCoffeeImageCount) {
     throw jsonPayloadError('Kahve yorumu için en az bir telveli kahve görseli yükle.', usage);
   }
-  if (rejectedLabels.length) {
-    throw jsonPayloadError(
-      suggestedPalm
-        ? 'Bu görsel kahve telvesinden çok avuç içi gibi görünüyor; kahve yorumu için telveli fincan veya tabak fotoğrafı yükle.'
-        : `${rejectedLabels.join(', ')} telveli fincan veya tabak içermiyor. Kahve yorumu için en az bir telve izi görünen fincan ya da tabak fotoğrafını yeniden yükle.`,
-      usage,
-    );
+  // En az 1 telveli görsel bulunduysa okuma BAŞLAR; diğer kareler okumayı düşürmez.
+  if (analyses.length && surfaces.length) {
+    return { surfaces, analyses, usage };
   }
-  if (groundlessLabels.length) {
+  // Buraya düştüysek hiçbir karede telveli fincan/tabak yok — bilgilendirici red.
+  if (groundlessLabels.length && !rejectedLabels.length) {
     throw jsonPayloadError(
       `${groundlessLabels.join(', ')} telvesiz/temiz görünüyor. Kahve yorumu için fincan veya tabakta telve izi, damla, akıntı ya da kalıntı görünen fotoğraf yükle.`,
       usage,
     );
   }
-  if (!analyses.length && (invalidReason || suggestedPalm)) {
+  if (suggestedPalm) {
     throw jsonPayloadError(
-      suggestedPalm
-        ? 'Bu kare kahve telvesinden çok avuç içi gibi görünüyor; el okuması için ayrı akışa geçebilirsin.'
-        : `${invalidReason || 'Lütfen telveyi gösteren uygun kahve görselleri yükle.'}`,
+      'Bu görsel kahve telvesinden çok avuç içi gibi görünüyor; kahve yorumu için telveli fincan veya tabak fotoğrafı yükle.',
       usage,
     );
   }
-  if (!analyses.length && clearlyGroundlessLabels.length) {
-    throw jsonPayloadError(
-      `${clearlyGroundlessLabels.join(', ')} telvesiz/temiz görünüyor; kahve yorumu için telve izi, damla, akıntı veya kalıntı görünen fotoğraf yükle.`,
-      usage,
-    );
-  }
-  if (!surfaces.length) {
-    throw jsonPayloadError(
-      'Kahve yorumu için uygun bir telveli fincan veya tabak görseli bulamadım. Telveyi daha net gösteren bir kareyle yeniden deneyelim.',
-      usage,
-    );
-  }
-  return { surfaces, analyses, usage };
+  throw jsonPayloadError(
+    `${rejectedLabels.length ? `${rejectedLabels.join(', ')} telveli fincan veya tabak içermiyor. ` : ''}Kahve yorumu için en az bir telve izi görünen fincan ya da tabak fotoğrafı yükle.`,
+    usage,
+  );
 }
 
 async function classifyPalmImage(imageData: string) {
@@ -320,7 +309,7 @@ async function classifyPalmImage(imageData: string) {
           parts: [
             {
               text:
-                "Görseldeki ana nesneyi Türkçe etiketle ve sınıflandır. Kahve fincanı/telvesi, kahve tabağı/telve tabağı, insan avuç içi, insan el sırtı, kedi patisi, köpek patisi, tavşan patisi, kuş ayağı, sürüngen/iguana ayağı, böcek, çiçek gibi ayrımları yap. İnsan eli için isInnerPalm avuç içi görünüyorsa true, handVisibleEnough çizgiler/fotoğraf yorumlamaya yeterliyse true olsun. visualLabelTr kısa ve doğal olsun: 'kahve fincanı', 'fincan tabağı', 'insan avuç içi', 'kedi patisi' gibi.",
+                "Görseldeki ana nesneyi Türkçe etiketle ve sınıflandır. Kahve fincanı/telvesi, kahve tabağı/telve tabağı, insan avuç içi, insan el sırtı, hayvan patisi/ayağı, böcek, çiçek gibi ayrımları yap. İnsan eli: avuç içi ve parmaklar görünüyorsa human_palm seç ve isInnerPalm true; elin dış yüzü/sırtı görünüyorsa human_hand_back. handVisibleEnough çizgiler/fotoğraf yorumlamaya yeterliyse true. Hayvan uzvu: patinin ALTI da ÜSTÜ/sırtı da, pençe, tırnaklı ayak, kuş ayağı, sürüngen ayağı veya toynak — hangi açıdan görünürse görünsün ve hangi hayvana ait olursa olsun hayvan uzvu sayılır; türe uyan cat_paw/dog_paw/rabbit_paw/bird_foot/reptile_foot tipini, tür belirsizse animal_paw seç. Görselde bir hayvan patisi/pençesi/ayağı görünüyorsa ASLA other seçme. visualLabelTr kısa ve doğal olsun: 'kahve fincanı', 'insan avuç içi', 'kedi patisi' gibi.",
             },
             inlineImage(imageData),
           ],
@@ -328,7 +317,8 @@ async function classifyPalmImage(imageData: string) {
       ],
       generationConfig: {
         temperature: 0,
-        maxOutputTokens: 120,
+        // Dar bütçe JSON'u kırpıp fallback'e (sahte red) düşürüyordu — geniş tut.
+        maxOutputTokens: 320,
         responseMimeType: 'application/json',
         responseJsonSchema: schema,
       },
@@ -337,20 +327,18 @@ async function classifyPalmImage(imageData: string) {
   );
 }
 
+// SÖZLEŞME-GÖRSEL-3: El okumasında insan avuç içi + parmaklar kabul edilir;
+// el sırtı/dış yüz reddedilir. Karar yalnız LLM sınıflandırmasından gelir.
 function isHumanPalmVisual(result: PalmClassification) {
-  return result.visualType === 'human_palm' && result.isInnerPalm === true;
+  // isInnerPalm alanı gelmediyse (undefined) human_palm sınıflandırmasına güven;
+  // yalnız açıkça false ise reddet — katı === true kontrolü sahte red üretiyordu.
+  return result.visualType === 'human_palm' && result.isInnerPalm !== false;
 }
 
+// SÖZLEŞME-GÖRSEL-4: Pati okumasında hayvan uzvu yeterlidir — patinin altı da
+// üstü/sırtı da, pençe, tırnaklı ayak, kuş/sürüngen ayağı; hayvan türü fark etmez.
 function isAnimalPawVisual(result: PalmClassification) {
   return ['cat_paw', 'dog_paw', 'rabbit_paw', 'bird_foot', 'reptile_foot', 'animal_paw'].includes(result.visualType || '');
-}
-
-function isClearlyDifferentPetSpecies(result: PalmClassification, expectedSpecies: string | null) {
-  if (!expectedSpecies || !result.animalSpecies || result.animalSpecies === 'none' || result.animalSpecies === 'other') {
-    return false;
-  }
-  if (result.visualType === 'animal_paw') return false;
-  return result.animalSpecies !== expectedSpecies && Number(result.confidence || 0) >= 0.78;
 }
 
 function normalizePetSpecies(value?: string | null) {
@@ -392,12 +380,12 @@ async function validatePalmImage(images: FortuneImages, memorySnippet?: ProfileM
     const expectedSpecies = normalizePetSpecies(memorySnippet?.petSpecies);
     const expectedLabel = speciesTr(expectedSpecies, memorySnippet?.petSpecies);
     if (!isAnimalPawVisual(result)) {
-      throw jsonPayloadError(`${memorySnippet?.profileName || 'Bu profil'} için pati okuması istemiştin fakat ${loadedLabel} yükledin. Pati okumasında yalnızca hayvan patisi fotoğrafı kabul edilir; patinin net göründüğü bir ${expectedLabel} fotoğrafıyla yeniden deneyelim.`, usage);
+      throw jsonPayloadError(`${memorySnippet?.profileName || 'Bu profil'} için pati okuması istemiştin fakat ${loadedLabel} yükledin. Pati okumasında hayvanın patisi, pençesi ya da ayağı yeterli — altı da üstü de olur; patinin göründüğü bir ${expectedLabel} fotoğrafıyla yeniden deneyelim.`, usage);
     }
     return { validation: result, usage };
   }
   if (!isHumanPalmVisual(result)) {
-    throw jsonPayloadError(`El okuması için yalnızca insan avuç içi kabul edilir; el sırtı, dış yüz veya başka bir görsel yüklenirse okuyamam. Avuç içi çizgilerinin seçildiği net bir fotoğrafla yeniden deneyelim.`, usage);
+    throw jsonPayloadError(`El okuması için avuç içinin ve parmakların göründüğü bir fotoğraf gerekli; el sırtı/dış yüz ya da başka bir görsel yüklenirse okuyamam. Avuç içi çizgilerinin seçildiği bir fotoğrafla yeniden deneyelim.`, usage);
   }
   return { validation: result, usage };
 }

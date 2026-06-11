@@ -55,6 +55,15 @@ if (inMobile) {
     }
   }
 
+  // Görsel uygunluk sözleşmesi (kahve/el/pati = yalnız LLM kararı) — statik, <100ms
+  if (['.ts', '.tsx'].includes(ext)) {
+    try {
+      execSync('node scripts/check-image-contract.js', { cwd: mobileDir, stdio: 'pipe' });
+    } catch (e) {
+      failures.push('GÖRSEL UYGUNLUK SÖZLEŞMESİ BAŞARISIZ:\n' + captureError(e));
+    }
+  }
+
   // Artımlı tsc --noEmit (node_modules kuruluysa)
   if (['.ts', '.tsx'].includes(ext)) {
     const tscJs = path.join(mobileDir, 'node_modules', 'typescript', 'lib', 'tsc.js');
