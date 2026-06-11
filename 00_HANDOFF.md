@@ -8,9 +8,9 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 - **Checkpoint disiplini:** Uzun işe başlamadan önce buraya "başlıyorum + plan" notu düşülür; iş sırasında ara adımlarda güncellenir. Oturum aniden kesilirse (usage/çökme) durum buradan + git commit'lerinden geri kurulur.
 - Sıralama netliği: güncel için 00'a bak; tarihçe için handoffs/ klasörüne bak. İkisi karışmaz.
 
-**En son snapshot:** [handoffs/2026-06-11_faz0-to-faz1_gecis.md](handoffs/2026-06-11_faz0-to-faz1_gecis.md) (Faz 0→1 geçiş + Faz 1 brifingi + Ozan kararları + özerk plan) · önceki: [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
+**En son snapshot:** [handoffs/2026-06-11_faz1-to-faz2_gecis.md](handoffs/2026-06-11_faz1-to-faz2_gecis.md) (Faz 1 kapanış + Ozan onay listesi TEK TEK + Faz 2 brifingi) · önceki: [faz0→1](handoffs/2026-06-11_faz0-to-faz1_gecis.md), [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
 
-**Son güncelleme:** 2026-06-11 (Faz 1 oturumu BAŞLADI) · **Durum:** 🔨 **FAZ 1 SÜRÜYOR (özerk).** Faz 0 ✅ (tag `faz0`). Ozan D1-D5 kararlarını verdi (aşağıda); Claude §4 planını özerk yürütüyor: kod renames + guardrail + yasal/persona taslakları → 13_FAZ1 test dokümanı → faz1-to-faz2 handoff → Faz 2 özerk kod kısmı.
+**Son güncelleme:** 2026-06-11 (özerk oturum) · **Durum:** ✅ **FAZ 1 ÖZERK KISMI BİTTİ** (tag `faz1`) — kod renames (fortune→reading, Sihirbaz), Red Kataloğu guardrailleri, yasal katman (onay kapısı + Yasal Bilgilendirme + 12 ekranda ibare), persona dil ikamesi, avukat dosyası (15_...md), öz-review (1 CRITICAL yakalandı/düzeltildi). **Ozan'a:** `13_FAZ1_CIHAZ_TESTLERI_2026-06-11.md` (APK gerekmez) + geçiş handoff'undaki §2 onay listesi (8 madde, TEK TEK). 🔨 **FAZ 2 ÖZERK KOD KISMI SÜRÜYOR:** K42 moderasyon → ledger-paket iskeleti → K40 taşınabilirlik → K34 analitik scaffold; IAP/fiyat/Play Console = blok: Ozan.
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
 - **D1 ONAY:** Faz 1/2 özerk; kod + taslak Claude; yasal onay/avukat/Play Console/IAP/fiyat Ozan.
