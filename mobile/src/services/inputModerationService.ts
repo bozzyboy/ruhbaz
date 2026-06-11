@@ -15,6 +15,8 @@
 //   "intihar etmek istiyorum" kriz yanıtını tetikler.
 // - Tekrarlı ihlalde kısıtlama (hesap/oturum) Faz 2 kapsamı DIŞI — iskelet notu.
 
+import { trackEvent } from './analyticsService';
+
 export type ModerationContext = 'chat' | 'question' | 'dream';
 
 export type ModerationCategory =
@@ -132,12 +134,15 @@ export function moderateUserInput(
   }
 
   if (CRISIS_RE.test(normalized)) {
+    trackEvent({ name: 'moderation_blocked', category: 'crisis' });
     return { verdict: 'crisis', category: 'crisis', replyText: REPLY.crisis };
   }
 
   const rules = context === 'dream' ? DREAM_RULES : FULL_RULES;
   for (const rule of rules) {
     if (rule.test(normalized)) {
+      // Yalnız kategori adı izlenir; kullanıcı metni ASLA event'e yazılmaz (K34 ilke 1).
+      trackEvent({ name: 'moderation_blocked', category: rule.category });
       return { verdict: 'block', category: rule.category, replyText: REPLY[rule.category] };
     }
   }

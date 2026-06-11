@@ -10,6 +10,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ONBOARDING_ACCEPT_LABEL, ONBOARDING_BODY, ONBOARDING_TITLE } from '../config/legalTexts';
 import { recordLegalConsentAcceptance } from '../services/legalConsentService';
+import { trackEvent } from '../services/analyticsService';
 
 type Props = {
   onAccepted: () => void;
@@ -25,6 +26,7 @@ export function LegalConsentScreen({ onAccepted }: Props) {
     setIsSaving(true);
     try {
       await recordLegalConsentAcceptance();
+      trackEvent({ name: 'onboarding_consent_accepted' });
       onAccepted();
     } catch {
       // Kayıt yazılamadıysa kullanıcıyı kilitleme: onayı bu oturum için kabul et,

@@ -14,6 +14,7 @@
 // bunu açıkça söyler). KVKK "tüm verimi sil" tek-tuşu da burada (wipeAllLocalData).
 
 import * as FileSystem from 'expo-file-system/legacy';
+import { trackEvent } from './analyticsService';
 
 const DOC_DIR = FileSystem.documentDirectory || '';
 const DATA_DIR = `${DOC_DIR}falci-data/`;
@@ -104,6 +105,7 @@ export async function exportBackupToUserFolder(): Promise<ExportResult> {
       'application/json',
     );
     await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(bundle));
+    trackEvent({ name: 'backup_exported' });
     return { ok: true, fileName, fileCount: bundle.files.length };
   } catch (err: any) {
     return { ok: false, reason: 'error', message: String(err?.message || err) };
@@ -168,6 +170,7 @@ export async function importBackupFromUri(backupFileUri: string): Promise<Import
         await FileSystem.writeAsStringAsync(target, file.content);
       }
     }
+    trackEvent({ name: 'backup_restored' });
     return { ok: true, fileCount: bundle.files.length };
   } catch (err: any) {
     return { ok: false, reason: 'error', message: String(err?.message || err) };
