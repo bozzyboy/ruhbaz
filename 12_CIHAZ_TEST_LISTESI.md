@@ -53,6 +53,34 @@
 | `mobile/src/screens/HomeScreen.tsx` | Token Sayaçları + Geliştirici Ayarları panelleri bayrağa bağlandı | F0-A7, F0-A8 |
 | — (not) | `MemoryDebugScreen` ("Hafıza Özeti" düğmesi, Profil Ayarları'nda) BİLEREK kapatılmadı — ürün özelliği mi debug mi belirsiz; karar Ozan'ın (07 defterine not düşüldü) | — |
 | `mobile/eslint.config.js` + `package.json` | ESLint kuruldu (`npm run lint`); 0 hata / 223 uyarı başlangıç çizgisi | Cihaz testi gerekmez — statik araç |
+
+### Grup F0-B: K10 yerel LLM (Gemma) sökümü
+
+> **📦 KURULUM KUTUSU (F0-B):**
+> 1. ⚠️ **YENİ APK GEREKİR** — native değişiklik var (LiteRT modülü + gradle bağımlılığı söküldü). APK yolu: Claude'un derleme denemesi sonucuna göre bu kutuya yazılacak / Claude derleyemezse: `cd mobile` → `npx expo run:android` (telefon USB'de, geliştirici modu açık).
+> 2. Yeni APK kurulduktan sonra: token server + `npx expo start` (F0-A kutusundaki gibi).
+>
+> Not: F0-A ve F0-B'yi TEK oturumda koşacaksan önce yeni APK'yı kur, sonra hepsini sırayla in — iki kez kurulum yapma.
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| F0-B1 | Senin Evin → profil seç → Astroloji okuma tipi → yorumcu seçim ekranına gel | Ekranda YALNIZ "Yorumcu Seçimi" var; "Yorumcunun Zekasını Seç" (Free/Pro/Premium IQ) paneli ve yerel model indirme kutusu YOK | ☐ |
+| F0-B2 | Aynı ekrandan Selin'i seç → "Yoruma Geç" → Günlük dönem seç → yorumu bekle | Kişisel astro yorumu buluttan (Gemini) üretilir; hata yok | ☐ |
+| F0-B3 | Üretilen yoruma takip sorusu yaz (ör. "bu hafta kariyerde ne öne çıkıyor?") | Yanıt gelir (follow-up artık tek yol: bulut) | ☐ |
+| F0-B4 | Aynı profil + aynı dönem için ekrandan çıkıp tekrar gir | Yorum cache'ten gelir (aynı metin; yeniden üretim yok) | ☐ |
+| F0-B5 | (Regresyon) Yorumcu seçim ekranından Numeroloji / Rüya / Tarot akışlarına gir | Persona seçimi + "Yoruma Geç" ile ilgili akış normal açılır (ekran sökümünden etkilenmediler) | ☐ |
+| F0-B6 | (Regresyon) Kahve yorumu uçtan uca bir kez | Çalışır — kahve yerel LLM'i hiç kullanmıyordu, ama APK değiştiği için bir kez doğrula | ☐ |
+
+**Değişen dosya → test eşlemesi (F0-B):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/screens/PersonalAssistantSelectScreen.tsx` | IQ paneli + yerel model UI söküldü; yalnız persona seçimi | F0-B1, F0-B5 |
+| `mobile/src/screens/PersonalAstroReadingScreen.tsx` | iqLevel/localGemmaModelId param ve dalları söküldü | F0-B2, F0-B3, F0-B4 |
+| `mobile/src/services/astroEngine.ts` | Yerel LLM dalları söküldü; bulut tek yol; cache key 'gemini' | F0-B2, F0-B3, F0-B4 |
+| `mobile/App.tsx` | PersonalAstroReading param tipi sadeleşti | F0-B2 (navigasyon çalışıyorsa geçti) |
+| `mobile/src/services/localGemmaService.ts` | DOSYA SİLİNDİ | tsc=0 (çağıran kalmadı) + F0-B2 |
+| `mobile/android/...` (gitignore'da, disk üzerinde) | RuhbazLiteRtLm modül+paket silindi; MainApplication kaydı + litertlm gradle bağımlılığı çıkarıldı | F0-B6 + APK'nın derlenebilmesi (Claude denemesi) |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |

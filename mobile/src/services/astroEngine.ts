@@ -21,12 +21,6 @@ import {
 import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionFromProfile, isAnimalProfile } from './animalProfilePrompt';
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
-import {
-  buildLocalGemmaPromptFromGeminiPayload,
-  getLocalGemmaGenerationLimits,
-  generateLocalGemmaText,
-  type LocalGemmaModelId,
-} from './localGemmaService';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
 
 export type AstroPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -1680,8 +1674,6 @@ export async function createPersonalAstroReading(params: {
   assistantLabel: string;
   focusQuestion?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
-  iqLevel?: 'free' | 'pro' | 'premium';
-  localGemmaModelId?: LocalGemmaModelId;
 }): Promise<AstroReadingResult> {
   const location = resolveAstroLocation(params.profile.birth.location);
   if (!params.profile.birth.date || !location) {
@@ -1707,7 +1699,7 @@ export async function createPersonalAstroReading(params: {
   const currentPeriodKey = periodKey(params.period);
   const fingerprint = profileFingerprint(params.profile);
   const focusQuestion = params.focusQuestion?.replace(/\s+/g, ' ').trim() || '';
-  const modelCacheKey = params.iqLevel === 'free' && params.localGemmaModelId ? `local-${params.localGemmaModelId}` : 'gemini';
+  const modelCacheKey = 'gemini';
   const cacheKeyValue = cacheKey([String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION), modelCacheKey, params.assistantId, params.profile.profileId, params.period, currentPeriodKey, fingerprint]);
   if (!focusQuestion) {
     const cached = await loadFreshPersonalAstroFromCache({ cacheKeyValue, periodKeyValue: currentPeriodKey, fingerprint });
@@ -1715,28 +1707,7 @@ export async function createPersonalAstroReading(params: {
   }
 
   try {
-    const localModelId = params.iqLevel === 'free' ? params.localGemmaModelId : undefined;
-    if (params.iqLevel === 'free' && !localModelId) {
-      throw new Error('Free IQ için önce bir yerel model seçmelisin.');
-    }
-    const localLimits = localModelId ? getLocalGemmaGenerationLimits(localModelId, 'initial') : null;
-    const data = localModelId
-      ? {
-          text: await generateLocalGemmaText({
-            modelId: localModelId,
-            prompt: buildLocalGemmaPromptFromGeminiPayload(geminiPayload, {
-              modelId: localModelId,
-              mode: 'initial',
-              inputTokenLimit: localLimits?.inputTokenLimit,
-            }),
-            maxTokens: localLimits?.maxOutputTokens,
-            temperature: 0.72,
-          }),
-          model: `local-${localModelId}`,
-          usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-          finishReason: undefined,
-        }
-      : await generateGeminiTextDirect(geminiPayload, 45000, { usageMode: 'raw' });
+    const data = await generateGeminiTextDirect(geminiPayload, 45000, { usageMode: 'raw' });
     const text = await completeWithRememberedPersonaClosing({
       text: cleanGeneratedTurkishText(data.text),
       assistantId: params.assistantId,
@@ -1797,8 +1768,6 @@ export async function createPersonalAstroFollowUp(params: {
   question: string;
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
-  iqLevel?: 'free' | 'pro' | 'premium';
-  localGemmaModelId?: LocalGemmaModelId;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
   const relevantMemory = formatRelevantMemory(params.memorySnippet, params.question, 'kişisel astroloji takip sorusu');
   let currentAstroContext = '';
@@ -1884,29 +1853,7 @@ export async function createPersonalAstroFollowUp(params: {
       maxOutputTokens: PERSONAL_FOLLOW_UP_MAX_OUTPUT_TOKENS,
     },
   };
-  const localLimits = params.iqLevel === 'free' && params.localGemmaModelId
-    ? getLocalGemmaGenerationLimits(params.localGemmaModelId, 'followUp')
-    : null;
-  if (params.iqLevel === 'free' && !params.localGemmaModelId) {
-    throw new Error('Free IQ için önce bir yerel model seçmelisin.');
-  }
-  const data = params.iqLevel === 'free' && params.localGemmaModelId
-    ? {
-        text: await generateLocalGemmaText({
-          modelId: params.localGemmaModelId,
-          prompt: buildLocalGemmaPromptFromGeminiPayload(followUpPayload, {
-            modelId: params.localGemmaModelId,
-            mode: 'followUp',
-            inputTokenLimit: localLimits?.inputTokenLimit,
-          }),
-          maxTokens: localLimits?.maxOutputTokens,
-          temperature: 0.68,
-        }),
-        model: `local-${params.localGemmaModelId}`,
-        usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-        finishReason: undefined,
-      }
-    : await generateGeminiTextDirect(followUpPayload, 45000, { usageMode: 'raw' });
+  const data = await generateGeminiTextDirect(followUpPayload, 45000, { usageMode: 'raw' });
   const text = await completeWithRememberedPersonaClosing({
     text: cleanGeneratedTurkishText(data.text),
     assistantId: params.assistantId,

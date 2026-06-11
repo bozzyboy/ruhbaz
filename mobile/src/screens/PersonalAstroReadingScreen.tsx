@@ -65,7 +65,7 @@ function themeFromReading(period: AstroPeriod, sign: string, risingSign?: string
 }
 
 export function PersonalAstroReadingScreen({ route, navigation }: Props) {
-  const { profileId, assistantId, iqLevel, localGemmaModelId } = route.params;
+  const { profileId, assistantId } = route.params;
   const insets = useSafeAreaInsets();
   const [period, setPeriod] = useState<AstroPeriod | null>(null);
   const [selection, setSelection] = useState<AstroSelection | null>(null);
@@ -174,15 +174,13 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         if (!profile) return;
         setProfileName(profile.displayName);
         if (!hasRequiredAstroBirthInputs(profile)) return;
-        const cached = iqLevel === 'free'
-          ? null
-          : await getCachedPersonalAstroReading({ profile, assistantId, period: nextPeriod });
+        const cached = await getCachedPersonalAstroReading({ profile, assistantId, period: nextPeriod });
         if (cached) applyReadingToScreen(cached, nextPeriod);
       } catch {
         // Cache kontrolü sessiz kalmalı; üretim butonu normal akışı sürdürecek.
       }
     },
-    [applyReadingToScreen, assistantId, iqLevel, isBusy, profileId],
+    [applyReadingToScreen, assistantId, isBusy, profileId],
   );
 
   const handleSelectTopic = useCallback(() => {
@@ -257,8 +255,6 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         assistantLabel,
         memorySnippet,
         focusQuestion: focusQuestion || undefined,
-        iqLevel,
-        localGemmaModelId,
       });
       if (!reading.cached && reading.usage) {
         const inputTokens = reading.usage.inputTokens || 0;
@@ -289,7 +285,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
     } finally {
       setIsLoading(false);
     }
-  }, [applyReadingToScreen, assistantId, assistantLabel, iqLevel, isBusy, localGemmaModelId, normalizedTopicText, period, profileId, selection, text]);
+  }, [applyReadingToScreen, assistantId, assistantLabel, isBusy, normalizedTopicText, period, profileId, selection, text]);
 
   useEffect(() => {
     return () => {
@@ -365,8 +361,6 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         question,
         previousFollowUps,
         memorySnippet: semanticMemorySnippet,
-        iqLevel,
-        localGemmaModelId,
       });
       setFollowUps((current) => [...current, { id: `a-${Date.now()}`, role: 'assistant', text: answer.text }]);
       const inputTokens = answer.usage.inputTokens || 0;
@@ -393,7 +387,7 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
     } finally {
       setIsSendingQuestion(false);
     }
-  }, [assistantId, assistantLabel, followUps, iqLevel, isSendingQuestion, localGemmaModelId, normalizedTopicText, period, profileName, profileId, questionText, selection, text]);
+  }, [assistantId, assistantLabel, followUps, isSendingQuestion, normalizedTopicText, period, profileName, profileId, questionText, selection, text]);
 
   const buildTranscript = useCallback(
     () => {

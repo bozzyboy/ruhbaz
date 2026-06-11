@@ -83,8 +83,6 @@ export type RootStackParamList = {
   PersonalAstroReading: {
     profileId: string;
     assistantId: string;
-    iqLevel?: 'free' | 'pro' | 'premium';
-    localGemmaModelId?: 'gemma-4-e2b-it';
   };
   AstroRelationshipReading: {
     profileId: string;
