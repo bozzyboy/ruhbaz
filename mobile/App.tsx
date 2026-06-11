@@ -241,9 +241,9 @@ export default function App() {
           <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: 'Genel Okuma' }} />
           <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: 'Genel Burç Uyumu' }} />
           <Stack.Screen name="DaisyReading" component={DaisyReadingScreen} options={{ title: 'Papatya Ritüeli' }} />
-          <Stack.Screen name="PersonalReadings" component={PersonalReadingsScreen} options={{ title: 'Senin Evin' }} />
-          <Stack.Screen name="SelfKnowledge" component={SelfKnowledgeScreen} options={{ title: 'Kendini Tanı' }} />
-          <Stack.Screen name="SimyaLab" component={SimyaLabScreen} options={{ title: 'Simya Laboratuvarı' }} />
+          <Stack.Screen name="PersonalReadings" component={PersonalReadingsScreen} options={{ title: 'Salon' }} />
+          <Stack.Screen name="SelfKnowledge" component={SelfKnowledgeScreen} options={{ title: 'Ayna Odası' }} />
+          <Stack.Screen name="SimyaLab" component={SimyaLabScreen} options={{ title: 'Simya Odası' }} />
           <Stack.Screen
             name="PersonalProfileSelect"
             component={PersonalProfileSelectScreen}

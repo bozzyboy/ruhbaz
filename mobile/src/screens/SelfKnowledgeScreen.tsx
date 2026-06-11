@@ -188,7 +188,7 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Kendini Tanı</Text>
+          <Text style={styles.panelTitle}>Ayna Odası</Text>
           <View style={styles.grid}>
             {items.map((item) => (
               <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.84} onPress={() => handleItemPress(item)}>

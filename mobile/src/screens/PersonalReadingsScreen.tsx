@@ -306,7 +306,7 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Senin Evin Okumaları</Text>
+          <Text style={styles.panelTitle}>Salon Okumaları</Text>
           <Text style={styles.sectionHelperText}>
             Burada dönemsel ya da konu odaklı yorum alabilir, fotoğraf yükleyerek sembolleri okutabilir, rüyanı anlatabilir veya hazırlanan okuma üzerinden takip soruları sorabilirsin. Kesin öngörü iddiası içermez; sezgisel, sembolik ve eğlence amaçlı yapay zeka destekli içgörüler sunar.
           </Text>

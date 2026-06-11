@@ -147,7 +147,7 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('PersonalReadings', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>⌂</Text>
-            <Text style={styles.lobbyTitle}>Senin Evin</Text>
+            <Text style={styles.lobbyTitle}>Salon</Text>
             <Text style={styles.lobbyText}>Kahve, el / pati, tarot, astroloji, numeroloji ve rüya yorumları.</Text>
           </TouchableOpacity>
 
@@ -157,7 +157,7 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('SimyaLab', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>⚗</Text>
-            <Text style={styles.lobbyTitle}>Simya Laboratuvarı</Text>
+            <Text style={styles.lobbyTitle}>Simya Odası</Text>
             <Text style={styles.lobbyText}>Manifest, kendi okumanı oluştur, baştan yarat ve combo yarat alanları.</Text>
           </TouchableOpacity>
 
@@ -167,7 +167,7 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('SelfKnowledge', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>◎</Text>
-            <Text style={styles.lobbyTitle}>Kendini Tanı</Text>
+            <Text style={styles.lobbyTitle}>Ayna Odası</Text>
             <Text style={styles.lobbyText}>Doğum haritası, temel numeroloji ve testler.</Text>
           </TouchableOpacity>
         </View>

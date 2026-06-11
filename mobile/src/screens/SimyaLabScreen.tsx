@@ -19,7 +19,7 @@ export function SimyaLabScreen({}: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Simya Laboratuvarı</Text>
+          <Text style={styles.panelTitle}>Simya Odası</Text>
           <Text style={styles.helperText}>
             Niyet, okuma tasarımı ve farklı araçları birleştiren deneysel alan. Buradaki bazı seçenekler şimdilik iskelet olarak hazır duruyor.
           </Text>
