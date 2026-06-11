@@ -71,6 +71,11 @@ if ($adbPath) {
   }
 }
 
+# --- 3c. Baglanti QR'ini ayri pencerede ac (telefonun NORMAL kamerasiyla taranir) ---
+# dev-client'in kendi tarayicisi Android 13'te takiliyor; bu QR sistem kamerasi
+# icin dogru semali derin-baglanti tasir. Ayri pencerede acik kalir.
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$mobileDir'; `$env:PORT='$PORT'; node scripts/qr.js" -WindowStyle Normal
+
 # --- 4. Expo'yu SABIT 8081'de baslat ---
 Yaz "[3/4] Expo dev server baslatiliyor (port $PORT, LAN)..." "Yellow"
 Yaz ""
@@ -84,15 +89,15 @@ if ($usbHazir) {
   Yaz ""
   Yaz "  (Bu yol Wi-Fi/IP degisse bile hep calisir.)" "White"
 } else {
-  Yaz "  1. Uygulamada 'Recently Opened' listesinde su satira DOKUN:" "White"
-  Yaz ""
+  Yaz "  Uc yoldan biri (hepsi yazma gerektirmez):" "White"
+  Yaz "  A) QR: Acilan ayri penceredeki QR'i TELEFONUN NORMAL KAMERASIYLA tara" "White"
+  Yaz "     (dev-client'in kendi tarayicisini DEGIL). Cikan linke dokun." "White"
+  Yaz "  B) Recently Opened listesinde su satira DOKUN:" "White"
   Yaz "        http://${ip}:${PORT}" "Cyan"
+  Yaz "  C) Ilk defa ise 'Enter URL manually' -> ayni adres (localhost DEGIL)." "White"
   Yaz ""
-  Yaz "  2. Listede yoksa (ilk defa) 'Enter URL manually' ile ayni adresi" "White"
-  Yaz "     yaz (localhost DEGIL). Sonraki sefer listede cikar, sadece dokun." "White"
-  Yaz "  -- QR tarayici Android'de takiliyorsa kullanma; dokun/yaz yeterli. --" "White"
-  Yaz "  -- En saglam yol icin telefonu USB ile bagla, scripti tekrar calistir. --" "White"
-  Yaz ""
+  Yaz "  En saglam yol: telefonu USB ile bagla, scripti tekrar calistir" "White"
+  Yaz "  -> http://localhost:${PORT} (Wi-Fi/IP/QR'dan bagimsiz)." "White"
   Yaz "  Telefon ve PC AYNI Wi-Fi'de olmali." "White"
 }
 Yaz "============================================================" "Green"

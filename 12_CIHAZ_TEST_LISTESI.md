@@ -8,10 +8,12 @@
 
 PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (veya terminalde `powershell -ExecutionPolicy Bypass -File baslat.ps1`). Bu script: eski/asılı süreçleri temizler, token server'ı açar, Expo'yu **HER ZAMAN sabit 8081**'de başlatır ve telefona yazacağın **doğru adresi** ekrana yazar.
 
-**Telefonda bağlan — QR'A GEREK YOK** (QR tarayıcı dev-client'ın native özelliği; Android 13'te takılabiliyor, app kodu düzeltemez — kullanma):
-1. İlk kez: **"Enter URL manually"** → `http://<PC-IP>:8081` yaz (şu an `192.168.1.127:8081`). ⚠️ **`localhost` YAZMA** (Wi-Fi yolunda localhost = telefonun kendisi).
-2. Sonraki her sefer: **"Recently Opened"** listesinde o satıra sadece **DOKUN** — yazma/tarama yok.
-3. Telefon ve PC **aynı Wi-Fi**'de olmalı.
+**Telefonda bağlan — ÜÇ yol (hangisi kolaysa):**
+1. **QR (çalışan yol):** `baslat.ps1` ayrı pencerede bir QR açar (`npm run qr` ile de elle açılır). Bunu **telefonun NORMAL kamera uygulamasıyla** tara → çıkan linke dokun → uygulama açılır. ⚠️ Dev-client'ın **kendi içindeki "Scan QR Code"** tarayıcısını KULLANMA — o Android 13'te bozuk ("cannot read QR"). Bizim QR doğru şemayı (`exp+mobile`) taşıdığı için sistem kamerası okur.
+2. **Recently Opened:** İlk bağlantıdan sonra listede çıkar — sadece **DOKUN** (yazma/tarama yok).
+3. **Elle:** "Enter URL manually" → `http://<PC-IP>:8081` (şu an `192.168.1.127:8081`). ⚠️ **`localhost` YAZMA** (Wi-Fi yolunda localhost = telefonun kendisi).
+
+**EN SAĞLAM (USB):** Telefonu USB ile bağla → `baslat.ps1` → `adb reverse` → uygulamada **`http://localhost:8081`**. Wi-Fi/IP/QR'dan bağımsız, her zaman çalışır.
 
 **EN SAĞLAM yol (USB):** Telefonu USB ile bağla, `baslat.ps1`'i çalıştır → script `adb reverse` yapar → uygulamada **`http://localhost:8081`** yaz. Bu yol Wi-Fi/IP değişse de QR çalışmasa da **her zaman** çalışır.
 
