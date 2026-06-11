@@ -12,7 +12,7 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **⭐ OZAN İÇİN TEK KAPI:** Testlere nereden başlayacağını bilmiyorsan SADECE şunu aç: [19_TEST_BASLANGIC_REHBERI.md](19_TEST_BASLANGIC_REHBERI.md) — sırayı o tutuyor.
 
-**Son güncelleme:** 2026-06-11 (özerk maraton bitti) · **Durum:** ✅ FAZ 1 (`faz1`) · ✅ FAZ 2 özerk kod (`faz2`) · ✅ FAZ 3 (`faz3`) · ✅ **FAZ 4 BİTTİ** (`faz4`: i18n + EN UI + EN içerik (tarot/melek/rün/I-Ching/numeroloji) + 7 persona EN sesi + EN kriz güvenliği; saf JS — **APK gerekmez**; bilinçli boşluklar `18_FAZ4 §SON`). **Ozan'a:** 4 cihaz-test dokümanı (13/14/16/18, tek oturuş) + faz4-bitti §2'deki 15 maddelik NİHAİ liste. ⏸️ **FAZ 5 (Konak Akışı+bildirimler) ÖZERK BAŞLAMADI** — brifing faz4-bitti §4'te onay bekliyor.
+**Son güncelleme:** 2026-06-12 (EN boşlukları 1-6 kapatıldı — Ozan talimatı; 7-8 kalıcı not; persona kanonu v2 + Ruhbaz Manor + soyadları işli; YENİ bekçi: C0 kontrol-karakteri taraması) · **Durum:** ✅ FAZ 1 (`faz1`) · ✅ FAZ 2 özerk kod (`faz2`) · ✅ FAZ 3 (`faz3`) · ✅ **FAZ 4 BİTTİ** (`faz4`: i18n + EN UI + EN içerik (tarot/melek/rün/I-Ching/numeroloji) + 7 persona EN sesi + EN kriz güvenliği; saf JS — **APK gerekmez**; bilinçli boşluklar `18_FAZ4 §SON`). **Ozan'a:** 4 cihaz-test dokümanı (13/14/16/18, tek oturuş) + faz4-bitti §2'deki 15 maddelik NİHAİ liste. ⏸️ **FAZ 5 (Konak Akışı+bildirimler) ÖZERK BAŞLAMADI** — brifing faz4-bitti §4'te onay bekliyor.
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
 - **D1 ONAY:** Faz 1/2 özerk; kod + taslak Claude; yasal onay/avukat/Play Console/IAP/fiyat Ozan.

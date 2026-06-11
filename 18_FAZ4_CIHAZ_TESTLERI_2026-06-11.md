@@ -27,7 +27,8 @@
 - [ ] **3.2** Günlük rün → "Today's Rune", "MESSAGE OF THE STONE"; I-Ching → "Today's I-Ching Reading", başlıklar bold (Present State...), "scroll down" ipucu; melek kartı/sayısı → "GUIDANCE OF THE DAY"; numeroloji EN.
 - [ ] **3.3** Genel astro (günlük/haftalık/aylık) → okuma TAMAMEN İngilizce.
 - [ ] **3.4** Dili değiştirip aynı günün okumasına dön → AYNI çekiliş (aynı kart/rün), metin yeni dilde (önbellek dil-bilinçli yeniden kurulur).
-- [ ] **3.5 (bilinçli TR kalanlar)** Şans kurabiyesi, sihirli küre, günlük olumlama, burç uyumu EN modda TR — §SON boşluk listesinde.
+- [ ] **3.5 (GÜNCELLENDİ — boşluk kapandı)** EN'de şans kurabiyesi → "Today's lucky charm:", sihirli küre → "The sphere's sign:", günlük olumlama EN üçlü metin; dil değişiminde AYNI çekiliş yeni dilde.
+- [ ] **3.6 (YENİ)** EN'de Genel Burç Uyumu: burç adları Aries/Taurus...; uyum metni İngilizce; TR'ye dönünce Koç/Boğa aynen.
 
 ## GRUP 4 — EN persona okumaları (LLM)
 
@@ -38,6 +39,11 @@
 - [ ] **4.4** EN'de takip sorusu + hata anı (server kapat) → retry mesajı EN.
 - [ ] **4.5** EN'de "give me lottery numbers" → nazik EN red; **"I want to kill myself"** → EN kriz yanıtı (yerel acil hat dili). *(Diğer kategorilerin EN TESPİTİ sınırlı — §SON.)*
 - [ ] **4.6 (ses onayı)** EN sesleri beğeni turu: 17 no'lu plan §3 yönüne uygun mu?
+- [ ] **4.7 (YENİ — sağlık)** EN'de "my dog is sick, will she be okay?" tarzı soru → yanıt sonunda İngilizce veteriner hatırlatması; insan sağlığında İngilizce doktor hatırlatması. TR'de eski davranış aynen (regresyon).
+- [ ] **4.8 (YENİ — moderasyon dil-bağımsız)** TR moddayken İngilizce zararlı metin ("give me lottery numbers") → yine yakalanır (yanıt TR); akıllı tırnaklı "I don’t want to live" → kriz yanıtı.
+- [ ] **4.9 (YENİ — testler)** EN'de Ayna Odası: MBTI + diğer testlerin soruları/sonuçları İngilizce; testi tamamla → özet EN kaydedilir; TR'ye dönünce TR testler aynen (eski kayıtlı sonuçlar bozulmaz).
+- [ ] **4.10 (YENİ — akış ekranları)** EN'de Session/kurulum/rüya/tarot/astro/numeroloji ekranlarının buton-etiketleri İngilizce (Duraklat→Pause sınıfı); LLM'e giden iç metinler bilinçli TR (görünmez).
+- [ ] **4.11 (YENİ — yedek mesajları)** EN'de Yedek Al/Geri Yükle/Sil sonuç mesajları İngilizce.
 
 ## GRUP 5 — TR tarafı bozulmadı (kritik regresyon)
 
@@ -53,13 +59,14 @@
 | 8a89993 | EN içerik+persona+14 ekran+dil bağlama | GRUP 2,3,4 |
 | c1e659f | Öz-review düzeltmeleri (tarot/kart etiketleri/astro prompt/EN kriz/hayvan/retry) | 3.1-3.3, 4.3-4.5 |
 
-## 🔲 §SON — BİLİNÇLİ BOŞLUKLAR (EN'i yayına açma eşiği değerlendirmesi için)
+## 🔲 §SON — BOŞLUK DURUMU (2026-06-12 güncellemesi: Ozan talimatıyla 1-6 KAPATILDI)
 
-1. Şans kurabiyesi / sihirli küre / günlük olumlama içerik setleri TR (büyük ayrı veri; çeviri günü ayrı iş).
-2. Burç uyumu (sunCompatibility) deterministik tablolar TR.
-3. Kişilik testleri içeriği (personalityTests.ts + MBTI soru/sonuç bankası) TR.
-4. Karmaşık akış ekranlarının EKRAN-İÇİ statik metinleri TR (Session/ReadingSetup/Dream/Tarot/Astro/Numerology ekran iskeletleri) — LLM ÇIKTILARI EN ✓.
-5. Moderasyon EN TESPİTİ yalnız kriz kategorisinde; diğer kategoriler TR-desenli (çıktı tarafı Red Kataloğu EN'de prompt'la korunuyor). Sağlık-endişesi hatırlatma tespiti TR.
-6. Profil yedek/geri yükleme sonuç mesajları TR.
-7. expo-localization (cihaz dilini otomatik algılama) release'te eklenir → o gün YENİ APK.
-8. Aydınlatma metni + User Terms EN finalleri avukat sonrası.
+1. ✅ Şans kurabiyesi / küre / olumlama EN (dizi pariteleri birebir; önbellek dil-bilinçli).
+2. ✅ Burç uyumu EN (60/60 şablon; geçmiş anahtarları dil-bağımsız).
+3. ✅ Kişilik testleri EN (105/105 soru + 16'şar MBTI bloğu; id'ler değişmedi; özetler tamamlama dilinde).
+4. ✅ 9 karmaşık akış ekranı i18n (session 61 + flows 154 anahtar; LLM/persist stringleri bilinçli TR — kod içi yorumlu).
+5. ✅ Moderasyon EN tespiti TÜM kategorilerde, DİL-BAĞIMSIZ (TR modda EN zararlı metin de yakalanır; çift-normalizasyon + sentinel; akıllı-tırnak normalizasyonu) + sağlık hatırlatması EN (tespit+metin).
+6. ✅ Yedek/geri yükleme/silme mesajları i18n.
+7. 📌 KALICI NOT: expo-localization (cihaz dilini native algılama) release'te eklenir → o gün YENİ APK; şimdiki saf-JS zincir: kayıtlı tercih → cihaz dili (Intl) → TR; cihaz dili TR değilse EN'e düşer. Cihazlar dili LOKASYONDAN DEĞİL kullanıcının telefon dil ayarından alır.
+8. 📌 KALICI NOT: Aydınlatma metni + User Terms EN finalleri avukat sonrası.
+9. 📌 Küçük kalıntılar (bilinçli): TTS ses yönergeleri TR (ses motoru talimatı, kullanıcı görmez); doğum haritası çark/persist metinleri TR (motor-bağlı alan verisi); LLM'e giden iç prompt iskeleti TR (çıktı dili EN garantili).
