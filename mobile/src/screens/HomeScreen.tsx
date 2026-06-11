@@ -18,10 +18,12 @@ import {
   type PersonalTokenUsageRow,
 } from '../services/tokenLedgerService';
 import type { DevSettings } from '../types';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 export function HomeScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [profileCount, setProfileCount] = useState(0);
   const [devSettings, setDevSettings] = useState<DevSettings>(DEFAULT_DEV_SETTINGS);
   const [pendingInputTokens, setPendingInputTokens] = useState(0);
@@ -117,7 +119,7 @@ export function HomeScreen({ navigation }: Props) {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <Text style={styles.title}>{APP_NAME}</Text>
-        <Text style={styles.subtitle}>Burası giriş lobin. Okuma, içgörü ve yaratım akışlarına buradan geçebilirsin.</Text>
+        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
 
         {(pendingInputTokens > 0 || pendingRejectedUploads > 0 || pendingMemoryAnalysisTokens > 0) && (
           <View style={styles.tokenCard}>
@@ -137,8 +139,8 @@ export function HomeScreen({ navigation }: Props) {
         <View style={styles.lobbyGrid}>
           <TouchableOpacity style={styles.lobbyCard} activeOpacity={0.86} onPress={() => navigation.navigate('GeneralReadings')}>
             <Text style={styles.lobbyIcon}>☕</Text>
-            <Text style={styles.lobbyTitle}>İkram Masası</Text>
-            <Text style={styles.lobbyText}>Genel astro, kartlar, rune, I-Ching ve günlük küçük ritüeller.</Text>
+            <Text style={styles.lobbyTitle}>{t('home.treatTableTitle')}</Text>
+            <Text style={styles.lobbyText}>{t('home.treatTableDesc')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -147,8 +149,8 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('PersonalReadings', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>⌂</Text>
-            <Text style={styles.lobbyTitle}>Salon</Text>
-            <Text style={styles.lobbyText}>Kahve, el / pati, tarot, astroloji, numeroloji ve rüya yorumları.</Text>
+            <Text style={styles.lobbyTitle}>{t('home.salonTitle')}</Text>
+            <Text style={styles.lobbyText}>{t('home.salonDesc')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -157,8 +159,8 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('SimyaLab', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>⚗</Text>
-            <Text style={styles.lobbyTitle}>Simya Odası</Text>
-            <Text style={styles.lobbyText}>Manifest, kendi okumanı oluştur, baştan yarat ve combo yarat alanları.</Text>
+            <Text style={styles.lobbyTitle}>{t('home.simyaTitle')}</Text>
+            <Text style={styles.lobbyText}>{t('home.simyaDesc')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -167,8 +169,8 @@ export function HomeScreen({ navigation }: Props) {
             onPress={() => navigation.navigate('SelfKnowledge', { devSettings })}
           >
             <Text style={styles.lobbyIcon}>◎</Text>
-            <Text style={styles.lobbyTitle}>Ayna Odası</Text>
-            <Text style={styles.lobbyText}>Doğum haritası, temel numeroloji ve testler.</Text>
+            <Text style={styles.lobbyTitle}>{t('home.mirrorTitle')}</Text>
+            <Text style={styles.lobbyText}>{t('home.mirrorDesc')}</Text>
           </TouchableOpacity>
         </View>
 

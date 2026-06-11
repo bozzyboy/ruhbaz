@@ -37,11 +37,15 @@ import { DaisyReadingScreen } from './src/screens/DaisyReadingScreen';
 import { LegalConsentScreen } from './src/screens/LegalConsentScreen';
 import { LegalInfoScreen } from './src/screens/LegalInfoScreen';
 import { hasAcceptedLegalConsent } from './src/services/legalConsentService';
-import { APP_NAME } from './src/config/constants';
+import { useTranslation } from 'react-i18next';
+import { initI18n } from './src/i18n';
 import type { TarotDeckId } from './src/data/tarotImageMap';
 import type { DevSettings, SessionConfig } from './src/types';
 import type { GeneralDivinationType } from './src/services/divinationEngine';
 import type { ReadingSummary } from './src/types/memory';
+
+// i18n, ilk render'dan önce senkron kurulur (kayıtlı tercih asenkron düzeltilir).
+initI18n();
 
 export type RootStackParamList = {
   Home: { freshStartToken?: number } | undefined;
@@ -157,6 +161,7 @@ function useAndroidImmersiveNavigation() {
 
 export default function App() {
   useAndroidImmersiveNavigation();
+  const { t } = useTranslation();
 
   // Yasal onay kapısı: null = kontrol sürüyor, false = onay ekranı, true = konak açık.
   const [consentAccepted, setConsentAccepted] = useState<boolean | null>(null);
@@ -200,18 +205,18 @@ export default function App() {
                 {route.name === 'Home' ? (
                   <TouchableOpacity
                     accessibilityRole="button"
-                    accessibilityLabel="Ayarlar"
+                    accessibilityLabel={t('common.settings')}
                     activeOpacity={0.82}
                     style={styles.gearButton}
                     onPress={() => navigation.navigate('ProfileSettings')}
                   >
                     <Text style={styles.gearButtonText}>⚙</Text>
-                    <Text style={styles.gearButtonLabel}>Profil Ayarları</Text>
+                    <Text style={styles.gearButtonLabel}>{t('common.profileSettings')}</Text>
                   </TouchableOpacity>
                 ) : null}
                 <TouchableOpacity
                   accessibilityRole="button"
-                  accessibilityLabel="Çıkış"
+                  accessibilityLabel={t('common.exit')}
                   activeOpacity={0.82}
                   style={styles.exitButton}
                   onPress={() => {
@@ -228,81 +233,81 @@ export default function App() {
                     }
                   }}
                 >
-                  <Text style={styles.exitButtonText}>Çıkış</Text>
+                  <Text style={styles.exitButtonText}>{t('common.exit')}</Text>
                 </TouchableOpacity>
               </View>
             ),
           })}
         >
-          <Stack.Screen name="Home" component={HomeScreen} options={{ title: APP_NAME }} />
-          <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ title: 'Profil Ayarları' }} />
-          <Stack.Screen name="LegalInfo" component={LegalInfoScreen} options={{ title: 'Yasal Bilgilendirme' }} />
-          <Stack.Screen name="GeneralReadings" component={GeneralReadingsScreen} options={{ title: 'İkram Masası' }} />
-          <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: 'Genel Okuma' }} />
-          <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: 'Genel Burç Uyumu' }} />
-          <Stack.Screen name="DaisyReading" component={DaisyReadingScreen} options={{ title: 'Papatya Ritüeli' }} />
-          <Stack.Screen name="PersonalReadings" component={PersonalReadingsScreen} options={{ title: 'Salon' }} />
-          <Stack.Screen name="SelfKnowledge" component={SelfKnowledgeScreen} options={{ title: 'Ayna Odası' }} />
-          <Stack.Screen name="SimyaLab" component={SimyaLabScreen} options={{ title: 'Simya Odası' }} />
+          <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('nav.home') }} />
+          <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ title: t('nav.profileSettings') }} />
+          <Stack.Screen name="LegalInfo" component={LegalInfoScreen} options={{ title: t('nav.legalInfo') }} />
+          <Stack.Screen name="GeneralReadings" component={GeneralReadingsScreen} options={{ title: t('nav.generalReadings') }} />
+          <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: t('nav.generalReadingResult') }} />
+          <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: t('nav.sunCompatibility') }} />
+          <Stack.Screen name="DaisyReading" component={DaisyReadingScreen} options={{ title: t('nav.daisyReading') }} />
+          <Stack.Screen name="PersonalReadings" component={PersonalReadingsScreen} options={{ title: t('nav.personalReadings') }} />
+          <Stack.Screen name="SelfKnowledge" component={SelfKnowledgeScreen} options={{ title: t('nav.selfKnowledge') }} />
+          <Stack.Screen name="SimyaLab" component={SimyaLabScreen} options={{ title: t('nav.simyaLab') }} />
           <Stack.Screen
             name="PersonalProfileSelect"
             component={PersonalProfileSelectScreen}
-            options={{ title: 'Profil Seçimi' }}
+            options={{ title: t('nav.personalProfileSelect') }}
           />
           <Stack.Screen
             name="PersonalReadingTypeSelect"
             component={PersonalReadingTypeSelectScreen}
-            options={{ title: 'Okuma Tipi Seçimi' }}
+            options={{ title: t('nav.personalReadingTypeSelect') }}
           />
           <Stack.Screen
             name="PersonalAssistantSelect"
             component={PersonalAssistantSelectScreen}
-            options={{ title: 'Yorumcu Seçimi' }}
+            options={{ title: t('nav.personalAssistantSelect') }}
           />
           <Stack.Screen
             name="PersonalReadingSetup"
             component={PersonalReadingSetupScreen}
-            options={{ title: 'Profil Ayarları ve Okuma Akışı' }}
+            options={{ title: t('nav.personalReadingSetup') }}
           />
           <Stack.Screen
             name="PersonalAstroReading"
             component={PersonalAstroReadingScreen}
-            options={{ title: 'Kişiye Özel Astroloji' }}
+            options={{ title: t('nav.personalAstroReading') }}
           />
           <Stack.Screen
             name="AstroRelationshipReading"
             component={AstroRelationshipReadingScreen}
-            options={{ title: 'Çoklu Astroloji' }}
+            options={{ title: t('nav.astroRelationshipReading') }}
           />
           <Stack.Screen
             name="PersonalBirthChart"
             component={PersonalBirthChartScreen}
-            options={{ title: 'Doğum Haritası' }}
+            options={{ title: t('nav.personalBirthChart') }}
           />
           <Stack.Screen
             name="BirthChartInterpretation"
             component={BirthChartInterpretationScreen}
-            options={{ title: 'Doğum Haritası Yorumu' }}
+            options={{ title: t('nav.birthChartInterpretation') }}
           />
           <Stack.Screen
             name="DreamInterpretation"
             component={DreamInterpretationScreen}
-            options={{ title: 'Rüya Yorumu' }}
+            options={{ title: t('nav.dreamInterpretation') }}
           />
           <Stack.Screen
             name="TarotSpreadSelect"
             component={TarotSpreadSelectScreen}
-            options={{ title: 'Tarot Açılımı' }}
+            options={{ title: t('nav.tarotSpreadSelect') }}
           />
           <Stack.Screen
             name="TarotReading"
             component={TarotReadingScreen}
-            options={{ title: 'Tarot Yorumu' }}
+            options={{ title: t('nav.tarotReading') }}
           />
           <Stack.Screen
             name="PersonalNumerologyReading"
             component={PersonalNumerologyReadingScreen}
-            options={{ title: 'Kişiye Özel Numeroloji' }}
+            options={{ title: t('nav.personalNumerologyReading') }}
           />
           <Stack.Screen
             name="MbtiTest"
@@ -322,11 +327,11 @@ export default function App() {
           <Stack.Screen
             name="Session"
             component={SessionScreen}
-            options={{ title: APP_NAME, headerBackVisible: false }}
+            options={{ title: t('nav.home'), headerBackVisible: false }}
           />
-          <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'Son Okumalar' }} />
-          <Stack.Screen name="MemoryDebug" component={MemoryDebugScreen} options={{ title: 'Hafıza' }} />
-          <Stack.Screen name="ReadingDetail" component={ReadingDetailScreen} options={{ title: 'Okuma Detayı' }} />
+          <Stack.Screen name="History" component={HistoryScreen} options={{ title: t('nav.history') }} />
+          <Stack.Screen name="MemoryDebug" component={MemoryDebugScreen} options={{ title: t('nav.memoryDebug') }} />
+          <Stack.Screen name="ReadingDetail" component={ReadingDetailScreen} options={{ title: t('nav.readingDetail') }} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

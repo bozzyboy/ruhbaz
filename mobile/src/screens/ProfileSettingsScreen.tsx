@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
+import { getAppLanguage, setAppLanguage, type AppLanguage } from '../i18n';
 import type { RootStackParamList } from '../../App';
 import { BrandedPicker } from '../components/BrandedPicker';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -302,6 +304,7 @@ function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | nul
 }
 
 export function ProfileSettingsScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const [state, setState] = useState<AccountState | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -312,6 +315,13 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     visible: false,
     message: '',
   });
+  // Dil tercihi (Faz 4 i18n)
+  const [appLanguage, setAppLanguageState] = useState<AppLanguage>(getAppLanguage());
+  const handleLanguageChange = useCallback(async (language: AppLanguage) => {
+    await setAppLanguage(language);
+    setAppLanguageState(language);
+  }, []);
+
   // K40 veri taşınabilirliği + KVKK silme akış durumları
   const [dataBusy, setDataBusy] = useState(false);
   const [restoreCandidate, setRestoreCandidate] = useState<{ uri: string; name: string } | null>(null);
@@ -636,14 +646,11 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
               style={styles.legalLinkButton}
               onPress={() => navigation.navigate('LegalInfo')}
             >
-              <Text style={styles.legalLinkButtonText}>Yasal Bilgilendirme</Text>
+              <Text style={styles.legalLinkButtonText}>{t('settings.legalInfoButton')}</Text>
             </TouchableOpacity>
 
-            <Text style={styles.dataSectionTitle}>Veri Yönetimi</Text>
-            <Text style={styles.dataSectionHint}>
-              Tüm profillerin, okumaların ve hafızan cihazında saklanır. Buradan kendi deposuna yedek alabilir,
-              yedeği geri yükleyebilir veya tüm verini silebilirsin.
-            </Text>
+            <Text style={styles.dataSectionTitle}>{t('settings.dataSectionTitle')}</Text>
+            <Text style={styles.dataSectionHint}>{t('settings.dataSectionHint')}</Text>
             <View style={styles.linkRow}>
               <TouchableOpacity
                 accessibilityRole="button"
@@ -651,7 +658,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 disabled={dataBusy}
                 onPress={() => void handleExportBackup()}
               >
-                <Text style={styles.linkButtonText}>{dataBusy ? 'Bekle...' : 'Yedek Al'}</Text>
+                <Text style={styles.linkButtonText}>{dataBusy ? t('common.wait') : t('settings.backupButton')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 accessibilityRole="button"
@@ -659,7 +666,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 disabled={dataBusy}
                 onPress={() => void handlePickRestore()}
               >
-                <Text style={styles.linkButtonText}>{dataBusy ? 'Bekle...' : 'Yedeği Geri Yükle'}</Text>
+                <Text style={styles.linkButtonText}>{dataBusy ? t('common.wait') : t('settings.restoreButton')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -669,8 +676,26 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
               disabled={dataBusy}
               onPress={() => setWipeStep(1)}
             >
-              <Text style={styles.wipeButtonText}>Tüm Verimi Sil</Text>
+              <Text style={styles.wipeButtonText}>{t('settings.wipeButton')}</Text>
             </TouchableOpacity>
+
+            <Text style={styles.dataSectionTitle}>{t('settings.languageSectionTitle')}</Text>
+            <View style={styles.linkRow}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={[styles.linkButton, appLanguage === 'tr' && styles.languageButtonActive]}
+                onPress={() => void handleLanguageChange('tr')}
+              >
+                <Text style={styles.linkButtonText}>{t('settings.languageTr')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={[styles.linkButton, appLanguage === 'en' && styles.languageButtonActive]}
+                onPress={() => void handleLanguageChange('en')}
+              >
+                <Text style={styles.linkButtonText}>{t('settings.languageEn')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </BrandedScrollView>
       </SafeAreaView>
@@ -1087,6 +1112,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212,165,116,0.06)',
   },
   legalLinkButtonText: { color: 'rgba(232,196,154,0.85)', fontSize: 13, fontWeight: '700' },
+  languageButtonActive: {
+    backgroundColor: 'rgba(212,165,116,0.32)',
+    borderWidth: 2,
+  },
   dataSectionTitle: { color: '#D4A574', fontSize: 14, fontWeight: '700', marginTop: 22, marginBottom: 4 },
   dataSectionHint: { color: 'rgba(200,200,212,0.75)', fontSize: 12, lineHeight: 17, marginBottom: 10 },
   wipeButton: {
