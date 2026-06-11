@@ -325,5 +325,14 @@ def health():
 
 
 if __name__ == "__main__":
+    # Güvenli varsayılan: yalnız bu makine (127.0.0.1). Telefonun LAN'dan
+    # bağlanması gereken cihaz testinde agent/.env içinde HOST=0.0.0.0 kullanılır;
+    # o durumda da X-Agent-Secret doğrulaması yabancı erişimi engeller.
+    host = (os.getenv("HOST") or "127.0.0.1").strip()
     port = int(os.getenv("PORT") or "8080")
-    app.run(host="0.0.0.0", port=port, threaded=True)
+    if host != "127.0.0.1" and not AGENT_SHARED_SECRET:
+        raise SystemExit(
+            "HOST=127.0.0.1 dışında dinleme için AGENT_SHARED_SECRET zorunlu (agent/.env). "
+            "Aksi halde LAN'daki herkes proxy üzerinden harcama yapabilir."
+        )
+    app.run(host=host, port=port, threaded=True)
