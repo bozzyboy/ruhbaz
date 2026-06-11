@@ -10,7 +10,7 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **En son snapshot:** [handoffs/2026-06-11_faz2-to-faz3_gecis.md](handoffs/2026-06-11_faz2-to-faz3_gecis.md) (Faz 2 kapanış + **Ozan'a kalan işler TAM LİSTE §2** + Faz 3 brifingi) · önceki: [faz1→2](handoffs/2026-06-11_faz1-to-faz2_gecis.md), [faz0→1](handoffs/2026-06-11_faz0-to-faz1_gecis.md), [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
 
-**Son güncelleme:** 2026-06-11 (özerk oturum bitti) · **Durum:** ✅ **FAZ 1 BİTTİ** (tag `faz1`: renames + guardrail + yasal katman + persona dili + avukat dosyası) · ✅ **FAZ 2 ÖZERK KOD KISMI BİTTİ** (tag `faz2`: K42 moderasyon + seans-hakkı iskeleti + K40 yedek/geri-yükle/sil + K34 analitik; her fazda bağımsız öz-review, CRITICAL'lar düzeltildi). **Ozan'a:** `13_FAZ1` + `14_FAZ2` cihaz testleri (tek oturuş, yeni APK GEREKMEZ) + geçiş handoff'u §2'deki 11 maddelik karar/iş listesi. ⏸️ **FAZ 3 (persona ses matrisi) ÖZERK BAŞLAMADI** — ses=marka; brifing faz2→3 handoff'unda onay bekliyor.
+**Son güncelleme:** 2026-06-11 (özerk oturum sürüyor) · **Durum:** ✅ FAZ 1 (tag `faz1`) · ✅ FAZ 2 özerk kod kısmı (tag `faz2`) · 🔨 **FAZ 3 + FAZ 4 ÖZERK BAŞLADI (Ozan onayı: "iki faz daha git böyle", 2026-06-11):** Faz 3 = ses matrisi TASLAK + lore kanonu + Brand Book + K45 hitap; Faz 4 = i18n + EN. Ses/marka işleri TASLAK işlenir, onay Ozan'da; her adım ayrı commit. **Ozan'a:** `13_FAZ1` + `14_FAZ2` testleri + faz2→3 handoff §2 listesi (değişmedi).
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
 - **D1 ONAY:** Faz 1/2 özerk; kod + taslak Claude; yasal onay/avukat/Play Console/IAP/fiyat Ozan.
