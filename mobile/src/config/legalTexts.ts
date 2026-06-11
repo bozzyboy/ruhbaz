@@ -82,18 +82,18 @@ export const LEGAL_INFO_SECTIONS: ReadonlyArray<{ title: string; body: string }>
 // ============================================================
 
 export const LEGAL_FRAME_SENTENCE_EN =
-  'All content in Ruhbaz Konağı is AI-generated symbolic interpretation, created for entertainment and personal discovery. ' +
+  'All content in Ruhbaz Manor is AI-generated symbolic interpretation, created for entertainment and personal discovery. ' +
   'It does not contain information, foresight or promises about the future, and it is not a substitute for medical, legal or financial advice.';
 
 export const READING_DISCLAIMER_SHORT_EN = 'Symbolic interpretation, for entertainment.';
 
-export const ONBOARDING_TITLE_EN = 'Welcome to the Mansion';
+export const ONBOARDING_TITLE_EN = 'Welcome to the Manor';
 
 export const ONBOARDING_BODY_EN = [
-  'Ruhbaz Konağı is a place of discovery — symbols, stories and quiet reflection. ' +
-    'Before you step in, we want to be clear about what this mansion is, and what it is not:',
+  'Ruhbaz Manor is a place of discovery — symbols, stories and quiet reflection. ' +
+    'Before you step in, we want to be clear about what this manor is, and what it is not:',
   LEGAL_FRAME_SENTENCE_EN,
-  'The characters of the mansion are fictional readers; what they say is meant to inspire and make you think — ' +
+  'The characters of the manor are fictional readers; what they say is meant to inspire and make you think — ' +
     'every decision about your life remains yours. For important matters such as health, legal or financial questions, ' +
     'please consult the relevant professional.',
   'By continuing, you confirm that you understand and accept this framework.',
@@ -105,8 +105,8 @@ export const LEGAL_INFO_SECTIONS_EN: ReadonlyArray<{ title: string; body: string
   {
     title: 'What is this app?',
     body:
-      'Ruhbaz Konağı is an app that offers symbolic interpretations for entertainment and personal discovery. ' +
-      'All readings and conversations are AI-generated; the characters of the mansion are fictional readers.',
+      'Ruhbaz Manor is an app that offers symbolic interpretations for entertainment and personal discovery. ' +
+      'All readings and conversations are AI-generated; the characters of the manor are fictional readers.',
   },
   {
     title: 'What does the content mean?',
@@ -131,7 +131,7 @@ export const LEGAL_INFO_SECTIONS_EN: ReadonlyArray<{ title: string; body: string
   },
   {
     title: 'Age requirement',
-    body: 'Ruhbaz Konağı is intended for users aged 18 and over.',
+    body: 'Ruhbaz Manor is intended for users aged 18 and over.',
   },
   {
     title: 'Contact',

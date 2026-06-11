@@ -108,7 +108,7 @@ export function isRetryableLlmError(err: any) {
 }
 
 const RETRY_MESSAGES_EN: RetryMessage[] = [
-  { title: 'A Short Pause in the Mansion', message: 'The reading channel is a little busy right now. Try again in a minute or two — nothing is lost.' },
+  { title: 'A Short Pause in the Manor', message: 'The reading channel is a little busy right now. Try again in a minute or two — nothing is lost.' },
   { title: 'The Symbols Need a Breath', message: 'The symbols asked for a brief moment to settle. Please try again shortly; your reading will be ready.' },
   { title: 'One Moment, Please', message: 'A small hiccup on the line. Give it a minute and tap again — we will pick up right where we left off.' },
 ];

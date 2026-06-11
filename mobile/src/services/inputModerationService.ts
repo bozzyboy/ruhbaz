@@ -73,15 +73,15 @@ const REPLY_EN: Record<ModerationCategory, string> = {
     'But what you deserve here is real support, not symbols. Please talk to someone you trust; ' +
     'if you are thinking of harming yourself, contact your local emergency number right away, ' +
     'and reach out to a mental health professional. This door is always open — but please take care of yourself first.',
-  csam: 'This content has no place in this mansion, in any form.',
-  sexual: 'The mansion keeps this door closed; everything here stays symbolic and gentle. Shall we open another topic together?',
-  hate: 'No community is spoken of that way in this mansion. Let us turn back to you — what is going on in your world?',
+  csam: 'This content has no place in this manor, in any form.',
+  sexual: 'The manor keeps this door closed; everything here stays symbolic and gentle. Shall we open another topic together?',
+  hate: 'No community is spoken of that way in this manor. Let us turn back to you — what is going on in your world?',
   religion: 'Matters of faith do not pass through this door; they are neither praised nor debated here. Let us look at your own path instead.',
-  politics: 'Worldly politics stays outside the mansion gate; we look at you here. What is on your mind these days?',
+  politics: 'Worldly politics stays outside the manor gate; we look at you here. What is on your mind these days?',
   violence_threat: 'Violence does not pass through this door. If you want to talk about what is weighing on you, I can read the symbols with you — but let us not speak of harming anyone.',
-  animal_abuse: 'In this mansion, every living being is met with kindness; this topic will not be read here.',
+  animal_abuse: 'In this manor, every living being is met with kindness; this topic will not be read here.',
   harassment: 'We cannot continue in this tone. Let us take a breath and start again, a little more gently.',
-  gambling: "Lottery numbers and betting tips are not the mansion's craft; symbols point to directions, not results. What else is on your mind?",
+  gambling: "Lottery numbers and betting tips are not the manor's craft; symbols point to directions, not results. What else is on your mind?",
 };
 
 function replyFor(category: ModerationCategory): string {

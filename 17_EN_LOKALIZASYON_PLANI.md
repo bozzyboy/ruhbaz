@@ -45,15 +45,15 @@ Uygulama: her persona klasörüne `identity.en.md` + generator'a dil parametresi
 
 ## 4. EN STORE LISTING TASLAĞI (blok: Ozan + avukat S1/S5 sonrası)
 
-**App adı:** Ruhbaz Konağı — Symbolic Readings *(alternatif: "Ruhbaz: Symbolic Readings")*
+**App adı (Ozan onayladı): Ruhbaz Manor — Symbolic Readings**
 
 **Kısa açıklama (80 kr):**
 > A warm mansion of symbolic readings — coffee cups, tarot, stars, dreams. For fun.
 
 **Uzun açıklama (taslak, ilk paragraf yasal çerçeve):**
-> Ruhbaz Konağı is an entertainment app. All content is AI-generated symbolic interpretation for fun and self-reflection — it does not predict the future and is not medical, legal or financial advice.
+> Ruhbaz Manor is an entertainment app. All content is AI-generated symbolic interpretation for fun and self-reflection — it does not predict the future and is not medical, legal or financial advice.
 >
-> Step into a mansion where a family of seven readers welcomes you: coffee cup readings, tarot spreads, palm and paw readings, astrology, numerology and dream interpretations — each in a distinct, warm voice that remembers you.
+> Step into a manor where a family of seven readers — the Ruhbaz family — welcomes you: coffee cup readings, tarot spreads, palm and paw readings, astrology, numerology and dream interpretations — each in a distinct, warm voice that remembers you.
 >
 > • Seven distinct reader personalities with their own style
 > • Coffee, tarot, palm/paw, astrology, numerology, dreams, daily rituals

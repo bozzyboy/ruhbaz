@@ -14,8 +14,8 @@
 ## 2. İsim ve mekân dili
 
 - Uygulama adı her yerde **Ruhbaz Konağı** (kısaltma gerekirse "Konak").
-- **Kanon (Ozan, 2026-06-11):** Ruhbaz, konakta yaşayan ailenin SOYADIDIR; konak adını aileden alır. Suzan, Teoman, Selin, Berk ve Arın = Ruhbaz; Ayşe = **Gönülbaz** (Suzan'ın kızlık soyadı — TASLAK öneri), Deniz = **Dilbaz** (babasından — TASLAK öneri). Soyadları UI'da gösterilmez; lore katmanında yaşar.
-- **EN app adı: KARAR BEKLİYOR** — öneri sıralaması: "Ruhbaz Manor" > "Ruhbaz Mansion" (BRAND_BOOK güncellenince tüm EN "mansion" geçişleri tek seferde hizalanır).
+- **Kanon (Ozan, 2026-06-11):** Ruhbaz, konakta yaşayan ailenin SOYADIDIR; konak adını aileden alır. Suzan, Teoman, Selin, Berk ve Arın = Ruhbaz; Ayşe = **Ateşbaz** (Suzan'ın kızlık soyadı; Ateşbaz-ı Veli/aşçı lore göndermesi — Ozan onayladı, telaffuz revizyonu), Deniz = **Dilbaz** (babasından — Ozan onayladı). Soyadları UI'da gösterilmez; lore katmanında yaşar.
+- **EN app adı (Ozan onayladı, 2026-06-11): "Ruhbaz Manor"** — store alt başlığı: "Ruhbaz Manor — Symbolic Readings". Tüm EN metinlerde "mansion" → "manor" hizalandı.
 - Oda adları (K50, onaylı): **İkram Masası · Salon · Simya Odası · Ayna Odası**. Mekân metaforu tutarlı kullanılır: kullanıcı odalara "girer", içerik "ikram edilir", persona "konağın sakinidir".
 - EN'de oda adları çevrilmez, lokalleştirilir (K45/K13 ile birlikte Faz 4).
 
@@ -46,10 +46,10 @@ Aura (K39) günün atmosferi, persona rengi okumanın imzasıdır; persona rengi
 | Ayşe / Aisha | 80 | Adaçayı | `#A3B18A` | Toprak-şifa, dinginlik |
 | Selin / Celine | 42 | Eflatun-gece | `#7B6CF6` | Modern parlak, gökyüzü (F10-B) |
 | Berk / Berg | 45 | Petrol | `#3F8E8C` | Analitik-serin ama insancıl |
-| Deniz / Dennis | 32* | Mercan | `#E8707B` | Canlı, sosyal, kıpır kıpır (F10-B) |
+| Deniz / Dennis | 27 | Mercan | `#E8707B` | Canlı, sosyal, kıpır kıpır (F10-B) |
 | Arın / Aaron | 32 | Füme mor | `#9B7BB8` | Melankolik mor/füme (F10-B) |
 
-*Deniz'in yaşını Ozan belirtmedi; 32 korundu. Aile ağacı (kanon): Suzan-Teoman evli; Ayşe Suzan'ın annesi; Selin (eşi Berg) ile Arın çocukları; Deniz, Suzan'ın öz yeğeni; Ayşe üç gencin anneannesi.
+Deniz: 27, erkek karakter (feminen enerji bilinçli karakter rengi — Ozan onayladı). Aile ağacı (kanon): Suzan-Teoman evli; Ayşe Suzan'ın annesi; Selin (eşi Berg) ile Arın çocukları; Deniz, Suzan'ın öz yeğeni; Ayşe üç gencin anneannesi.
 
 Kullanım yüzeyleri (Faz 5'te bağlanır): persona seçim kartı kenarlığı, okuma başlığı vurgusu, paylaşım kartı imzası, bekleme sahnesi atmosferi.
 

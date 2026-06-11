@@ -9,7 +9,7 @@ import type { TranslationResource } from './tr';
 
 export const en: TranslationResource = {
   common: {
-    appName: 'Ruhbaz Konağı',
+    appName: 'Ruhbaz Manor',
     exit: 'Exit',
     settings: 'Settings',
     profileSettings: 'Profile Settings',

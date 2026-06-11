@@ -82,7 +82,7 @@ const FALLBACK_CLOSINGS: Record<'astro' | 'numerology', Record<string, string[]>
 
 // EN modda persona-bagimsiz, sicak hayvan kapanislari (Faz 4; TASLAK - onay: Ozan).
 const ANIMAL_CLOSINGS_EN: string[] = [
-  'Give that sweet companion a gentle scratch from the mansion; some bonds need no words at all.',
+  'Give that sweet companion a gentle scratch from the manor; some bonds need no words at all.',
   'May their bowl be full and their naps be long; the love between you reads clearer than any symbol.',
   'A little extra play, a little extra patience — that is all the guidance this reading really asks for.',
   'Watch how they greet you at the door tonight; the answer you are looking for often lives right there.',
