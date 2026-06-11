@@ -230,16 +230,26 @@ const HEALTH_CLOSING_TERMS =
 const HEALTH_CONCERN_TERMS =
   /\b(sağlık|saglik|hasta|hastalık|hastalik|rahatsız|rahatsiz|ağrı|agri|acı|aci|sancı|sanci|ateş|ates|kusma|ishal|kan|nefes|öksür|oksur|uyku|uykusuz|yemiyor|içmiyor|icmiyor|iyileş|iyiles|tedavi|ilaç|ilac|doz|veteriner|doktor|psikolog|psikiyatrist|terapi|anksiyete|depresyon)\b/iu;
 
+// EN saglik terimleri (Faz 4 bosluk-kapama): tespit dil-bagimsiz birlesik calisir.
+const HEALTH_CONCERN_TERMS_EN =
+  /(health|sick|illness|disease|pain|ache|fever|vomit|nausea|bleeding|breath(ing)?|cough|insomnia|sleepless|not eating|won'?t eat|medicat\w*|medicine|dosage|treatment|therapy|anxiety|depress\w*|doctor|vet(erinarian)?|psychologist|psychiatrist)/i;
+
+const ANIMAL_HEALTH_TERMS_EN = /(cat|dog|kitten|puppy|bird|rabbit|pet|animal|paw|vet(erinarian)?)/i;
+
 const ANIMAL_HEALTH_TERMS =
   /\b(kedi|kedim|köpek|kopek|köpeğim|kopegim|kuş|kus|kuşum|kusum|tavşan|tavsan|hayvan|pati|veteriner)\b/iu;
 
 export function userAskedHealthConcern(userText?: string | null) {
-  return HEALTH_CONCERN_TERMS.test((userText || '').toLocaleLowerCase('tr-TR'));
+  const text = (userText || '').toLocaleLowerCase('tr-TR');
+  return HEALTH_CONCERN_TERMS.test(text) || HEALTH_CONCERN_TERMS_EN.test(text);
 }
 
 export function userAskedAnimalHealthConcern(userText?: string | null, isAnimalProfile?: boolean) {
   const text = (userText || '').toLocaleLowerCase('tr-TR');
-  return userAskedHealthConcern(text) && (Boolean(isAnimalProfile) || ANIMAL_HEALTH_TERMS.test(text));
+  return (
+    userAskedHealthConcern(text) &&
+    (Boolean(isAnimalProfile) || ANIMAL_HEALTH_TERMS.test(text) || ANIMAL_HEALTH_TERMS_EN.test(text))
+  );
 }
 
 export function isHealthClosingSentence(sentence: string) {
@@ -489,6 +499,16 @@ export function sanitizePublicReadingLanguage(text: string) {
     .trim();
 }
 
+// EN hatirlatmalar (Faz 4): EN modda doktor/veteriner yonlendirmesi EN doner.
+const HUMAN_HEALTH_REMINDERS_EN = [
+  'One gentle note: for anything that touches your health, a doctor or a trusted health professional is the right companion — symbols can sit beside that care, never in its place.',
+  'And please remember: health questions deserve real medical eyes. Seeing a doctor about this would be the kindest thing you can do for yourself.',
+];
+const ANIMAL_HEALTH_REMINDERS_EN = [
+  'One gentle note: for anything about their health, the veterinarian is the one true reader — please have them looked at; the symbols will keep them company on the way.',
+  'And please remember: a little companion’s health belongs with the vet. A check-up would be the kindest next step.',
+];
+
 export function appendHealthProfessionalReminder(
   text: string,
   params?: { userText?: string | null; isAnimalProfile?: boolean },
@@ -496,11 +516,20 @@ export function appendHealthProfessionalReminder(
   const source = (params?.userText || '').toLocaleLowerCase('tr-TR');
   if (!userAskedHealthConcern(source)) return text;
   const animalConcern = userAskedAnimalHealthConcern(source, params?.isAnimalProfile);
-  const options = animalConcern ? ANIMAL_HEALTH_REMINDERS : HUMAN_HEALTH_REMINDERS;
+  const isEnglish = getAppLanguage() === 'en';
+  const options = animalConcern
+    ? isEnglish
+      ? ANIMAL_HEALTH_REMINDERS_EN
+      : ANIMAL_HEALTH_REMINDERS
+    : isEnglish
+      ? HUMAN_HEALTH_REMINDERS_EN
+      : HUMAN_HEALTH_REMINDERS;
   const reminder = options[hashString(source) % options.length] || options[0];
   if (text.toLocaleLowerCase('tr-TR').includes(reminder.toLocaleLowerCase('tr-TR'))) return text;
   if (animalConcern && /\bveteriner/.test(text.toLocaleLowerCase('tr-TR'))) return text;
+  if (animalConcern && /\bvet(erinarian)?\b/i.test(text)) return text;
   if (!animalConcern && /\b(doktor|sağlık uzman)/.test(text.toLocaleLowerCase('tr-TR'))) return text;
+  if (!animalConcern && /\b(doctor|health professional)\b/i.test(text)) return text;
   return `${text.trim()}\n\n${reminder}`.trim();
 }
 

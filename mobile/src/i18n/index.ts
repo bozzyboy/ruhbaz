@@ -19,12 +19,16 @@ const DATA_DIR = `${FileSystem.documentDirectory}falci-data/`;
 const LANGUAGE_FILE = `${DATA_DIR}app-language.json`;
 
 function detectDeviceLanguage(): AppLanguage {
+  // Cihaz DİLİ esas alınır (lokasyon/saat dilimi DEĞİL — kullanıcının telefon dili).
+  // TR cihaz → TR; diğer TÜM diller → EN (Almanca/Fransızca kullanıcıya TR dayatmak yanlış olur).
+  // Intl yoksa güvenli varsayılan TR (ana pazar).
   try {
     const locale =
       typeof Intl !== 'undefined' && typeof Intl.DateTimeFormat === 'function'
         ? Intl.DateTimeFormat().resolvedOptions().locale || ''
         : '';
-    return locale.toLowerCase().startsWith('en') ? 'en' : 'tr';
+    if (!locale) return 'tr';
+    return locale.toLowerCase().startsWith('tr') ? 'tr' : 'en';
   } catch {
     return 'tr';
   }

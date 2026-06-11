@@ -188,21 +188,60 @@ const GAMBLING_RE = new RegExp(
   'iu',
 );
 
+// --- EN sinyal desenleri (Faz 4 boşluk-kapama). Tespit DİL-BAĞIMSIZ çalışır:
+// TR moddaki kullanıcı da İngilizce zararlı metin yapıştırabilir; bu yüzden
+// EN desenleri dil anahtarına bağlanmaz, TR desenlerle BİRLEŞİK denenir.
+// Aynı muhafazakârlık ilkesi: yüksek-kesinlikli, niyet-temelli kalıplar.
+
+const SEXUAL_RE_EN =
+  /(\bsex\b|\bsexual\b|\bporn\w*|\bexplicit photo|\bnude(s| photo| pic)\b|\bnaked (photo|pic)|masturbat\w*|\berotic\b)/i;
+const CSAM_CHILD_RE_EN = /(\bchild(ren)?\b|\bminor\b|under[- ]?age|\b1[0-7][- ]?year[- ]?old)/i;
+const FERTILITY_CONTEXT_RE_EN = /(have (a )?(child|baby|kid)|get pregnant|pregnan\w*|trying for a baby)/i;
+const HATE_GROUP_RE_EN =
+  /(\bjews?\b|\barabs?\b|\bkurds?\b|\bturks?\b|\bsyrians?\b|\brefugees?\b|\bimmigrants?\b|\bmuslims?\b|\bchristians?\b|\bgays?\b|\blesbians?\b|\batheists?\b)/i;
+const HATE_INSULT_RE_EN =
+  /(\bdisgusting\b|\bvermin\b|\bsubhuman\b|\bfilthy\b|should all (die|leave|be deported|disappear)|\bscum\b)/i;
+const RELIGION_RE_EN =
+  /((\bgod\b|\ballah\b|\bjesus\b|the bible|the quran|the koran)\s+(is|isn'?t)\s+(fake|a lie|real|nonsense)|religion is (fake|a lie|nonsense|stupid)|which religion is (true|right|correct))/i;
+const POLITICS_RE_EN =
+  /(\bpolitics\b|\bpolitician\w*|who (will|is going to) win the election|\bpresident (erdogan|trump|biden|putin)\b|\bprime minister\b|\bparliament\b)/i;
+const VIOLENCE_RE_EN =
+  /((i'?m going to|i will|i wanna|i want to) (kill|hurt|stab|beat( up)?|shoot) (him|her|them|my)\b|\bkill (him|her|them)\b)/i;
+const ANIMAL_RE_EN = /(\bcat\b|\bdog\b|\bkitten\b|\bpuppy\b|\bbird\b|\banimal\b|\bpet\b)/i;
+const ABUSE_RE_EN = /((i'?m going to|i will|i wanna|i want to) (torture|poison|kick|kill|burn|hurt)|\btorturing\b|\bpoisoning\b)/i;
+const HARASSMENT_RE_EN = /(\bfuck(ing|er)?\b|\bbitch\b|\basshole\b|\bcunt\b|piece of shit|\bmotherfuck)/i;
+const GAMBLING_RE_EN =
+  /(lottery numbers?|lotto numbers?|lucky numbers? for (the )?(lotto|lottery|bet)|betting tips?|which team (will|is going to) win|sports bet)/i;
+
+function unionRe(a: RegExp, b: RegExp): RegExp {
+  return new RegExp(`(?:${a.source})|(?:${b.source})`, 'iu');
+}
+
+const SEXUAL_ANY = unionRe(SEXUAL_RE, SEXUAL_RE_EN);
+const CSAM_CHILD_ANY = unionRe(CSAM_CHILD_RE, CSAM_CHILD_RE_EN);
+const HATE_GROUP_ANY = unionRe(HATE_GROUP_RE, HATE_GROUP_RE_EN);
+const HATE_INSULT_ANY = unionRe(HATE_INSULT_RE, HATE_INSULT_RE_EN);
+const ANIMAL_ANY = unionRe(ANIMAL_RE, ANIMAL_RE_EN);
+const ABUSE_ANY = unionRe(ABUSE_RE, ABUSE_RE_EN);
+
 type Rule = { category: Exclude<ModerationCategory, 'crisis'>; test: (t: string) => boolean };
 
 const FULL_RULES: Rule[] = [
   {
     category: 'csam',
-    test: (t) => !FERTILITY_CONTEXT_RE.test(t) && nearEachOther(CSAM_CHILD_RE, SEXUAL_RE, t),
+    test: (t) =>
+      !FERTILITY_CONTEXT_RE.test(t) &&
+      !FERTILITY_CONTEXT_RE_EN.test(t) &&
+      nearEachOther(CSAM_CHILD_ANY, SEXUAL_ANY, t),
   },
-  { category: 'sexual', test: (t) => SEXUAL_RE.test(t) },
-  { category: 'hate', test: (t) => nearEachOther(HATE_GROUP_RE, HATE_INSULT_RE, t) },
-  { category: 'religion', test: (t) => RELIGION_RE.test(t) },
-  { category: 'politics', test: (t) => POLITICS_RE.test(t) },
-  { category: 'violence_threat', test: (t) => VIOLENCE_RE.test(t) },
-  { category: 'animal_abuse', test: (t) => nearEachOther(ANIMAL_RE, ABUSE_RE, t) },
-  { category: 'harassment', test: (t) => HARASSMENT_RE.test(t) },
-  { category: 'gambling', test: (t) => GAMBLING_RE.test(t) },
+  { category: 'sexual', test: (t) => SEXUAL_ANY.test(t) },
+  { category: 'hate', test: (t) => nearEachOther(HATE_GROUP_ANY, HATE_INSULT_ANY, t) },
+  { category: 'religion', test: (t) => RELIGION_RE.test(t) || RELIGION_RE_EN.test(t) },
+  { category: 'politics', test: (t) => POLITICS_RE.test(t) || POLITICS_RE_EN.test(t) },
+  { category: 'violence_threat', test: (t) => VIOLENCE_RE.test(t) || VIOLENCE_RE_EN.test(t) },
+  { category: 'animal_abuse', test: (t) => nearEachOther(ANIMAL_ANY, ABUSE_ANY, t) },
+  { category: 'harassment', test: (t) => HARASSMENT_RE.test(t) || HARASSMENT_RE_EN.test(t) },
+  { category: 'gambling', test: (t) => GAMBLING_RE.test(t) || GAMBLING_RE_EN.test(t) },
 ];
 
 // Rüya bağlamı: kâbus anlatımı (şiddet/ölüm/din/siyaset imgesi) okumayı bloklamaz;
@@ -216,14 +255,25 @@ const DREAM_RULES: Rule[] = FULL_RULES.filter((rule) =>
  * Sonuç 'allow' değilse LLM ÇAĞRISI YAPILMAMALI; replyText kullanıcıya
  * persona-nötr nazik yanıt olarak gösterilir.
  */
+/**
+ * Çift normalizasyon: tr-TR lowercase İngilizce 'I'yı noktasız 'ı' yapar ve EN
+ * desenleri kaçırır ("I want to..." → "ı want to..."). Bu yüzden metnin hem
+ * tr-TR hem standart lowercase kopyası, yakınlık penceresinden (80) büyük bir
+ * boşluk tamponuyla (120) birleştirilir; tüm desenler bu probe üzerinde koşar.
+ */
+function buildProbe(text: string): string {
+  return `${text.toLocaleLowerCase('tr-TR')}${' '.repeat(120)}${text.toLowerCase()}`;
+}
+
 export function moderateUserInput(
   text: string | null | undefined,
   context: ModerationContext = 'chat',
 ): ModerationResult {
-  const normalized = (text || '').trim().toLocaleLowerCase('tr-TR');
-  if (!normalized) {
+  const trimmed = (text || '').trim();
+  if (!trimmed) {
     return { verdict: 'allow' };
   }
+  const normalized = buildProbe(trimmed);
 
   if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) {
     trackEvent({ name: 'moderation_blocked', category: 'crisis' });
@@ -243,8 +293,9 @@ export function moderateUserInput(
 
 /** Sessiz denetim: event üretmeden yalnız izin durumu (geçmiş süzme için). */
 export function isAllowedUserText(text: string | null | undefined, context: ModerationContext = 'chat'): boolean {
-  const normalized = (text || '').trim().toLocaleLowerCase('tr-TR');
-  if (!normalized) return true;
+  const trimmed = (text || '').trim();
+  if (!trimmed) return true;
+  const normalized = buildProbe(trimmed);
   if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) return false;
   const rules = context === 'dream' ? DREAM_RULES : FULL_RULES;
   return !rules.some((rule) => rule.test(normalized));
