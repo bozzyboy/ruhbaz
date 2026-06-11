@@ -25,7 +25,9 @@
 
 **Geçici durum kuralı:** UI EN'e çevrilse bile okuma çıktıları TR kalır (madde 5-6 bitene dek). Test dokümanında işaretli; EN dilinde uygulamayı "yayınlanabilir" sayma eşiği = madde 5-6.
 
-## 3. Persona EN ses stratejisi (K45 — TASLAK, onay: Ozan)
+## 3. Persona EN ses stratejisi (K45)
+
+> ✅ **GÜNCELLEME (2026-06-11): EN adlar OZAN tarafından karara bağlandı ve uygulandı:** Suzan→**Susan**, Teoman→**Theo** (kayıtlarda Theodore — "Theo mu Theodore mu" sorusuna seçimim: görünen ad Theo, lore'da Theodore; itirazın varsa tek satır), Ayşe→**Aisha**, Selin→**Celine**, Berk→**Berg**, Deniz→**Dennis**, Arın→**Aaron**. Yeni yaşlar + kesin aile ağacı da TR+EN kanona işlendi.
 
 TR'deki akrabalık-sıcaklığı EN'de YOKTUR ("my child" ürkütücü). Eşleme önerisi:
 

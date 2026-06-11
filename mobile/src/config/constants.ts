@@ -5,6 +5,7 @@
 import Constants from 'expo-constants';
 
 import type { DevSettings } from '../types';
+import { getReadingPersonaData } from '../services/personaDataI18n';
 
 export const APP_NAME = 'Ruhbaz';
 
@@ -165,7 +166,10 @@ export function getAssistantPreset(assistantId: string): AssistantPreset {
 }
 
 export function getAssistantLabel(assistantId: string): string {
-  return getAssistantPreset(assistantId).label;
+  // Faz 4: persona görünen adı dile duyarlı (TR: Suzan/Teoman..., EN: Susan/Theo...).
+  // Kaynak generated persona verisi; preset label TR yedeği olarak kalır.
+  const persona = getReadingPersonaData()[normalizeAssistantId(assistantId)];
+  return persona?.displayName || getAssistantPreset(assistantId).label;
 }
 
 export function applyAssistantPreset(

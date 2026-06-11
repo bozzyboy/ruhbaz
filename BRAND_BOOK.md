@@ -37,15 +37,17 @@
 
 Aura (K39) günün atmosferi, persona rengi okumanın imzasıdır; persona rengi yalnız vurgu dozunda kullanılır (zemin asla).
 
-| Persona | Renk önerisi | Hex | Gerekçe |
-|---|---|---|---|
-| Suzan | Bakır/kiremit | `#C1714F` | Sıcak topraksı, mutfak-ocak (F10-B) |
-| Teoman | Çay yeşili | `#5E7B5A` | Sakin, köklü, çay sohbeti |
-| Ayşe | Adaçayı | `#A3B18A` | Toprak-şifa, dinginlik |
-| Selin | Eflatun-gece | `#7B6CF6` | Modern parlak, gökyüzü (F10-B) |
-| Berk | Petrol | `#3F8E8C` | Analitik-serin ama insancıl |
-| Deniz | Mercan | `#E8707B` | Canlı, sosyal, kıpır kıpır (F10-B) |
-| Arın | Füme mor | `#9B7BB8` | Melankolik mor/füme (F10-B) |
+| Persona (TR / EN) | Yaş | Renk önerisi | Hex | Gerekçe |
+|---|---|---|---|---|
+| Suzan / Susan | 62 | Bakır/kiremit | `#C1714F` | Sıcak topraksı, mutfak-ocak (F10-B) |
+| Teoman / Theo | 68 | Çay yeşili | `#5E7B5A` | Sakin, köklü, çay sohbeti |
+| Ayşe / Aisha | 80 | Adaçayı | `#A3B18A` | Toprak-şifa, dinginlik |
+| Selin / Celine | 42 | Eflatun-gece | `#7B6CF6` | Modern parlak, gökyüzü (F10-B) |
+| Berk / Berg | 45 | Petrol | `#3F8E8C` | Analitik-serin ama insancıl |
+| Deniz / Dennis | 32* | Mercan | `#E8707B` | Canlı, sosyal, kıpır kıpır (F10-B) |
+| Arın / Aaron | 32 | Füme mor | `#9B7BB8` | Melankolik mor/füme (F10-B) |
+
+*Deniz'in yaşını Ozan belirtmedi; 32 korundu. Aile ağacı (kanon): Suzan-Teoman evli; Ayşe Suzan'ın annesi; Selin (eşi Berg) ile Arın çocukları; Deniz, Suzan'ın öz yeğeni; Ayşe üç gencin anneannesi.
 
 Kullanım yüzeyleri (Faz 5'te bağlanır): persona seçim kartı kenarlığı, okuma başlığı vurgusu, paylaşım kartı imzası, bekleme sahnesi atmosferi.
 

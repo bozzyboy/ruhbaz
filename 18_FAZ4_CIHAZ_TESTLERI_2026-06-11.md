@@ -31,6 +31,7 @@
 
 ## GRUP 4 — EN persona okumaları (LLM)
 
+- [ ] **4.0 (YENİ — kanon v2)** EN'de yorumcu seçim/yükleme ekranlarında adlar: **Susan, Theo, Aisha, Celine, Berg, Dennis, Aaron**; TR'ye dönünce Suzan, Teoman... (yaşlar güncellendi: 62/68/80/42/45/32 — hitap davranışı buna göre).
 - [ ] **4.1** EN'de Salon'dan kahve okuması (Suzan) → yorum akıcı İngilizce; "my child/dearie" YOK; kapanış cümlesi EN.
 - [ ] **4.2** EN'de tarot (Arın) + astro (Selin) birer okuma → her persona kendi EN sesinde; Türkçe kelime sızıntısı YOK.
 - [ ] **4.3** EN'de pet profille okuma → kapanış EN (TR hayvan kapanışı sızmaz).
