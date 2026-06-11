@@ -1,6 +1,30 @@
-# 12 — CİHAZ TEST LİSTESİ (Ozan tek oturuşta iner)
+# FAZ 0 — CİHAZ TESTLERİ (2026-06-11)
 
-**Nasıl kullanılır:** Claude her kod değişikliğinde buraya test maddesi ekler (değişiklik → test maddesi birebir eşleşir; istisna yok). Sen müsait olduğunda yukarıdan aşağı inersin. Her grubun başındaki **KURULUM kutusu** o grubu koşmadan önce ne yapman gerektiğini söyler — tahmin etmen gereken hiçbir adım yok.
+> **Doküman tarihi:** 2026-06-11 · **Faz:** Faz 0 (güvenlik + altyapı + görsel uygunluk) · **Cihaz:** Samsung, Android 13.
+> **Kural (Ozan direktifi):** Her fazın cihaz testleri AYRI dokümanda tutulur. Bu doküman yalnız Faz 0'ı kapsar; Faz 1 için yeni doküman açılır.
+
+**Nasıl kullanılır:** Claude her kod değişikliğinde buraya test maddesi ekler (değişiklik → test maddesi birebir eşleşir; istisna yok). Sen müsait olduğunda yukarıdan aşağı inersin. Her grubun başındaki **KURULUM kutusu** o grubu koşmadan önce ne yapman gerektiğini söyler.
+
+## 📊 TEST DURUM ÖZETİ (Ozan, 2026-06-11)
+
+| Grup | Sonuç | Not |
+|---|---|---|
+| F0-A1, F0-A2, F0-A3 | ✅ Geçti (2026-06-11) | Backend güvenlik + genel astro |
+| F0-A4, F0-A5, F0-A6 | ⏭️ Atlandı | Ozan yapmayacak (regresyon/curl ön-doğrulamaları zaten Claude'da geçti) |
+| F0-B1, F0-B2, F0-B3 | ✅ Geçti (2026-06-11) | B3'te "günlük sorup haftalık yanıt" = app hatası değil; çapraz-satış fırsatı olarak K52'ye not düşüldü |
+| F0-B4, F0-B5, F0-B6 | ✅ Geçti (2026-06-11) | B4/B5 cache doğru çalıştı; "seçim diyaloğu" fikri K53'e işlendi |
+| F0-C | ⏭️ Atlandı | Ozan: cihaz için anlamı yok (öz-review düzeltmeleri zaten statik doğrulandı) |
+| EK1-1 … EK1-6 | ✅ Geçti (2026-06-11) | Görsel uygunluk LLM-only |
+| EK1-7 (el sırtı reddi) | ❌→🔧 Düzeltildi | El sırtı hâlâ okutuluyordu; prompt güçlendirildi (EK5-2'de yeniden test) |
+| EK1-8, EK1-10 | ✅ Geçti (2026-06-11) | Pati (hayvan profil) + alakasız ret |
+| EK1-9 (pati altı) | ⏳ Kalan | Kedinin pati altı fotoğrafı çekilemedi; en sonda tekrar |
+| EK2-1 … EK2-3 | ✅ Geçti (2026-06-11) | Çoklu galeri seçimi |
+| EK2-4, EK2-5, EK2-6 | ⏳ Ertelendi | İzin uyarısı bazen markasız/beyaz bazen markalı geliyor; chat ekranı aşamasında bakılacak (önemsiz) |
+| EK2-7, EK2-8 | ✅ Geçti (2026-06-11) | Desen yorumlama yok + aynı fincan farklı açı |
+| EK-3 (uygulama adı) | ⏳ Sonraki derleme | Şu an hâlâ eski etiket görünüyor; yeni APK'da "Ruhbaz Konağı" olur |
+| EK-4 (kamera izni) | ✅ Geçti (görünüyor) | Sistem sorgusu geri geldi |
+
+**Bugün eklenen düzeltmeler → EK-5 grubunda yeni test maddeleri var (en altta).** Kalan/ertelenen her şey → **"⏳ KALAN TESTLER"** bölümü (en altta).
 
 **Test düzeni (senin kararın):** Expo Go YOK. Telefonda **dev build APK** + PC'de **Expo dev server** + **token server**.
 
@@ -210,3 +234,38 @@ PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (vey
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |
 | `agent/scripts/check_turkish_utf8.py` | Windows konsol UTF-8 düzeltmesi (yalnız script çıktısı) | Cihaz testi gerekmez — Claude koştu, geçti |
 | `agent/AGENTS.md` | Endpoint listesi güncellendi (doküman) | Cihaz testi gerekmez |
+
+### Grup EK-5: Okuma kalitesi düzeltmeleri (Ozan testleri, 2026-06-11)
+
+> **📦 KURULUM KUTUSU (EK-5):** Yalnız JS/TS değişikliği — **yeni APK GEREKMEZ**, app'te reload (r) yeter (token server + expo açık olsun).
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| EK5-1 | Astroloji/herhangi bir okuma al; içinde "7. evdeki", "3. haftada", "12. evindeki" gibi sıra-sayılı ifade olsun | Sayı ile kelime AYNI satırda/paragrafta kalır; "7." görünce yeni paragrafa kayma YOK. Paragraflar yine var (okuma kolaylığı korunur) | ☐ |
+| EK5-2 | El okuması → elin SIRTINI (tırnaklar kameraya bakacak şekilde) yükle | Nazik ret: avuç içi çizgileri istenir; okuma BAŞLAMAZ (eskiden başlıyordu — düzeltildi) | ☐ |
+| EK5-3 | (Regresyon) El okuması → gerçek avuç içi (çizgiler net) yükle | Okuma normal başlar (güçlendirilmiş prompt gerçek avuç içini reddetmiyor) | ☐ |
+| EK5-4 | Kahve → yalnızca TABAK fotoğrafı yükle → yorum al | Yorum yalnız tabak yüzeyinden bahseder; "fincanın kulbuna yakın" gibi tabakta olmayan parça atfı YOK | ☐ |
+
+**Değişen dosya → test eşlemesi (EK-5):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/components/SelectableFormattedText.tsx` | Sıra-sayısı koruması kelime-listesinden genel kurala çevrildi (rakam+nokta+küçük harf = sıra sayısı, bölme yok); Türkçe ekler artık kaçmıyor | EK5-1 |
+| `mobile/src/services/fortuneApiService.ts` | El sınıflandırma prompt'u güçlendirildi: tırnak/boğum/el sırtı → human_hand_back; avuç çizgileri net değilse varsayılan ret | EK5-2, EK5-3 |
+| `mobile/src/services/fortunePromptBuilder.ts` | Yalnız-tabak yüzey kuralı: fincan/kulp gibi olmayan parçalara konum atfı yasaklandı | EK5-4 |
+
+---
+
+## ⏳ KALAN TESTLER (Faz 0 — en sonda / koşulları oluşunca)
+
+Bu maddeler bilinçli ertelendi; Faz 0 "bitti" sayılır ama bunlar açık kuyrukta. Faz 1'e geçmeden Ozan müsait olunca dönülür.
+
+| Madde | Neden bekliyor | Ne zaman |
+|---|---|---|
+| **EK1-9** (pati ALTI fotoğrafı) | Kedinin pati altı fotoğrafı çekilemedi (hayvan izin vermedi) | Fırsat olunca; düşük öncelik |
+| **EK2-4, EK2-5, EK2-6** (izin uyarısı tipi) | İzin sorgusu ilk geliş bazen markasız/beyaz, sonra markalı geliyor; tetikleyici net değil. Ozan şimdi vakit ayırmak istemiyor | **K31 (chat ekranı dönüşümü)** aşamasında STT/izin akışıyla birlikte |
+| **EK-3** (uygulama adı "Ruhbaz Konağı") | Etiket yeni APK derlenince değişir; şu an eski etiket görünüyor | **Bir sonraki APK derlemesinde** |
+| **F0-A4, F0-A5, F0-A6** | Ozan yapmayacak (curl ön-doğrulamaları zaten geçti) | Atlandı — gerekirse ileride |
+| **F0-C** | Cihaz için anlamı yok (öz-review düzeltmeleri statik doğrulandı) | Atlandı |
+
+**Atlanan testlerin gerekçesi (Ozan kararı):** F0-A4/5/6 ve F0-C, cihazda elle koşmaya değmeyen, Claude'un curl/statik doğrulamalarıyla zaten kapanmış maddeler. Ozan bunları bilinçli atladı; regresyon riski düşük çünkü değişiklikler ya backend-curl ya statik-araç doğrulamalı.

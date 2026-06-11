@@ -72,6 +72,9 @@ Durumlar: 📥 ham · 📋 işlendi (karar/doküman referansıyla) · 🅿️ pa
 | 2026-06-11 | Persona HİTAP sistemi: bakılan profilin yaş verisini alıp persona kendi yaşıyla kıyaslayıp hitap seçmeli (sen/siz, abla/teyze/evladım...); TR kültürü ile Batı kültürü FARKLI çalışır | 📋 | K45 + F10 |
 | 2026-06-11 | `MemoryDebugScreen` ürün mü debug mi? Profil Ayarları'nda "Hafıza Özeti" düğmesiyle KULLANICIYA açık; adı "Debug" ama kullanıcıya hafıza şeffaflığı değerli olabilir (bağ stratejisiyle uyumlu). Faz 0 debug-kapısına BİLEREK dahil edilmedi | ❓ | Ozan karar verecek: ürünleşecekse adı/UX'i değişir; debug'sa `ENABLE_DEVELOPER_DEBUG_UI` kapısına alınır |
 | 2026-06-11 | Mikrofon (STT) bir çalışıp bir kapanıyor, kendi kendine sönüyor (Android dev build) | 📋 | **K31 (chat ekranı) aşamasına bağlandı** — okuma ekranı bilindik chat'e dönüştürülürken STT akışı baştan ele alınacak; o güne kadar bekletilir, ayrı acil iş açılmaz. Olası kök: `expo-speech-recognition` oturum süre/`no-speech` timeout'u veya izin yenilenmesi. Aşağıda K31 detayına işlendi |
+| 2026-06-11 | **Dönem çapraz-satış fırsatı (Ozan):** Kullanıcı günlük okuma alıyorsa, haftalığa YUMUŞAKÇA yönlendir — kapanışta 3-4 cümlelik, hafta hakkında merak uyandıran/"hooking" ama kanca olduğu belli olmayan bir teaser ("önümüzdeki günlerde X tohumu beliriyor, haftalık bakışta daha net görünür..."). Kredi harcamasını teşvik eder, doğal hisseder | 📋 | K52 + aşağıda K52 detayı. K21 (genel→kişisel zarif davet) ile aynı aile; persona sesinde, 677-uyumlu, frekans-tavanlı |
+| 2026-06-11 | **Mevcut okuma varken seçim diyaloğu (Ozan):** Aynı profil+dönem için zaten okuma varsa kullanıcıya OTOMATİK cache göstermek yerine markalı seçim sun (kullanıcıya "cache" denmez): "Bu profil için bu döneme ait bir okuma zaten var. Mevcut okumayı mı görmek istersiniz, yoksa aynı dönem için YENİ bir okuma mı? Belki başka bir yorumcunun (persona) gözünden? Ya da farklı bir profil için mi bakmak istediniz?" | 📋 | K53 + aşağıda K53 detayı. Hem F0-B4 (profil) hem F0-B5 (profil+persona) yollarını kapsar; yanıtlara göre dallanan markalı akış. Kredi/UX dengesi Ozan kararı |
+| 2026-06-11 | **Doğum günü kutlama modu (Ozan):** Profilin doğum gününde UI otomatik kutlama temasına döner; yorumlarda da değinilir (selamlama/kapanışa eklenir); push ile kutlama. Kullanıcının KENDİ profili için daha şatafatlı, oluşturduğu ek profiller için daha sade | 📋 | K54 + aşağıda K54 detayı. Push tarafı Faz 5 bildirim taksonomisine de eklendi (05). K39 Aura temasıyla katman uyumu gözetilir |
 
 ---
 
@@ -223,6 +226,38 @@ Cevabın püf noktası: **App sosyal medyayı OKUMAZ — çünkü okumasına ger
 5. Çevrimdışı/eski feed durumunda zarif bozulma: bülten yoksa persona yalnız kanonla konuşur — hata değil, sadece daha az güncel.
 
 **Neden güçlü:** Kullanıcı Instagram'da Ayşe'nin tarifini görüp app'e girince Deniz'in "Ayşe'nin tatlısından yedin mi?" demesi — chat LLM'lerinin YAPAMAYACAĞI cross-channel karakter sürekliliği (01/Rakip tanımı, madde 4). Maliyeti ise neredeyse sıfır: içerik zaten üretiliyor, feed zaten var, lore graph zaten kodda.
+
+### K52 — Dönem çapraz-satış: günlükten haftalığa yumuşak kanca
+
+Fırsat (Ozan'ın gözlemi): Kullanıcı günlük okuma alıyorsa, o anın sonunda haftalık okumaya merak uyandıran bir köprü kurulabilir — kredi harcamasını artırır ama **kanca olduğu belli olmadan**, persona sesinin doğal bir uzantısı gibi.
+
+- **Mekanizma:** Günlük (ve aylık olmayan) okumanın KAPANIŞINA, 3-4 cümlelik, hafta hakkında genel ama spesifik-hissettiren, bir "tohum/eğilim" teaser'ı. Örn: "Bu birkaç gün senin için bir hazırlık; asıl kıpırtı önümüzdeki haftaya saklı. Haftalık bakışta Venüs'ün o geçişi netleşir, istersen oraya da bir göz atarız." Açık reklam DEĞİL; merak + persona daveti.
+- **Tetikleyici disiplin:** Her günlükte değil — frekans tavanlı (ör. ardışık 1-2 günlük sonrası, veya kullanıcı o hafta haftalığa hiç bakmamışsa). Spam hissi yasak (Ozan'ın "kapanmamış döngü/bıkkınlık" hassasiyeti).
+- **Hukuk:** 677 sözlüğü korunur ("eğilim", "izlenim"); kesin gelecek vaadi yok.
+- **Aile:** K21 (genel→kişisel zarif davet) ve K53 (mevcut-okuma diyaloğu) ile aynı çapraz-satış ailesi; ortak bir "zarif yönlendirme" altyapısı düşünülebilir. Ölçüm: teaser sonrası haftalığa tıklama oranı.
+
+### K53 — Mevcut okuma varken seçim diyaloğu (cache yerine kullanıcı kararı)
+
+Bugün: Aynı profil+dönem için okuma cache'te varsa otomatik gösteriliyor (F0-B4/B5'te doğru çalıştı). Ozan'ın isteği: kullanıcıya **seçenek sun** — belki yeni bir okuma, belki başka persona, belki yanlış profil seçti. "cache" kelimesi kullanıcıya ASLA gösterilmez.
+
+- **Markalı diyalog (taslak metin, persona-nötr veya Kâhya sesinde):** "Bu profil için bu döneme ait bir okuma zaten hazır. Ne yapmak istersin?" → seçenekler:
+  1. **Mevcut okumayı göster** (kredi harcamaz) — varsayılan/güvenli.
+  2. **Aynı dönem için yeni bir okuma** (kredi harcar; "aynı gökyüzü, taze bir bakış") — tekrar-etmeme hafızası devrede, öncekiyle çelişmeyen ama yeni vurgulu.
+  3. **Başka bir yorumcuyla oku** (persona değiştir; aynı profil+dönem, farklı ses/üslup) — kredi harcar.
+  4. **Farklı profil için bak** ("yoksa başka birine mi bakmak istedin?") — yanlış-profil kazasını yakalar.
+- **Kapsam:** Hem F0-B4 (profil bazlı) hem F0-B5 (profil+persona bazlı). Persona değişince cache anahtarı zaten persona içeriyor (astroEngine), yani "başka yorumcu" yolu doğal yeni okuma üretir.
+- **Denge kararı (Ozan):** Varsayılan davranış ne olsun? Otomatik göster + küçük "yeniden oku/başka yorumcu" düğmeleri mi, yoksa her girişte diyalog mu? Diyalog her seferinde çıkarsa sürtünme; hiç çıkmazsa kredi/keşif fırsatı kaçar. Öneri: ilk girişte otomatik göster, ekranda zarif "Taze bir bakış / Başka yorumcu" eylemleri; "emin misiniz" diyaloğu yalnız kullanıcı yeni-okuma'ya basınca. Ozan netleştirecek.
+- **Hukuk/hafıza:** Yeni okuma tekrar-etmeme bağlamını kullanır; krediyle üretilen her okuma usage'a yazılır.
+
+### K54 — Doğum günü kutlama modu
+
+Profilin doğum gününde uygulama o profil bağlamında kutlama moduna geçer — bağ (bond) stratejisinin duygusal çekirdeğiyle birebir uyumlu (kullanıcı "beni hatırlıyor" hissi).
+
+- **UI:** O gün ilgili profil seçiliyken otomatik kutlama teması (konfeti/atmosfer, kutlama rengi) — K39 Aura temasıyla çakışmadan katmanlanır (kutlama önceliklidir o gün).
+- **Yorumda:** Selamlamaya/kapanışa doğal kutlama dokunuşu (persona sesinde, abartısız) — "Bugün senin günün; konak bunu biliyor."
+- **Push:** Doğum günü kutlama bildirimi (Faz 5 bildirim taksonomisine eklendi).
+- **Kademe (Ozan kuralı):** Kullanıcının KENDİ ana profili için daha şatafatlı/zengin kutlama; oluşturduğu EK profiller (yakınları) için daha sade/ölçülü — hem maliyet hem duygusal hiyerarşi doğru olur.
+- **Veri:** Doğum tarihi zaten profilde var (astro için). Gün eşleşmesi yerel, sıfır ek maliyet. Yıl bağımsız (her yaşta), sadece gün+ay.
 
 ### K31 — Okuma ekranı → bilindik chat ekranı dönüşümü (kapsam toplama)
 

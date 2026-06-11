@@ -36,7 +36,7 @@ Backend tek-sağlayıcı kontrolü: kalıntı SIFIR çıktı — server zaten ya
 
 ## Ozan'a kalan TEK iş
 
-📱 `12_CIHAZ_TEST_LISTESI.md` — tek oturuş, kurulum kutuları hazır (F0-A/B/C grupları). Yeni APK kur → token server + expo start → listeyi in.
+📱 `12_FAZ0_CIHAZ_TESTLERI_2026-06-11.md` — tek oturuş, kurulum kutuları hazır (F0-A/B/C grupları). Yeni APK kur → token server + expo start → listeyi in.
 
 ## Park edilen notlar (Faz 0 kapsamı dışı, bilinçli)
 

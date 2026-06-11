@@ -449,7 +449,7 @@ export function buildFortunePrompt(params: {
     } else if (params.validatedSurfaces.length === 1 && params.validatedSurfaces[0] === 'cup') {
       surfaceRules.push('## Surface Guard', '- Bu turda yalnızca fincan içi doğrulandı.', '- Tabak görmüş gibi konuşma.', '- Yorumu fincan içi derinliği, kenar akışı ve iç yüzey üzerinden kur.');
     } else if (params.validatedSurfaces.length === 1 && params.validatedSurfaces[0] === 'saucer') {
-      surfaceRules.push('## Surface Guard', '- Bu turda yalnızca kahve tabağı doğrulandı.', '- Fincan görmüş gibi konuşma.', '- Yorumu tabak yüzeyi, yayılma, göllenme ve dış dünya yansıması üzerinden kur.');
+      surfaceRules.push('## Surface Guard', '- Bu turda yalnızca kahve tabağı doğrulandı.', '- Fincan görmüş gibi konuşma; fincan, fincan kulpu, fincan kenarı, kulp dibi gibi tabakta OLMAYAN parçalara konum atıfı yapma (örn. "fincanın kulbuna yakın" deme).', '- Yorumu yalnızca tabak yüzeyindeki telve/iz, yayılma, göllenme ve dış dünya yansıması üzerinden kur.');
     } else if (params.validatedSurfaces.length) {
       surfaceRules.push('## Surface Guard', '- Bu turda fincan içi ve tabak birlikte doğrulandı.', '- Hangi yüzeyi yorumladığını açıkça ayır.');
     }

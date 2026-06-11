@@ -34,8 +34,14 @@ function sanitizeDisplayText(text: string) {
 }
 
 function sentencesOf(text: string) {
+  // Türkçe sıra sayıları "N." (7. ev, 3. hafta, 12. evindeki) cümle sonu DEĞİLDİR.
+  // Genel ve eke-dayanıklı kural: rakam + nokta + (boşluk) + KÜÇÜK harf -> sıra sayısı,
+  // çünkü Türkçe'de cümle BÜYÜK harfle başlar. Önceki kelime-listesi yaklaşımı
+  // "evdeki/haftalık/döneminde" gibi eklemeli biçimleri kaçırıp paragrafı yanlış
+  // yerden bölüyordu. Ondalık (15.30) ve "7. Bu" (büyük harf = gerçek cümle sonu)
+  // bu kurala takılmaz, doğru kalır.
   const protectedText = text.replace(
-    /(\b\d{1,2})\.(\s*)(?=(?:haftası|haftanın|hafta|günü|gün|ayın|ay|yarısı|yarı|çeyrek|evde|evin|eve|evden|evler|evleri|ev|adım|aşama|faz|dönem|kapı|sayı|gibi)(?=$|[\s,;:)\]]))/giu,
+    /(\b\d{1,3})\.(\s*)(?=[a-zçğıöşü])/gu,
     (_match, number, space) => `${number}${ORDINAL_DOT_TOKEN}${space}`,
   );
   return (
