@@ -220,8 +220,13 @@ function unique(arr) {
 }
 
 function run() {
-  const mojibakeFiles = unique(mojibakeScopes.flatMap(collectFiles));
-  const strictFiles = unique(strictTurkishScopes.flatMap(collectFiles));
+  // İsteğe bağlı dosya argümanları: verilirse yalnız o dosyalar taranır
+  // (hook/editor entegrasyonu için hızlı yol); verilmezse tam tarama.
+  const argFiles = process.argv
+    .slice(2)
+    .filter((arg) => allowedExtensions.has(path.extname(arg)) && fs.existsSync(arg) && !shouldIgnore(path.resolve(arg)));
+  const mojibakeFiles = argFiles.length ? argFiles.map((f) => path.resolve(f)) : unique(mojibakeScopes.flatMap(collectFiles));
+  const strictFiles = argFiles.length ? mojibakeFiles : unique(strictTurkishScopes.flatMap(collectFiles));
 
   const findings = [];
 

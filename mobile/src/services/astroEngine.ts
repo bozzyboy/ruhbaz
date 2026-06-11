@@ -423,8 +423,12 @@ export async function getCachedPersonalAstroReading(params: {
 }): Promise<AstroReadingResult | null> {
   const currentPeriodKey = periodKey(params.period);
   const fingerprint = profileFingerprint(params.profile);
+  // DİKKAT: bu anahtar createPersonalAstroReading'in KAYIT anahtarıyla birebir aynı
+  // dizilimde olmak zorunda ('gemini' segmenti dahil) — yoksa ekran girişindeki
+  // cache ön-kontrolü hiçbir kaydı bulamaz (Faz 0 öz-review bulgusu).
   const cacheKeyValue = cacheKey([
     String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION),
+    'gemini',
     params.assistantId,
     params.profile.profileId,
     params.period,
@@ -1699,8 +1703,8 @@ export async function createPersonalAstroReading(params: {
   const currentPeriodKey = periodKey(params.period);
   const fingerprint = profileFingerprint(params.profile);
   const focusQuestion = params.focusQuestion?.replace(/\s+/g, ' ').trim() || '';
-  const modelCacheKey = 'gemini';
-  const cacheKeyValue = cacheKey([String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION), modelCacheKey, params.assistantId, params.profile.profileId, params.period, currentPeriodKey, fingerprint]);
+  // 'gemini' segmenti getCachedPersonalAstroReading'deki anahtarla birebir aynı kalmalı.
+  const cacheKeyValue = cacheKey([String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION), 'gemini', params.assistantId, params.profile.profileId, params.period, currentPeriodKey, fingerprint]);
   if (!focusQuestion) {
     const cached = await loadFreshPersonalAstroFromCache({ cacheKeyValue, periodKeyValue: currentPeriodKey, fingerprint });
     if (cached) return cached;

@@ -37,20 +37,17 @@ quota_lock = threading.Lock()
 quota_entries: deque[dict[str, Any]] = deque()
 
 
-PROTECTED_PATHS = {"/gemini-generate", "/gemini-embed"}
+# Varsayılan KORUMALI: yeni eklenen her endpoint otomatik gizli-header ister.
+# Yalnızca buradaki yollar açıktır (bağlantı teşhisi).
+PUBLIC_PATHS = {"/health"}
 
 
 @app.before_request
 def _require_shared_secret():
-    # Maliyetli endpoint'ler paylaşılan gizli olmadan ÇALIŞMAZ (güvenli varsayılan):
+    # Endpoint'ler paylaşılan gizli olmadan ÇALIŞMAZ (güvenli varsayılan):
     # LAN'da proxy'nin adresini bulan yabancı, anahtar üzerinden harcama yapamasın.
-    if request.path not in PROTECTED_PATHS:
+    if request.path in PUBLIC_PATHS:
         return None
-    if not AGENT_SHARED_SECRET:
-        return (
-            jsonify({"ok": False, "error": "Sunucu yapılandırması eksik: AGENT_SHARED_SECRET tanımlı değil (agent/.env)."}),
-            503,
-        )
     provided = (request.headers.get("X-Agent-Secret") or "").strip()
     if not provided or not hmac.compare_digest(provided, AGENT_SHARED_SECRET):
         return jsonify({"ok": False, "error": "Yetkisiz istek."}), 401
@@ -326,13 +323,14 @@ def health():
 
 if __name__ == "__main__":
     # Güvenli varsayılan: yalnız bu makine (127.0.0.1). Telefonun LAN'dan
-    # bağlanması gereken cihaz testinde agent/.env içinde HOST=0.0.0.0 kullanılır;
-    # o durumda da X-Agent-Secret doğrulaması yabancı erişimi engeller.
+    # bağlanması gereken cihaz testinde agent/.env içinde HOST=0.0.0.0 kullanılır.
     host = (os.getenv("HOST") or "127.0.0.1").strip()
     port = int(os.getenv("PORT") or "8080")
-    if host != "127.0.0.1" and not AGENT_SHARED_SECRET:
+    if not AGENT_SHARED_SECRET:
+        # Koşulsuz zorunlu: istek katmanı zaten secret'sız hiçbir şey servis etmez;
+        # burada açıkça durmak "server kalktı ama her istek 401/503" karmaşasını önler.
         raise SystemExit(
-            "HOST=127.0.0.1 dışında dinleme için AGENT_SHARED_SECRET zorunlu (agent/.env). "
-            "Aksi halde LAN'daki herkes proxy üzerinden harcama yapabilir."
+            "AGENT_SHARED_SECRET tanımlı değil (agent/.env). Aynı değer mobile/.env.local "
+            "içinde EXPO_PUBLIC_AGENT_SHARED_SECRET olarak da durmalı. Örnek: agent/.env.example"
         )
     app.run(host=host, port=port, threaded=True)

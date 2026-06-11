@@ -13,17 +13,23 @@ declare const process: { env?: Record<string, string | undefined> } | undefined;
 const AGENT_API_PORT = 8080;
 
 /**
- * B-5: Server adresi Expo dev bağlantısından (hostUri) türetilir — token server
- * Expo dev server ile aynı PC'de koştuğu için PC'nin IP'si değişse bile adres
- * kendiliğinden doğru kalır (.env.local'a IP yazma derdi bitti).
- * hostUri yoksa (production build) EXPO_PUBLIC_AGENT_API_URL, o da yoksa localhost.
+ * B-5: Server adresi öncelik sırası:
+ * 1) EXPO_PUBLIC_AGENT_API_URL — AÇIK override (farklı makine/tünel/production).
+ *    Normal geliştirmede BOŞ bırakılır; eski sync-agent-url.js akışı arşivlendi.
+ * 2) Expo dev bağlantısı (hostUri) — token server Expo dev server ile aynı PC'de
+ *    koştuğu için PC'nin IP'si değişse bile adres kendiliğinden doğru kalır.
+ * 3) localhost (son çare).
+ * Not: env okumaları babel inline için DÜZ process.env.X erişimi olmalı.
  */
 function deriveAgentApiUrl(): string {
+  const fromEnv =
+    typeof process !== 'undefined' && process.env
+      ? process.env.EXPO_PUBLIC_AGENT_API_URL?.replace(/\/+$/, '')
+      : undefined;
+  if (fromEnv) return fromEnv;
   const hostUri = Constants.expoConfig?.hostUri;
   const host = hostUri?.split('/')[0]?.split(':')[0]?.trim();
   if (host) return `http://${host}:${AGENT_API_PORT}`;
-  const fromEnv = process?.env?.EXPO_PUBLIC_AGENT_API_URL?.replace(/\/+$/, '');
-  if (fromEnv) return fromEnv;
   return `http://127.0.0.1:${AGENT_API_PORT}`;
 }
 
@@ -35,7 +41,10 @@ export const AGENT_API_URL = deriveAgentApiUrl();
  * Server bu değer olmadan /gemini-generate ve /gemini-embed isteklerini reddeder;
  * LAN'da proxy'yi bulan yabancıların anahtar üzerinden harcama yapmasını engeller.
  */
-export const AGENT_SHARED_SECRET = process?.env?.EXPO_PUBLIC_AGENT_SHARED_SECRET?.trim() || '';
+export const AGENT_SHARED_SECRET =
+  (typeof process !== 'undefined' && process.env
+    ? process.env.EXPO_PUBLIC_AGENT_SHARED_SECRET?.trim()
+    : undefined) || '';
 
 /** Token server'a giden her isteğe eklenecek kimlik başlıkları. */
 export function agentAuthHeaders(): Record<string, string> {

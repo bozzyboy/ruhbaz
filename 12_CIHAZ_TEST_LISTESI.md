@@ -57,7 +57,7 @@
 ### Grup F0-B: K10 yerel LLM (Gemma) sökümü
 
 > **📦 KURULUM KUTUSU (F0-B):**
-> 1. ⚠️ **YENİ APK GEREKİR** — native değişiklik var (LiteRT modülü + gradle bağımlılığı söküldü). APK yolu: Claude'un derleme denemesi sonucuna göre bu kutuya yazılacak / Claude derleyemezse: `cd mobile` → `npx expo run:android` (telefon USB'de, geliştirici modu açık).
+> 1. ⚠️ **YENİ APK GEREKİR** — native değişiklik var (LiteRT modülü + gradle bağımlılığı söküldü). **Claude derledi ✅ — APK yolu:** `mobile\android\app\build\outputs\apk\debug\app-debug.apk` (~78MB). Telefona kopyala (USB/Drive) ve kur; ya da telefon USB'deyken `cd mobile\android` → `..\..\platform-tools yoksa` Android Studio'dan `adb install app-debug.apk`.
 > 2. Yeni APK kurulduktan sonra: token server + `npx expo start` (F0-A kutusundaki gibi).
 >
 > Not: F0-A ve F0-B'yi TEK oturumda koşacaksan önce yeni APK'yı kur, sonra hepsini sırayla in — iki kez kurulum yapma.
@@ -67,7 +67,7 @@
 | F0-B1 | Senin Evin → profil seç → Astroloji okuma tipi → yorumcu seçim ekranına gel | Ekranda YALNIZ "Yorumcu Seçimi" var; "Yorumcunun Zekasını Seç" (Free/Pro/Premium IQ) paneli ve yerel model indirme kutusu YOK | ☐ |
 | F0-B2 | Aynı ekrandan Selin'i seç → "Yoruma Geç" → Günlük dönem seç → yorumu bekle | Kişisel astro yorumu buluttan (Gemini) üretilir; hata yok | ☐ |
 | F0-B3 | Üretilen yoruma takip sorusu yaz (ör. "bu hafta kariyerde ne öne çıkıyor?") | Yanıt gelir (follow-up artık tek yol: bulut) | ☐ |
-| F0-B4 | Aynı profil + aynı dönem için ekrandan çıkıp tekrar gir | Yorum cache'ten gelir (aynı metin; yeniden üretim yok) | ☐ |
+| F0-B4 | Aynı profil + aynı dönem için ekrandan çıkıp tekrar gir ve aynı dönemi seç | Yorum cache'ten OTOMATİK görünür (aynı metin; yeniden üretim yok). Not: Bu eskiden hiç çalışmıyordu — öz-review'da bulunan cache-anahtarı uyumsuzluğu düzeltildi; bu madde o düzeltmenin testi | ☐ |
 | F0-B5 | (Regresyon) Yorumcu seçim ekranından Numeroloji / Rüya / Tarot akışlarına gir | Persona seçimi + "Yoruma Geç" ile ilgili akış normal açılır (ekran sökümünden etkilenmediler) | ☐ |
 | F0-B6 | (Regresyon) Kahve yorumu uçtan uca bir kez | Çalışır — kahve yerel LLM'i hiç kullanmıyordu, ama APK değiştiği için bir kez doğrula | ☐ |
 
@@ -80,7 +80,28 @@
 | `mobile/src/services/astroEngine.ts` | Yerel LLM dalları söküldü; bulut tek yol; cache key 'gemini' | F0-B2, F0-B3, F0-B4 |
 | `mobile/App.tsx` | PersonalAstroReading param tipi sadeleşti | F0-B2 (navigasyon çalışıyorsa geçti) |
 | `mobile/src/services/localGemmaService.ts` | DOSYA SİLİNDİ | tsc=0 (çağıran kalmadı) + F0-B2 |
-| `mobile/android/...` (gitignore'da, disk üzerinde) | RuhbazLiteRtLm modül+paket silindi; MainApplication kaydı + litertlm gradle bağımlılığı çıkarıldı | F0-B6 + APK'nın derlenebilmesi (Claude denemesi) |
+| `mobile/android/...` (gitignore'da, disk üzerinde) | RuhbazLiteRtLm modül+paket silindi; MainApplication kaydı + litertlm gradle bağımlılığı + AndroidManifest'teki libedgetpu_litert satırı çıkarıldı | F0-B6 + APK derlendi ✅ (Claude, gradle assembleDebug exit=0) |
+
+### Grup F0-C: Öz-review düzeltmeleri (JS — reload yeter)
+
+> **📦 KURULUM KUTUSU (F0-C):** Yeni APK + `npx expo start` zaten F0-B'de kuruluysa hiçbir şey gerekmez; F0-B ile aynı oturumda koş.
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| F0-C1 | = F0-B4 (cache otomatik geri gelme) | (öz-review düzeltmesi #1'in testi — F0-B4'ü işaretlemen yeter) | ☐ |
+| F0-C2 | Normal akışta (env'de URL YOKKEN) herhangi bir yorum üret | Çalışır — adres artık Expo bağlantısından türetiliyor; `.env.local`'daki eski URL satırını Claude SİLDİ, sync-agent-url.js arşive taşındı | ☐ |
+| F0-C3 | (Regresyon) Server'ı kapatıp app'ten yorum dene | Düzgün hata mesajı görünür (çökme yok) | ☐ |
+
+**Değişen dosya → test eşlemesi (F0-C):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/services/astroEngine.ts` | Cache-anahtarı uyumsuzluğu düzeltildi (probe'a 'gemini' segmenti eklendi) | F0-B4 |
+| `mobile/src/config/constants.ts` | Adres önceliği: açık env override → hostUri → localhost; env okumaları babel-uyumlu düz erişime çevrildi | F0-C2, F0-A5 |
+| `agent/token_server.py` | Varsayılan-korumalı auth (PUBLIC_PATHS={'/health'}); secret koşulsuz zorunlu (başlangıçta net hata) | F0-A4 + Claude curl (4 senaryo ✅) |
+| `mobile/scripts/check-turkish-utf8.js` | Tek-dosya argüman desteği (hook hız yolu); tam tarama davranışı değişmedi | Cihaz testi gerekmez — Claude iki modda da koştu ✅ |
+| `.claude/hooks/post-edit-check.js` | BOM düzeltmesi (kontroller gerçekten koşuyor artık), artımlı tsc (11.5s→4.3s), stderr yakalama, agent/*.py desteği | Cihaz testi gerekmez — Claude geçti/kaldı senaryolarıyla test etti ✅ |
+| `mobile/package.json` | `npm run typecheck` script'i eklendi | Cihaz testi gerekmez |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |

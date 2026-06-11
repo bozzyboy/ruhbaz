@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "check:turkish:utf8": "node scripts/check-turkish-utf8.js",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "setup:hooks": "git config core.hooksPath .githooks"
   },
   "dependencies": {
