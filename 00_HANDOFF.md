@@ -10,9 +10,15 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **En son snapshot:** [handoffs/2026-06-11_faz0-to-faz1_gecis.md](handoffs/2026-06-11_faz0-to-faz1_gecis.md) (Faz 0→1 geçiş + Faz 1 brifingi + Ozan kararları + özerk plan) · önceki: [faz0-bitti](handoffs/faz0-bitti_guvenlik-altyapi_2026-06-11.md)
 
-**Son güncelleme:** 2026-06-11 (Faz 0 + cihaz-test düzeltmeleri oturumu) · **Durum:** ✅ **FAZ 0 BİTTİ** (tag `faz0`) + Ozan cihaz testlerinden gelen düzeltmeler yapıldı (görsel uygunluk, paragraf hatası genel, el sırtı, İkram Masası UX, I-Ching, bağlantı/QR). Sıradaki: **Faz 1** — Ozan YENİ SESSION açacak; orada önce geçiş handoff'undaki **§3 kararları (D1-D5)** konuşulur, sonra özerk Faz 1/2.
+**Son güncelleme:** 2026-06-11 (Faz 1 oturumu BAŞLADI) · **Durum:** 🔨 **FAZ 1 SÜRÜYOR (özerk).** Faz 0 ✅ (tag `faz0`). Ozan D1-D5 kararlarını verdi (aşağıda); Claude §4 planını özerk yürütüyor: kod renames + guardrail + yasal/persona taslakları → 13_FAZ1 test dokümanı → faz1-to-faz2 handoff → Faz 2 özerk kod kısmı.
 
-**⭐ YENİ SESSION İLK İŞ:** [handoffs/2026-06-11_faz0-to-faz1_gecis.md](handoffs/2026-06-11_faz0-to-faz1_gecis.md) OKU → §3'teki D1-D5 kararlarını Ozan'a sor → §4 özerk çoklu-faz planını yürüt. Özerk sınır: yasal/persona/marka onayı + avukat + Play Console + IAP + fiyat = Ozan; ben kod + taslak üretirim.
+**✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
+- **D1 ONAY:** Faz 1/2 özerk; kod + taslak Claude; yasal onay/avukat/Play Console/IAP/fiyat Ozan.
+- **D2:** Yasal + persona dil taslaklarını Claude hazırlar (ton: sıcak-ama-net, "eğlence amaçlı sembolik yorum" çerçevesi); "onay bekliyor" diye bırakılır; Ozan tek seferde onaylar.
+- **D3:** DB/klasör adı (`falci-memory-v2.db`, `falci-data/`) ŞİMDİ DEĞİŞMEZ — release öncesi tek seferde migration'la. Faz 1'de yalnız: görünen metin + kaynak yorumları + fortune→reading.
+- **D4 ONAY:** Faz 2'de kod iskeleti (ledger-paket, moderation, portability, analitik) Claude; gerçek IAP ürün/fiyat Ozan.
+- **D5:** Avukat soru listesini Claude "avukata hazır" netleştirir; randevu Ozan.
+- Ozan ayrıca istedi: **kalan "blok: Ozan" işleri faz sonunda TEK TEK listelenecek.**
 
 **Faz 0 özeti (detay: snapshot):** Temiz git + 12 commit. Backend delikleri kapandı (/gemini-api-key silindi; CORS söküldü; X-Agent-Secret zorunlu — varsayılan-KORUMALI; HOST env'li, varsayılan 127.0.0.1). B-5 ✅ (adres önceliği: açık env override → Expo hostUri → localhost; IP derdi bitti). Debug bayrağı `__DEV__` kapısında. ESLint + typecheck + Claude hook'ları (artımlı tsc + UTF-8, gerçekten test edildi). K9/K10 ✅ yerel LLM tamamen söküldü (−557 satır + Android native). Öz-review 7 ajanla yapıldı; DOĞRULANMIŞ astro cache-anahtarı bug'ı dahil düzeltmeler `e4f925c`'de. **Debug APK derlendi:** `mobile\android\app\build\outputs\apk\debug\app-debug.apk` (~78MB). Gizli değerler: `agent/.env` (AGENT_SHARED_SECRET, HOST) + `mobile/.env.local` (EXPO_PUBLIC_AGENT_SHARED_SECRET) — git dışı, Claude üretti; şablon: `agent/.env.example`.
 
