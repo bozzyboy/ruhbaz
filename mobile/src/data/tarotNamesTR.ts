@@ -1,6 +1,6 @@
 export const TAROT_TR_NAMES: Record<string, string> = {
   'The Fool': 'Mecnun',
-  'The Magician': 'Büyücü',
+  'The Magician': 'Sihirbaz',
   'The High Priestess': 'Azize',
   'The Empress': 'İmparatoriçe',
   'The Emperor': 'İmparator',
