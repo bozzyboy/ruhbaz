@@ -55,18 +55,46 @@ if (-not (Test-Path $agentEnv)) {
 }
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$agentDir'; `$env:HOST='0.0.0.0'; python token_server.py" -WindowStyle Normal
 
+# --- 3b. USB takiliysa adb reverse: localhost:8081 telefonu PC'ye baglar ---
+# Bu yol QR/Wi-Fi/IP'den BAGIMSIZ ve hic degismez. USB yoksa sessizce atlanir.
+$usbHazir = $false
+$adbPath = $null
+$adbCmd = Get-Command adb -ErrorAction SilentlyContinue
+if ($adbCmd) { $adbPath = $adbCmd.Source }
+elseif (Test-Path "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe") { $adbPath = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" }
+if ($adbPath) {
+  $devices = & $adbPath devices 2>$null | Select-String "device$"
+  if ($devices) {
+    & $adbPath reverse tcp:$PORT tcp:$PORT 2>$null | Out-Null
+    & $adbPath reverse tcp:8080 tcp:8080 2>$null | Out-Null
+    $usbHazir = $true
+  }
+}
+
 # --- 4. Expo'yu SABIT 8081'de baslat ---
 Yaz "[3/4] Expo dev server baslatiliyor (port $PORT, LAN)..." "Yellow"
 Yaz ""
 Yaz "============================================================" "Green"
-Yaz "[4/4] TELEFONDA YAPMAN GEREKEN:" "Green"
-Yaz "  1. Onceki/eski sunucu kayitlarini sil: uygulamada" "White"
-Yaz "     'Recently Opened' yaninda RESET'e dokun (eski 8082 kaydi gitsin)." "White"
-Yaz "  2. 'Enter URL manually' alanina ASAGIDAKINI yaz (localhost DEGIL):" "White"
-Yaz ""
-Yaz "        http://${ip}:${PORT}" "Cyan"
-Yaz ""
-Yaz "  Telefon ve PC AYNI Wi-Fi'de olmali." "White"
+Yaz "[4/4] TELEFONDA BAGLAN (QR'A GEREK YOK):" "Green"
+if ($usbHazir) {
+  Yaz "  USB bagli ve adb reverse ayarlandi. EN SAGLAM yol:" "White"
+  Yaz "  Uygulamada 'Enter URL manually' alanina:" "White"
+  Yaz ""
+  Yaz "        http://localhost:${PORT}" "Cyan"
+  Yaz ""
+  Yaz "  (Bu yol Wi-Fi/IP degisse bile hep calisir.)" "White"
+} else {
+  Yaz "  1. Uygulamada 'Recently Opened' listesinde su satira DOKUN:" "White"
+  Yaz ""
+  Yaz "        http://${ip}:${PORT}" "Cyan"
+  Yaz ""
+  Yaz "  2. Listede yoksa (ilk defa) 'Enter URL manually' ile ayni adresi" "White"
+  Yaz "     yaz (localhost DEGIL). Sonraki sefer listede cikar, sadece dokun." "White"
+  Yaz "  -- QR tarayici Android'de takiliyorsa kullanma; dokun/yaz yeterli. --" "White"
+  Yaz "  -- En saglam yol icin telefonu USB ile bagla, scripti tekrar calistir. --" "White"
+  Yaz ""
+  Yaz "  Telefon ve PC AYNI Wi-Fi'de olmali." "White"
+}
 Yaz "============================================================" "Green"
 Yaz ""
 

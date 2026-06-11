@@ -8,12 +8,14 @@
 
 PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (veya terminalde `powershell -ExecutionPolicy Bypass -File baslat.ps1`). Bu script: eski/asılı süreçleri temizler, token server'ı açar, Expo'yu **HER ZAMAN sabit 8081**'de başlatır ve telefona yazacağın **doğru adresi** ekrana yazar.
 
-**Telefonda:**
-1. Uygulamada **"Recently Opened"** yanında **RESET**'e dokun (eski `:8082` ölü kaydı gitsin — `failed to connect` hatasının sebebi oydu).
-2. **"Enter URL manually"** alanına script'in yazdığı adresi gir: **`http://<PC-IP>:8081`** (şu an `http://192.168.1.127:8081`). ⚠️ **`localhost` YAZMA** — telefonda localhost = telefonun kendisi.
+**Telefonda bağlan — QR'A GEREK YOK** (QR tarayıcı dev-client'ın native özelliği; Android 13'te takılabiliyor, app kodu düzeltemez — kullanma):
+1. İlk kez: **"Enter URL manually"** → `http://<PC-IP>:8081` yaz (şu an `192.168.1.127:8081`). ⚠️ **`localhost` YAZMA** (Wi-Fi yolunda localhost = telefonun kendisi).
+2. Sonraki her sefer: **"Recently Opened"** listesinde o satıra sadece **DOKUN** — yazma/tarama yok.
 3. Telefon ve PC **aynı Wi-Fi**'de olmalı.
 
-> ⚠️ Expo bir gün "Port 8081 dolu, 8082'ye geçeyim mi?" derse **`n`** de ve önce `baslat.ps1`'i çalıştır. **8082'yi asla kabul etme** — telefon cache'ine ölü port yazılıp bu hata geri gelir.
+**EN SAĞLAM yol (USB):** Telefonu USB ile bağla, `baslat.ps1`'i çalıştır → script `adb reverse` yapar → uygulamada **`http://localhost:8081`** yaz. Bu yol Wi-Fi/IP değişse de QR çalışmasa da **her zaman** çalışır.
+
+> ⚠️ Expo bir gün "Port 8081 dolu, 8082'ye geçeyim mi?" derse **`n`** de, `baslat.ps1`'i çalıştır. **8082'yi asla kabul etme.** Eski ölü `:8082` kaydı listede duruyorsa "Recently Opened" yanında RESET'e dokunup temizle.
 
 **Kurulum kutusu kuralları (hangi değişiklik ne gerektirir):**
 - Native/gradle/modül değişikliği → **YENİ APK** kur.
