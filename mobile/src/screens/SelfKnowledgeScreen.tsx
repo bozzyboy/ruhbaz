@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -19,10 +21,10 @@ type SelfKnowledgeItem = {
   description: string;
 };
 
-function profileBadge(profile: SubjectProfile) {
-  if (profile.relationshipPrimary === 'kendi') return 'Kendim';
-  if (profile.relationshipPrimary === 'cocuk') return 'Çocuk';
-  if (profile.relationshipPrimary === 'es') return 'Eş';
+function profileBadge(profile: SubjectProfile, t: TFunction) {
+  if (profile.relationshipPrimary === 'kendi') return t('profile.relationshipSelf');
+  if (profile.relationshipPrimary === 'cocuk') return t('profile.relationshipChild');
+  if (profile.relationshipPrimary === 'es') return t('profile.relationshipSpouse');
   return profile.relationshipPrimary;
 }
 
@@ -36,6 +38,7 @@ function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | nul
 }
 
 export function SelfKnowledgeScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<SubjectProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
   const [infoModal, setInfoModal] = useState<{ visible: boolean; title: string; message: string; profileAction: boolean }>({
@@ -73,21 +76,21 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
     () => [
       {
         id: 'birth-chart',
-        title: 'Doğum Haritası',
-        description: 'Doğum anındaki gökyüzü yerleşimlerinden karakter, potansiyel ve yaşam temalarını gör.',
+        title: t('readings.typeBirthChart'),
+        description: t('readings.descBirthChart'),
       },
       {
         id: 'numerology-core',
-        title: 'Temel Numeroloji',
-        description: 'İsim ve doğum tarihinden yaşam yolu, kader, ruh arzusu ve ana sayı haritası çıkarılır.',
+        title: t('readings.typeNumerologyCoreShort'),
+        description: t('readings.descNumerologyCore'),
       },
       {
         id: 'tests',
-        title: 'Testler',
-        description: 'Kişilik, uyum, bağlanma, değerler ve stresle başa çıkma testleri arasından seçim yap.',
+        title: t('tests.title'),
+        description: t('readings.descTests'),
       },
     ],
-    [],
+    [t],
   );
 
   const closeInfoModal = useCallback(() => {
@@ -106,7 +109,7 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         setInfoModal({
           visible: true,
           title: APP_NAME,
-          message: 'Kendini tanıma akışları için önce bir profil oluşturmalı veya seçmelisin.',
+          message: t('readings.needProfileForSelfKnowledge'),
           profileAction: true,
         });
         return;
@@ -116,9 +119,8 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         if (!hasRequiredAstroBirthInputs(selectedProfile)) {
           setInfoModal({
             visible: true,
-            title: 'Profil Bilgisi Gerekli',
-            message:
-              'Doğum haritası için bu profilde doğum tarihi, doğum ülkesi ve doğum şehri olmalı. Doğum saati varsa yükselen ve evler de netleşir. Profil Ayarları ekranından tamamlayabilirsin.',
+            title: t('modals.profileInfoRequiredTitle'),
+            message: t('modals.birthChartInfoMessage'),
             profileAction: true,
           });
           return;
@@ -131,8 +133,8 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         if (!hasRequiredNumerologyInputs(selectedProfile)) {
           setInfoModal({
             visible: true,
-            title: 'Profil Bilgisi Gerekli',
-            message: 'Temel numeroloji için profil adı ve doğum tarihi yeterli. Profil Ayarları ekranından tamamlayabilirsin.',
+            title: t('modals.profileInfoRequiredTitle'),
+            message: t('modals.coreNumerologyInfoMessage'),
             profileAction: true,
           });
           return;
@@ -147,15 +149,15 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
 
       navigation.navigate('MbtiTest', { profileId: selectedProfile.profileId });
     },
-    [navigation, selectedProfile],
+    [navigation, selectedProfile, t],
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Kimin İçin Öğreniyoruz?</Text>
-          <Text style={styles.helperText}>Harita, numeroloji ve test sonuçları seçili profilin hafızasına işlenir.</Text>
+          <Text style={styles.panelTitle}>{t('readings.whoForLearningTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.whoForLearningHelper')}</Text>
           {profiles.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {profiles.map((profile) => {
@@ -167,20 +169,20 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
                     onPress={() => setSelectedProfileId(profile.profileId)}
                   >
                     <Text style={styles.profileName}>{profile.displayName}</Text>
-                    <Text style={styles.profileMeta}>{profileBadge(profile)}</Text>
+                    <Text style={styles.profileMeta}>{profileBadge(profile, t)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
           ) : (
             <View style={styles.emptyProfileBox}>
-              <Text style={styles.emptyProfileText}>Henüz seçim yapabileceğin bir profil yok. Profil Ayarlarına gidip profil oluşturmalısın.</Text>
+              <Text style={styles.emptyProfileText}>{t('profile.noProfilesYet')}</Text>
               <View style={styles.emptyProfileActions}>
                 <TouchableOpacity style={styles.emptyProfileButton} onPress={() => navigation.navigate('ProfileSettings')}>
-                  <Text style={styles.emptyProfileButtonText}>Profil Ayarlarına Git</Text>
+                  <Text style={styles.emptyProfileButtonText}>{t('profile.goToProfileSettings')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.emptyProfileGhostButton} onPress={() => void loadProfiles()}>
-                  <Text style={styles.emptyProfileGhostButtonText}>Profilleri Yenile</Text>
+                  <Text style={styles.emptyProfileGhostButtonText}>{t('profile.refreshProfiles')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -188,7 +190,7 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Ayna Odası</Text>
+          <Text style={styles.panelTitle}>{t('home.mirrorTitle')}</Text>
           <View style={styles.grid}>
             {items.map((item) => (
               <TouchableOpacity key={item.id} style={styles.itemCard} activeOpacity={0.84} onPress={() => handleItemPress(item)}>
@@ -204,9 +206,9 @@ export function SelfKnowledgeScreen({ navigation }: Props) {
         visible={infoModal.visible}
         title={infoModal.title}
         message={infoModal.message}
-        confirmLabel={infoModal.profileAction ? null : 'Tamam'}
-        cancelLabel="Kapat"
-        extraActionLabel={infoModal.profileAction ? 'Profil Ayarlarına Git' : null}
+        confirmLabel={infoModal.profileAction ? null : t('common.ok')}
+        cancelLabel={t('common.close')}
+        extraActionLabel={infoModal.profileAction ? t('profile.goToProfileSettings') : null}
         onExtraAction={infoModal.profileAction ? openProfileSettings : undefined}
         onConfirm={closeInfoModal}
         onCancel={closeInfoModal}

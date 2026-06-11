@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
@@ -62,10 +64,10 @@ function monthLabel(date = new Date()) {
   return date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
 }
 
-function profileBadge(profile: SubjectProfile) {
-  if (profile.relationshipPrimary === 'kendi') return 'Kendim';
-  if (profile.relationshipPrimary === 'cocuk') return 'Çocuk';
-  if (profile.relationshipPrimary === 'es') return 'Eş';
+function profileBadge(profile: SubjectProfile, t: TFunction) {
+  if (profile.relationshipPrimary === 'kendi') return t('profile.relationshipSelf');
+  if (profile.relationshipPrimary === 'cocuk') return t('profile.relationshipChild');
+  if (profile.relationshipPrimary === 'es') return t('profile.relationshipSpouse');
   return profile.relationshipPrimary;
 }
 
@@ -79,6 +81,7 @@ function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | nul
 }
 
 export function GeneralReadingsScreen({ navigation }: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [profiles, setProfiles] = useState<SubjectProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -191,111 +194,111 @@ export function GeneralReadingsScreen({ navigation }: Props) {
     () => [
       {
         id: 'astro-daily',
-        title: 'Genel Astro Günlük',
-        description: 'Yükselen veya ay burcunu dikkate almayan, 3-4 ana konuya değinen kısa genel yorum.',
+        title: t('readings.astroDailyTitle'),
+        description: t('readings.astroDailyDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'astro-weekly',
-        title: 'Genel Astro Haftalık',
-        description: 'Haftanın genel ritmi, fırsatlar ve dikkat edilmesi gereken ana başlıklar.',
+        title: t('readings.astroWeeklyTitle'),
+        description: t('readings.astroWeeklyDesc'),
         isPaid: false,
-        refreshLabel: `Pazar akşamı yenilenir (${weekRangeLabel()})`,
+        refreshLabel: t('readings.refreshWeekly', { range: weekRangeLabel() }),
       },
       {
         id: 'astro-monthly',
-        title: 'Genel Astro Aylık',
-        description: 'Ayın genel gündemi. 3 aylık ve yıllık bu bölümde yer almaz.',
+        title: t('readings.astroMonthlyTitle'),
+        description: t('readings.astroMonthlyDesc'),
         isPaid: false,
-        refreshLabel: `Ayın son günü yenilenir (${monthLabel()})`,
+        refreshLabel: t('readings.refreshMonthly', { month: monthLabel() }),
       },
       {
         id: 'sun-compatibility',
-        title: 'Genel Burç Uyumu',
-        description: 'İki Güneş burcuna göre aşk, iş, ev, dostluk ve komşuluk uyumu. LLM kullanılmaz.',
+        title: t('readings.sunCompatibilityTitle'),
+        description: t('readings.sunCompatibilityDesc'),
         isPaid: false,
-        refreshLabel: 'Sınırsız ücretsiz',
+        refreshLabel: t('readings.refreshUnlimited'),
       },
       {
         id: 'daisy-fortune',
-        title: 'Papatya ile Hızlı EVET/HAYIR Ritüeli',
-        description: 'Aklındaki soru için yaprakları tek tek kopararak hızlı evet/hayır yanıtı.',
+        title: t('readings.daisyTitle'),
+        description: t('readings.daisyDesc'),
         isPaid: false,
-        refreshLabel: 'Sınırsız ücretsiz',
+        refreshLabel: t('readings.refreshUnlimited'),
       },
       {
         id: 'fortune-cookie',
-        title: 'Şans Kurabiyesi',
-        description: 'Kısa ve motive edici günlük mesaj.',
+        title: t('readings.fortuneCookieTitle'),
+        description: t('readings.fortuneCookieDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'magic-ball',
-        title: 'Sihirli Küre',
-        description: 'Tek soru için hızlı ve eğlenceli yanıt.',
+        title: t('readings.magicBallTitle'),
+        description: t('readings.magicBallDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-affirmation',
-        title: 'Günlük Olumlamalar',
-        description: 'Her gün için kısa, güçlendirici olumlama metni.',
+        title: t('readings.dailyAffirmationTitle'),
+        description: t('readings.dailyAffirmationDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-quote',
-        title: 'Günlük İlham',
-        description: 'Ünlü isimlerden ilham veren gerçek alıntılar.',
+        title: t('readings.dailyQuoteTitle'),
+        description: t('readings.dailyQuoteDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-runes',
-        title: 'Günlük Rune Taşı Mesajı',
-        description: 'Günün runesi ve kısa anlamı.',
+        title: t('readings.dailyRunesTitle'),
+        description: t('readings.dailyRunesDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-i-ching',
-        title: 'Günlük I-Ching',
-        description: 'Günlük hexagram odaklı kısa içgörü.',
+        title: t('readings.dailyIChingTitle'),
+        description: t('readings.dailyIChingDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-tarot',
-        title: 'Günlük Tek Tarot Kartı',
-        description: 'Günlük enerjiye yönelik tek kartlık genel açılım.',
+        title: t('readings.dailyTarotTitle'),
+        description: t('readings.dailyTarotDesc'),
         isPaid: true,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-angel',
-        title: 'Günlük Melek Kartı',
-        description: 'Günlük niyet ve rehberlik odaklı tek kartlık okuma.',
+        title: t('readings.dailyAngelTitle'),
+        description: t('readings.dailyAngelDesc'),
         isPaid: true,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-numerology',
-        title: 'Günün Numerolojisi',
-        description: 'Tarihten hesaplanan genel gün enerjisi yorumu.',
+        title: t('readings.dailyNumerologyTitle'),
+        description: t('readings.dailyNumerologyDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
       {
         id: 'daily-angel-number',
-        title: 'Günün Uğurlu Melek Sayısı',
-        description: 'Güne özel melek sayısı ve kısa anlamı.',
+        title: t('readings.dailyAngelNumberTitle'),
+        description: t('readings.dailyAngelNumberDesc'),
         isPaid: false,
-        refreshLabel: 'Her gün yenilenir',
+        refreshLabel: t('readings.refreshDaily'),
       },
     ],
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -310,7 +313,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         setInfoModal({
           visible: true,
           title: APP_NAME,
-          message: 'Okuma hazırlayabilmemiz için önce bir profil oluşturmalı veya seçmelisin.',
+          message: t('modals.needProfileForReading'),
         });
         setSpeechMode('hidden');
         return;
@@ -339,7 +342,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
             profile: selectedProfile,
           });
           if (!result) {
-            throw new Error('Genel astro şu an hazırlanamadı. Lütfen birazdan tekrar dene.');
+            throw new Error(t('readings.generalAstroNotReady'));
           }
           setAstroReveal({ title: item.title, text: result.text });
           setInfoAction('personalAstro');
@@ -484,7 +487,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         setInfoModal({
           visible: true,
           title: retryMessage?.title || APP_NAME,
-          message: retryMessage?.message || err?.message || 'Şu an metin üretilemedi, lütfen tekrar dene.',
+          message: retryMessage?.message || err?.message || t('readings.textGenerationFailed'),
         });
         setInfoAction(null);
         setSpeechMode('hidden');
@@ -492,7 +495,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         setIsGenerating(false);
       }
     },
-    [isGenerating, selectedProfile],
+    [isGenerating, selectedProfile, t],
   );
 
   const handleGeneralReadingPress = useCallback(
@@ -510,7 +513,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         setInfoModal({
           visible: true,
           title: APP_NAME,
-          message: 'Okuma hazırlayabilmemiz için önce bir profil oluşturmalı veya seçmelisin.',
+          message: t('modals.needProfileForReading'),
         });
         setSpeechMode('hidden');
         return;
@@ -521,7 +524,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         title: item.title,
       });
     },
-    [navigation, selectedProfile],
+    [navigation, selectedProfile, t],
   );
 
   // Ozan: genel okumada ayrı "Okumayı Başlat" butonu yok; karta dokununca okuma
@@ -542,7 +545,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
       setInfoModal({
         visible: true,
         title: APP_NAME,
-        message: 'Okuma hazırlayabilmemiz için önce bir profil oluşturmalı veya seçmelisin.',
+        message: t('modals.needProfileForReading'),
       });
       setSpeechMode('hidden');
       return;
@@ -552,15 +555,15 @@ export function GeneralReadingsScreen({ navigation }: Props) {
       readingId: reading.id,
       title: reading.title,
     });
-  }, [items, navigation, selectedProfile]);
+  }, [items, navigation, selectedProfile, t]);
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Kimin İçin Okuyoruz?</Text>
-          <Text style={styles.helperText}>Önce profili seç, sonra masadaki okuma türünü belirle.</Text>
+          <Text style={styles.panelTitle}>{t('readings.whoForReadingTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.whoForReadingHelper')}</Text>
           {profiles.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {profiles.map((profile) => {
@@ -574,20 +577,20 @@ export function GeneralReadingsScreen({ navigation }: Props) {
                     }}
                   >
                     <Text style={styles.profileName}>{profile.displayName}</Text>
-                    <Text style={styles.profileMeta}>{profileBadge(profile)}</Text>
+                    <Text style={styles.profileMeta}>{profileBadge(profile, t)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
           ) : (
             <View style={styles.emptyProfileBox}>
-              <Text style={styles.emptyProfileText}>Henüz seçim yapabileceğin bir profil yok. Profil Ayarlarına gidip profil oluşturmalısın.</Text>
+              <Text style={styles.emptyProfileText}>{t('profile.noProfilesYet')}</Text>
               <View style={styles.emptyProfileActions}>
                 <TouchableOpacity style={styles.emptyProfileButton} onPress={() => navigation.navigate('ProfileSettings')}>
-                  <Text style={styles.emptyProfileButtonText}>Profil Ayarlarına Git</Text>
+                  <Text style={styles.emptyProfileButtonText}>{t('profile.goToProfileSettings')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.emptyProfileGhostButton} onPress={() => void loadProfiles()}>
-                  <Text style={styles.emptyProfileGhostButtonText}>Profilleri Yenile</Text>
+                  <Text style={styles.emptyProfileGhostButtonText}>{t('profile.refreshProfiles')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -595,8 +598,8 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>İkram Masası</Text>
-          <Text style={styles.helperText}>Genel okumalar daha kısa ve daha geneldir; yükselen veya ay burcu gibi doğum anı etkileri hesaplamalara katılmaz.</Text>
+          <Text style={styles.panelTitle}>{t('readings.treatTablePanelTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.treatTableHelper')}</Text>
           <View style={styles.grid}>
             {items.map((item) => {
               const selected = item.id === selectedReadingId;
@@ -627,11 +630,11 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         title={APP_NAME}
         message={
           pendingItem && selectedProfile
-            ? `${selectedProfile.displayName} için bakıyoruz, değil mi?`
-            : 'Bu profil için bakıyoruz, değil mi?'
+            ? t('readings.confirmProfileReading', { name: selectedProfile.displayName })
+            : t('readings.confirmProfileReadingFallback')
         }
-        confirmLabel="Evet"
-        cancelLabel="Hayır"
+        confirmLabel={t('common.yes')}
+        cancelLabel={t('common.no')}
         onConfirm={() => {
           const item = pendingItem;
           setConfirmVisible(false);
@@ -681,13 +684,13 @@ export function GeneralReadingsScreen({ navigation }: Props) {
           ) : undefined
         }
         hideMessageText={!!tarotReveal || !!angelReveal || !!angelNumberReveal || !!affirmationReveal || !!numerologyReveal || !!runeReveal || !!fortuneCookieReveal || !!magicBallReveal || !!iChingReveal || !!inspirationReveal || !!astroReveal}
-        confirmLabel="Tamam"
+        confirmLabel={t('common.ok')}
         cancelLabel={null}
         extraActionLabel={
           infoAction === 'profile'
-            ? 'Profil Ayarları'
+            ? t('common.profileSettings')
             : infoAction === 'personalAstro'
-              ? 'Kişiye Özel'
+              ? t('readings.personalShortcut')
               : null
         }
         onExtraAction={infoAction ? handleInfoExtraAction : undefined}

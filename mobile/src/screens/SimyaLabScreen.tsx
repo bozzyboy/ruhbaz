@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -9,6 +10,7 @@ import { BrandedScrollView } from '../components/BrandedScrollView';
 type Props = NativeStackScreenProps<RootStackParamList, 'SimyaLab'>;
 
 export function SimyaLabScreen({}: Props) {
+  const { t } = useTranslation();
   const [infoVisible, setInfoVisible] = useState(false);
 
   const showMockInfo = useCallback(() => {
@@ -19,35 +21,35 @@ export function SimyaLabScreen({}: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Simya Odası</Text>
+          <Text style={styles.panelTitle}>{t('home.simyaTitle')}</Text>
           <Text style={styles.helperText}>
-            Niyet, okuma tasarımı ve farklı araçları birleştiren deneysel alan. Buradaki bazı seçenekler şimdilik iskelet olarak hazır duruyor.
+            {t('readings.simyaHelper')}
           </Text>
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Manifest</Text>
+          <Text style={styles.panelTitle}>{t('readings.manifestSectionTitle')}</Text>
           <TouchableOpacity
             style={styles.wideCard}
             activeOpacity={0.84}
             onPress={showMockInfo}
           >
-            <Text style={styles.cardTitle}>Sohbetli Manifestleme</Text>
-            <Text style={styles.cardText}>Niyetini netleştir, dirençleri fark et ve adım adım odak kur.</Text>
-            <Text style={styles.cardMeta}>Bağlantı daha sonra ayrı manifest akışına taşınacak.</Text>
+            <Text style={styles.cardTitle}>{t('readings.typeManifestChat')}</Text>
+            <Text style={styles.cardText}>{t('readings.manifestChatDesc')}</Text>
+            <Text style={styles.cardMeta}>{t('readings.manifestChatMeta')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Kendi Okumanı Oluştur</Text>
+          <Text style={styles.panelTitle}>{t('readings.createYourOwnTitle')}</Text>
           <View style={styles.grid}>
             <TouchableOpacity style={styles.createCard} activeOpacity={0.84} onPress={showMockInfo}>
-              <Text style={styles.cardTitle}>Baştan Yarat</Text>
-              <Text style={styles.cardText}>Konu, araç, derinlik ve yorumcu seçimlerini sıfırdan kur.</Text>
+              <Text style={styles.cardTitle}>{t('readings.createFromScratchTitle')}</Text>
+              <Text style={styles.cardText}>{t('readings.createFromScratchDesc')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.createCard} activeOpacity={0.84} onPress={showMockInfo}>
-              <Text style={styles.cardTitle}>Combo Yarat</Text>
-              <Text style={styles.cardText}>Tarot, astroloji, numeroloji ve sezgisel araçları tek akışta birleştir.</Text>
+              <Text style={styles.cardTitle}>{t('readings.createComboTitle')}</Text>
+              <Text style={styles.cardText}>{t('readings.createComboDesc')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -55,9 +57,9 @@ export function SimyaLabScreen({}: Props) {
 
       <BrandedConfirmModal
         visible={infoVisible}
-        title="Yakında"
-        message="Bu alanın seçim modeli hazır; okuma motoruna bağlantısını sonraki adımda ekleyeceğiz."
-        confirmLabel="Tamam"
+        title={t('modals.comingSoonTitle')}
+        message={t('modals.comingSoonEngineMessage')}
+        confirmLabel={t('common.ok')}
         cancelLabel={null}
         onConfirm={() => setInfoVisible(false)}
         onCancel={() => setInfoVisible(false)}

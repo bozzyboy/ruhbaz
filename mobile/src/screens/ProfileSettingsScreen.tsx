@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { getAppLanguage, setAppLanguage, type AppLanguage } from '../i18n';
 import type { RootStackParamList } from '../../App';
 import { BrandedPicker } from '../components/BrandedPicker';
@@ -113,18 +114,18 @@ const EMPTY_BIRTH: BirthInfo = {
 
 const YEAR_OPTIONS = Array.from({ length: 90 }, (_, index) => String(new Date().getFullYear() - index));
 const MONTH_OPTIONS = [
-  { value: '01', label: 'Ocak' },
-  { value: '02', label: 'Şubat' },
-  { value: '03', label: 'Mart' },
-  { value: '04', label: 'Nisan' },
-  { value: '05', label: 'Mayıs' },
-  { value: '06', label: 'Haziran' },
-  { value: '07', label: 'Temmuz' },
-  { value: '08', label: 'Ağustos' },
-  { value: '09', label: 'Eylül' },
-  { value: '10', label: 'Ekim' },
-  { value: '11', label: 'Kasım' },
-  { value: '12', label: 'Aralık' },
+  { value: '01', labelKey: 'profile.monthJanuary' },
+  { value: '02', labelKey: 'profile.monthFebruary' },
+  { value: '03', labelKey: 'profile.monthMarch' },
+  { value: '04', labelKey: 'profile.monthApril' },
+  { value: '05', labelKey: 'profile.monthMay' },
+  { value: '06', labelKey: 'profile.monthJune' },
+  { value: '07', labelKey: 'profile.monthJuly' },
+  { value: '08', labelKey: 'profile.monthAugust' },
+  { value: '09', labelKey: 'profile.monthSeptember' },
+  { value: '10', labelKey: 'profile.monthOctober' },
+  { value: '11', labelKey: 'profile.monthNovember' },
+  { value: '12', labelKey: 'profile.monthDecember' },
 ];
 const DAY_OPTIONS = Array.from({ length: 31 }, (_, index) => String(index + 1).padStart(2, '0'));
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
@@ -136,82 +137,82 @@ function sortTurkishLabels<T extends string>(items: readonly T[]): T[] {
   return [...items].sort((a, b) => a.localeCompare(b, 'tr-TR', { sensitivity: 'base' }));
 }
 
-function labelForRelationship(value: RelationshipPrimary) {
+function labelForRelationship(value: RelationshipPrimary, t: TFunction) {
   switch (value) {
     case 'kendi':
-      return 'Kendim';
+      return t('profile.relationshipSelf');
     case 'es':
-      return 'Eş';
+      return t('profile.relationshipSpouse');
     case 'sevgili':
-      return 'Sevgili';
+      return t('profile.relationshipLover');
     case 'eski_sevgili':
-      return 'Eski sevgili / eski eş';
+      return t('profile.relationshipExLover');
     case 'sevgili_adayi':
-      return 'Sevgili adayı';
+      return t('profile.relationshipLoverCandidate');
     case 'anne':
-      return 'Anne';
+      return t('profile.relationshipMother');
     case 'baba':
-      return 'Baba';
+      return t('profile.relationshipFather');
     case 'kardes':
-      return 'Kardeş';
+      return t('profile.relationshipSibling');
     case 'cocuk':
-      return 'Çocuk';
+      return t('profile.relationshipChild');
     case 'arkadas':
-      return 'Arkadaş';
+      return t('profile.relationshipFriend');
     case 'evcil_hayvan':
-      return 'Evcil hayvan';
+      return t('profile.relationshipPet');
     case 'akraba':
-      return 'Akraba';
+      return t('profile.relationshipRelative');
     case 'diger':
-      return 'Diğer';
+      return t('profile.relationshipOther');
   }
 }
 
-function labelForRelative(value: RelationshipRelativeDetail) {
-  if (value === 'diger_akraba') return 'Diğer akraba';
-  const labels: Record<RelationshipRelativeDetail, string> = {
-    teyze: 'Teyze',
-    dayi: 'Dayı',
-    hala: 'Hala',
-    amca: 'Amca',
-    kuzen: 'Kuzen',
-    dede: 'Dede',
-    nine: 'Nine',
-    anneanne: 'Anneanne',
-    babaanne: 'Babaanne',
-    torun: 'Torun',
-    yegen: 'Yeğen',
-    diger_akraba: 'Diğer akraba',
+function labelForRelative(value: RelationshipRelativeDetail, t: TFunction) {
+  if (value === 'diger_akraba') return t('profile.relativeOther');
+  const labelKeys: Record<RelationshipRelativeDetail, string> = {
+    teyze: 'profile.relativeAuntMaternal',
+    dayi: 'profile.relativeUncleMaternal',
+    hala: 'profile.relativeAuntPaternal',
+    amca: 'profile.relativeUnclePaternal',
+    kuzen: 'profile.relativeCousin',
+    dede: 'profile.relativeGrandfather',
+    nine: 'profile.relativeGrandmother',
+    anneanne: 'profile.relativeGrandmotherMaternal',
+    babaanne: 'profile.relativeGrandmotherPaternal',
+    torun: 'profile.relativeGrandchild',
+    yegen: 'profile.relativeNiece',
+    diger_akraba: 'profile.relativeOther',
   };
-  return labels[value];
+  return t(labelKeys[value]);
 }
 
-function labelForGender(value: ProfileGender | 'bos') {
+function labelForGender(value: ProfileGender | 'bos', t: TFunction) {
   switch (value) {
     case 'bos':
-      return 'Seç';
+      return t('profile.genderSelect');
     case 'kadin':
-      return 'Kadın';
+      return t('profile.genderFemale');
     case 'erkek':
-      return 'Erkek';
+      return t('profile.genderMale');
     case 'hicbiri':
-      return 'Hiçbiri';
+      return t('profile.genderNone');
     case 'belirtmek_istemiyorum':
-      return 'Belirtmek istemiyorum';
+      return t('profile.genderPreferNotToSay');
   }
 }
 
-function profileBadge(profile: SubjectProfile) {
+function profileBadge(profile: SubjectProfile, t: TFunction) {
   if (profile.relationshipPrimary === 'evcil_hayvan') {
-    return profile.relationshipFreeform || 'Evcil hayvan';
+    return profile.relationshipFreeform || t('profile.relationshipPet');
   }
   if (profile.relationshipPrimary !== 'akraba') {
-    return labelForRelationship(profile.relationshipPrimary);
+    return labelForRelationship(profile.relationshipPrimary, t);
   }
   if (profile.relationshipDetail === 'diger_akraba') {
-    return profile.relationshipFreeform || 'Akraba';
+    return profile.relationshipFreeform || t('profile.relationshipRelative');
   }
-  return profile.relationshipDetail ? labelForRelative(profile.relationshipDetail) : 'Akraba';
+  return profile.relationshipDetail ? labelForRelative(profile.relationshipDetail, t) : t('profile.relationshipRelative');
 }
 
 function emptyDraft(isPrimary: boolean): ProfileDraft {
@@ -359,14 +360,14 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
         return;
       }
       if (!result.backups.length) {
-        showDataMessage('Seçtiğin klasörde "ruhbaz-yedek-...json" dosyası bulunamadı.');
+        showDataMessage(t('profile.backupNotFoundMessage'));
         return;
       }
       setRestoreCandidate(result.backups[0]);
     } finally {
       setDataBusy(false);
     }
-  }, [dataBusy, showDataMessage]);
+  }, [dataBusy, showDataMessage, t]);
 
   const handleConfirmRestore = useCallback(async () => {
     const candidate = restoreCandidate;
@@ -393,14 +394,14 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     try {
       const result = await wipeAllLocalData();
       if (result.ok) {
-        showDataMessage('Tüm verilerin silindi. Uygulamayı tamamen kapatıp yeniden açtığında sıfırdan başlayacaksın.');
+        showDataMessage(t('profile.wipeDoneMessage'));
       } else {
         showDataMessage(`Silme tamamlanamadı: ${result.message || 'bilinmeyen hata'}`);
       }
     } finally {
       setDataBusy(false);
     }
-  }, [showDataMessage]);
+  }, [showDataMessage, t]);
 
   const primaryProfile = state ? getPrimaryProfile(state) : null;
   const selectedProfile = useMemo(
@@ -492,22 +493,22 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
   const handleSaveProfile = useCallback(async () => {
     const trimmedName = profileDraft.displayName.trim();
     if (!trimmedName) {
-      setValidationModal({ visible: true, message: 'Profil için isim veya nick yazmalısın.' });
+      setValidationModal({ visible: true, message: t('profile.nameRequired') });
       return;
     }
 
     if (profileDraft.gender === 'bos') {
-      setValidationModal({ visible: true, message: 'Profil için cinsiyet seçmelisin.' });
+      setValidationModal({ visible: true, message: t('profile.genderRequired') });
       return;
     }
 
     if (!profileDraft.birthYear || !profileDraft.birthMonth || !profileDraft.birthDay) {
-      setValidationModal({ visible: true, message: 'Profil için doğum tarihini yıl, ay ve gün olarak seçmelisin.' });
+      setValidationModal({ visible: true, message: t('profile.birthDateRequired') });
       return;
     }
 
     if (needsRelationshipFreeform(profileDraft) && !profileDraft.relationshipFreeform.trim()) {
-      setValidationModal({ visible: true, message: 'Bu yakınlık derecesi için kısa bir açıklama yazmalısın.' });
+      setValidationModal({ visible: true, message: t('profile.relationshipFreeformRequired') });
       return;
     }
 
@@ -552,7 +553,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     setSelectedProfileId(targetId);
     setProfileModalVisible(false);
     setProfileDraft(emptyDraft(!getPrimaryProfile(next)));
-  }, [editingIsPrimary, profileDraft]);
+  }, [editingIsPrimary, profileDraft, t]);
 
   const handleDeleteProfile = useCallback(async () => {
     if (!profileDraft.profileId) return;
@@ -577,8 +578,8 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
         <BrandedScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showScrollToTop>
           <View style={styles.panel}>
-            <Text style={styles.panelTitle}>Profil Ayarları</Text>
-            <Text style={styles.helperText}>Profili seçmek için karta dokun, düzenlemek için Düzenle butonunu kullan.</Text>
+            <Text style={styles.panelTitle}>{t('common.profileSettings')}</Text>
+            <Text style={styles.helperText}>{t('profile.profilesHelper')}</Text>
             <View style={styles.subjectGrid}>
               {state?.profiles.map((profile) => {
                 const selected = profile.profileId === selectedProfileId;
@@ -593,7 +594,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       onPress={() => setSelectedProfileId(profile.profileId)}
                     >
                       <Text style={styles.subjectName}>{profile.displayName}</Text>
-                      <Text style={styles.subjectMeta}>{profileBadge(profile)}</Text>
+                      <Text style={styles.subjectMeta}>{profileBadge(profile, t)}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       accessibilityRole="button"
@@ -602,7 +603,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       style={styles.editProfileButton}
                       onPress={() => openProfileDetailModal(profile)}
                     >
-                      <Text style={styles.editProfileButtonText}>Düzenle</Text>
+                      <Text style={styles.editProfileButtonText}>{t('profile.editButton')}</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -610,7 +611,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
             </View>
             <TouchableOpacity style={styles.addProfileButton} onPress={openNewProfileModal}>
               <Text style={styles.addProfilePlus}>+</Text>
-              <Text style={styles.addProfileButtonText}>Profil Ekle</Text>
+              <Text style={styles.addProfileButtonText}>{t('profile.addProfile')}</Text>
             </TouchableOpacity>
 
             {selectedProfile ? (
@@ -711,16 +712,16 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 showScrollToTop
               >
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{editingExistingProfile ? 'Profil Detayları' : 'Profil Oluştur'}</Text>
+                  <Text style={styles.modalTitle}>{editingExistingProfile ? t('profile.profileDetailsTitle') : t('profile.createProfile')}</Text>
                   <TouchableOpacity onPress={() => setProfileModalVisible(false)}>
-                    <Text style={styles.modalClose}>Kapat</Text>
+                    <Text style={styles.modalClose}>{t('common.close')}</Text>
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.inlineLabel}>İsim veya nick</Text>
+                <Text style={styles.inlineLabel}>{t('profile.nameLabel')}</Text>
                 <TextInput
                   style={styles.textInput}
-                  placeholder="İsim veya nick"
+                  placeholder={t('profile.nameLabel')}
                   placeholderTextColor="rgba(255,255,255,0.35)"
                   value={profileDraft.displayName}
                   onChangeText={(value) => handleDraftChange('displayName', value)}
@@ -728,12 +729,12 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
 
                 {!editingIsPrimary ? (
                   <>
-                    <Text style={styles.inlineLabel}>Yakınlık derecesi</Text>
+                    <Text style={styles.inlineLabel}>{t('profile.relationshipLabel')}</Text>
                     <BrandedPicker
                       selectedValue={profileDraft.relationshipPrimary}
                       onValueChange={(value) => handleDraftChange('relationshipPrimary', value)}
                       options={RELATIONSHIP_OPTIONS.filter((item) => item !== 'kendi').map((option) => ({
-                        label: labelForRelationship(option),
+                        label: labelForRelationship(option, t),
                         value: option,
                       }))}
                     />
@@ -742,21 +743,21 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
 
                 {profileDraft.relationshipPrimary === 'akraba' && !editingIsPrimary ? (
                   <>
-                    <Text style={styles.inlineLabel}>Akrabalık tipi</Text>
+                    <Text style={styles.inlineLabel}>{t('profile.relativeTypeLabel')}</Text>
                     <BrandedPicker
                       selectedValue={profileDraft.relationshipDetail}
                       onValueChange={(value) => handleDraftChange('relationshipDetail', value)}
-                      options={RELATIVE_DETAILS.map((option) => ({ label: labelForRelative(option), value: option }))}
+                      options={RELATIVE_DETAILS.map((option) => ({ label: labelForRelative(option, t), value: option }))}
                     />
                   </>
                 ) : null}
 
                 {needsRelationshipFreeform(profileDraft) && !editingIsPrimary ? (
                   <>
-                    <Text style={styles.inlineLabel}>{profileDraft.relationshipPrimary === 'evcil_hayvan' ? 'Tür' : 'Açıklama'}</Text>
+                    <Text style={styles.inlineLabel}>{profileDraft.relationshipPrimary === 'evcil_hayvan' ? t('profile.petTypeLabel') : t('profile.explanationLabel')}</Text>
                     <TextInput
                       style={styles.textInput}
-                      placeholder={profileDraft.relationshipPrimary === 'evcil_hayvan' ? 'Kedi, köpek...' : 'Bu profil sana ne oluyor?'}
+                      placeholder={profileDraft.relationshipPrimary === 'evcil_hayvan' ? t('profile.petTypePlaceholder') : t('profile.explanationPlaceholder')}
                       placeholderTextColor="rgba(255,255,255,0.35)"
                       value={profileDraft.relationshipFreeform}
                       onChangeText={(value) => handleDraftChange('relationshipFreeform', value)}
@@ -764,69 +765,69 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                   </>
                 ) : null}
 
-                <Text style={styles.inlineLabel}>Cinsiyet</Text>
+                <Text style={styles.inlineLabel}>{t('profile.genderLabel')}</Text>
                 <BrandedPicker
                   selectedValue={profileDraft.gender}
                   onValueChange={(value) => handleDraftChange('gender', value)}
-                  options={GENDER_OPTIONS.map((option) => ({ label: labelForGender(option), value: option }))}
+                  options={GENDER_OPTIONS.map((option) => ({ label: labelForGender(option, t), value: option }))}
                 />
 
-                <Text style={styles.inlineLabel}>Doğum tarihi</Text>
-                <Text style={styles.helperText}>İsim, yakınlık, cinsiyet ve doğum tarihi profili kaydetmek için yeterli. Doğum saati ve doğum yeri isteğe bağlıdır; doğum haritası veya kişiye özel astrolojide gerekirse tamamlatılır.</Text>
+                <Text style={styles.inlineLabel}>{t('profile.birthDateLabel')}</Text>
+                <Text style={styles.helperText}>{t('profile.birthDateHelper')}</Text>
                 <View style={styles.wheelRow}>
                   <View style={styles.wheelColumn}>
-                    <Text style={styles.wheelLabel}>Yıl</Text>
+                    <Text style={styles.wheelLabel}>{t('profile.yearLabel')}</Text>
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthYear)}
                       onValueChange={(value) => handleDraftChange('birthYear', value === 'sec' ? '' : value)}
-                      options={[{ label: 'Yıl', value: 'sec' }, ...YEAR_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={[{ label: t('profile.yearLabel'), value: 'sec' }, ...YEAR_OPTIONS.map((option) => ({ label: option, value: option }))]}
                       compact
                     />
                   </View>
                   <View style={styles.wheelColumn}>
-                    <Text style={styles.wheelLabel}>Ay</Text>
+                    <Text style={styles.wheelLabel}>{t('profile.monthLabel')}</Text>
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthMonth)}
                       onValueChange={(value) => handleDraftChange('birthMonth', value === 'sec' ? '' : value)}
-                      options={[{ label: 'Ay', value: 'sec' }, ...MONTH_OPTIONS.map((option) => ({ label: option.label, value: option.value }))]}
+                      options={[{ label: t('profile.monthLabel'), value: 'sec' }, ...MONTH_OPTIONS.map((option) => ({ label: t(option.labelKey), value: option.value }))]}
                       compact
                     />
                   </View>
                   <View style={styles.wheelColumn}>
-                    <Text style={styles.wheelLabel}>Gün</Text>
+                    <Text style={styles.wheelLabel}>{t('profile.dayLabel')}</Text>
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthDay)}
                       onValueChange={(value) => handleDraftChange('birthDay', value === 'sec' ? '' : value)}
-                      options={[{ label: 'Gün', value: 'sec' }, ...DAY_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={[{ label: t('profile.dayLabel'), value: 'sec' }, ...DAY_OPTIONS.map((option) => ({ label: option, value: option }))]}
                       compact
                     />
                   </View>
                 </View>
 
-                <Text style={styles.inlineLabel}>Doğum saati (isteğe bağlı)</Text>
+                <Text style={styles.inlineLabel}>{t('profile.birthTimeLabel')}</Text>
                 <View style={styles.wheelRow}>
                   <View style={styles.wheelColumn}>
-                    <Text style={styles.wheelLabel}>Saat</Text>
+                    <Text style={styles.wheelLabel}>{t('profile.hourLabel')}</Text>
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthHour)}
                       onValueChange={(value) => handleDraftChange('birthHour', value === 'sec' ? '' : value)}
-                      options={[{ label: 'Saat', value: 'sec' }, ...HOUR_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={[{ label: t('profile.hourLabel'), value: 'sec' }, ...HOUR_OPTIONS.map((option) => ({ label: option, value: option }))]}
                       compact
                     />
                   </View>
                   <View style={styles.wheelColumn}>
-                    <Text style={styles.wheelLabel}>Dakika</Text>
+                    <Text style={styles.wheelLabel}>{t('profile.minuteLabel')}</Text>
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthMinute)}
                       onValueChange={(value) => handleDraftChange('birthMinute', value === 'sec' ? '' : value)}
-                      options={[{ label: 'Dakika', value: 'sec' }, ...MINUTE_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={[{ label: t('profile.minuteLabel'), value: 'sec' }, ...MINUTE_OPTIONS.map((option) => ({ label: option, value: option }))]}
                       compact
                     />
                   </View>
                 </View>
 
-                <Text style={styles.inlineLabel}>Doğum yeri (astroloji için gerekli)</Text>
-                <Text style={styles.helperText}>Şimdi boş bırakabilirsin. Doğum haritası ve kişiye özel astroloji için ülke ve şehir bilgisi gerekir; ilçe ve saat varsa yorumu keskinleştirir.</Text>
+                <Text style={styles.inlineLabel}>{t('profile.birthPlaceLabel')}</Text>
+                <Text style={styles.helperText}>{t('profile.birthPlaceHelper')}</Text>
                 <BrandedPicker
                   selectedValue={pickerValue(profileDraft.birthCountry)}
                   onValueChange={(value) => {
@@ -834,7 +835,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     handleDraftChange('birthCity', '');
                     handleDraftChange('birthDistrict', '');
                   }}
-                  options={[{ label: 'Ülke seç', value: 'sec' }, ...COUNTRY_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                  options={[{ label: t('profile.countrySelect'), value: 'sec' }, ...COUNTRY_OPTIONS.map((option) => ({ label: option, value: option }))]}
                 />
                 {isTurkeyBirthCountry ? (
                   <BrandedPicker
@@ -848,12 +849,12 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       handleDraftChange('birthCity', value);
                       handleDraftChange('birthDistrict', '');
                     }}
-                    options={[{ label: 'Şehir seç', value: 'sec' }, ...turkeyCities.map((option) => ({ label: option, value: option }))]}
+                    options={[{ label: t('profile.citySelect'), value: 'sec' }, ...turkeyCities.map((option) => ({ label: option, value: option }))]}
                   />
                 ) : (
                   <TextInput
                     style={styles.textInput}
-                    placeholder="Şehir"
+                    placeholder={t('profile.cityPlaceholder')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     value={profileDraft.birthCity}
                     onChangeText={(value) => handleDraftChange('birthCity', value)}
@@ -877,16 +878,16 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       handleDraftChange('birthDistrict', value);
                     }}
                     options={[
-                      { label: 'İlçe seç', value: 'sec' },
+                      { label: t('profile.districtSelect'), value: 'sec' },
                       ...selectedCityDistricts.map((option) => ({ label: option, value: option })),
-                      { label: 'Diğer', value: DISTRICT_OTHER_VALUE },
+                      { label: t('profile.districtOther'), value: DISTRICT_OTHER_VALUE },
                     ]}
                   />
                 ) : null}
                 {showDistrictFreeform ? (
                   <TextInput
                     style={styles.textInput}
-                    placeholder="İlçe, belde, bucak veya kaza"
+                    placeholder={t('profile.districtDetailedPlaceholder')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     value={profileDraft.birthDistrict === DISTRICT_OTHER_VALUE ? '' : profileDraft.birthDistrict}
                     onChangeText={(value) => handleDraftChange('birthDistrict', value)}
@@ -897,7 +898,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 {!isTurkeyBirthCountry ? (
                   <TextInput
                     style={styles.textInput}
-                    placeholder="İlçe"
+                    placeholder={t('profile.districtPlaceholder')}
                     placeholderTextColor="rgba(255,255,255,0.35)"
                     value={profileDraft.birthDistrict}
                     onChangeText={(value) => handleDraftChange('birthDistrict', value)}
@@ -907,12 +908,12 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                 ) : null}
 
                 <TouchableOpacity style={styles.primaryButton} onPress={() => void handleSaveProfile()}>
-                  <Text style={styles.primaryButtonText}>{editingExistingProfile ? 'Profili Güncelle' : 'Profili Kaydet'}</Text>
+                  <Text style={styles.primaryButtonText}>{editingExistingProfile ? t('profile.updateProfileButton') : t('profile.saveProfileButton')}</Text>
                 </TouchableOpacity>
 
                 {editingExistingProfile && profileDraft.profileId ? (
                   <TouchableOpacity style={styles.deleteButton} onPress={() => setDeleteConfirmVisible(true)}>
-                    <Text style={styles.deleteButtonText}>Profili Sil</Text>
+                    <Text style={styles.deleteButtonText}>{t('profile.deleteProfileButton')}</Text>
                   </TouchableOpacity>
                 ) : null}
               </BrandedScrollView>
@@ -923,16 +924,16 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
 
       <BrandedConfirmModal
         visible={deleteConfirmVisible}
-        title="Profili Sil"
+        title={t('profile.deleteProfileButton')}
         message={
           deletingPrimaryProfile
-            ? 'Ana profilini silersen bu profile bağlı hafıza, okuma geçmişi ve oluşturduğun diğer tüm profiller de silinir. Bu işlem geri alınamaz. Emin misin?'
+            ? t('profile.deletePrimaryWarning')
             : deleteTargetProfile
-              ? `${deleteTargetProfile.displayName} profili ve bağlı kayıtları silinsin mi?`
-              : 'Bu profili silmek istiyor musun?'
+              ? t('profile.deleteProfileMessage', { name: deleteTargetProfile.displayName })
+              : t('profile.deleteProfileFallback')
         }
-        confirmLabel="Evet - Sil"
-        cancelLabel="Hayır"
+        confirmLabel={t('profile.yesDelete')}
+        cancelLabel={t('common.no')}
         onCancel={() => setDeleteConfirmVisible(false)}
         onConfirm={() => {
           void handleDeleteProfile();
@@ -940,19 +941,19 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
       />
       <BrandedConfirmModal
         visible={validationModal.visible}
-        title="Eksik Bilgi"
+        title={t('profile.missingInfoTitle')}
         message={validationModal.message}
-        confirmLabel="Tamam"
+        confirmLabel={t('common.ok')}
         cancelLabel={null}
         onCancel={() => setValidationModal({ visible: false, message: '' })}
         onConfirm={() => setValidationModal({ visible: false, message: '' })}
       />
       <BrandedConfirmModal
         visible={Boolean(restoreCandidate)}
-        title="Yedeği Geri Yükle"
-        message={`"${restoreCandidate?.name || ''}" geri yüklensin mi?\n\nDİKKAT: Cihazdaki MEVCUT profiller, okumalar ve hafıza bu yedekteki verilerle DEĞİŞTİRİLİR. Bu işlem geri alınamaz.`}
-        confirmLabel="Evet, Üzerine Yaz"
-        cancelLabel="Vazgeç"
+        title={t('settings.restoreButton')}
+        message={t('profile.restoreConfirmMessage', { name: restoreCandidate?.name || '' })}
+        confirmLabel={t('profile.yesOverwrite')}
+        cancelLabel={t('profile.cancelAction')}
         onCancel={() => setRestoreCandidate(null)}
         onConfirm={() => {
           void handleConfirmRestore();
@@ -960,19 +961,19 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
       />
       <BrandedConfirmModal
         visible={wipeStep === 1}
-        title="Tüm Verimi Sil"
-        message="Cihazdaki TÜM profiller, okumalar, hafıza ve ayarlar silinecek. Bu işlem geri alınamaz. Devam etmeden önce yedek almak isteyebilirsin."
-        confirmLabel="Devam"
-        cancelLabel="Vazgeç"
+        title={t('settings.wipeButton')}
+        message={t('profile.wipeWarningMessage')}
+        confirmLabel={t('profile.continueLabel')}
+        cancelLabel={t('profile.cancelAction')}
         onCancel={() => setWipeStep(0)}
         onConfirm={() => setWipeStep(2)}
       />
       <BrandedConfirmModal
         visible={wipeStep === 2}
-        title="Son Onay"
-        message="Emin misin? Bu, son adım: tüm verin kalıcı olarak silinecek."
-        confirmLabel="Evet, Hepsini Sil"
-        cancelLabel="Vazgeç"
+        title={t('profile.finalConfirmTitle')}
+        message={t('profile.finalConfirmMessage')}
+        confirmLabel={t('profile.yesDeleteAll')}
+        cancelLabel={t('profile.cancelAction')}
         onCancel={() => setWipeStep(0)}
         onConfirm={() => {
           void handleConfirmWipe();

@@ -314,12 +314,12 @@ export default function App() {
             component={MbtiTestScreen}
             options={({ route }) => {
               const titles = {
-                mbti: 'MBTI Kişilik Testi',
-                compatibility: 'Uyumluluk Testi',
-                'big-five': 'Beş Faktör Testi',
-                attachment: 'Bağlanma Stili Testi',
-                values: 'Değerler Pusulası',
-                'coping-style': 'Stresle Başa Çıkma Testi',
+                mbti: t('nav.testMbti'),
+                compatibility: t('nav.testCompatibility'),
+                'big-five': t('nav.testBigFive'),
+                attachment: t('nav.testAttachment'),
+                values: t('nav.testValues'),
+                'coping-style': t('nav.testCopingStyle'),
               };
               return { title: titles[route.params.testId || 'mbti'] };
             }}

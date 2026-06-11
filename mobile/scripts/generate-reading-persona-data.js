@@ -109,3 +109,55 @@ const source = `// Generated from mobile/src/identity/assistants/reading-family/
 
 fs.writeFileSync(outputPath, source, 'utf8');
 console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length} personas.`);
+
+// --- EN sürümü (Faz 4): identity.en.md varsa onu kullanır, yoksa TR'ye düşer ---
+// EN ses dosyaları TASLAK aşamasındayken bile build kırılmaz (fallback TR).
+// Her EN systemBody'ye çıktı-dili sözleşmesi eklenir (TR-fallback'te bile EN yanıt güvencesi).
+const OUTPUT_LANGUAGE_BLOCK_EN = [
+  '# Output Language',
+  '',
+  'The user is using the app in English. Respond entirely in natural, fluent English.',
+  'Never mix Turkish words into user-visible text. Use the vocabulary of "symbolic reading /',
+  'interpretation / reflection"; never call yourself a fortune teller or psychic, and never',
+  'promise future outcomes — keep everything in the language of possibility and invitation.',
+].join('\n');
+const entriesEn = fs
+  .readdirSync(identityRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => {
+    const enPath = path.join(identityRoot, entry.name, 'identity.en.md');
+    const trPath = path.join(identityRoot, entry.name, 'identity.md');
+    const usedPath = fs.existsSync(enPath) ? enPath : trPath;
+    const raw = fs.readFileSync(usedPath, 'utf8');
+    const meta = parseFrontmatter(raw);
+    if (!meta.id) throw new Error(`${usedPath}: missing id.`);
+    return [
+      meta.id,
+      {
+        assistantId: meta.id,
+        displayName: meta.displayName,
+        age: meta.age,
+        primaryDomainLabel: meta.primaryDomainLabel,
+        systemBody: `${stripClosingLibrary(meta.body)}\n\n${OUTPUT_LANGUAGE_BLOCK_EN}`,
+        closingLibrary: parseClosingLibrary(meta.body, `${meta.id} (en)`),
+        isEnglishSource: fs.existsSync(enPath),
+      },
+    ];
+  })
+  .sort(([a], [b]) => a.localeCompare(b, 'tr'));
+
+const enFallbackCount = entriesEn.filter(([, value]) => !value.isEnglishSource).length;
+const dataEn = Object.fromEntries(entriesEn.map(([id, value]) => {
+  const { isEnglishSource, ...rest } = value;
+  return [id, rest];
+}));
+const commonEnPath = path.join(identityRoot, 'common.en.md');
+const commonIdentityBodyEn = fs.existsSync(commonEnPath)
+  ? fs.readFileSync(commonEnPath, 'utf8').trim()
+  : commonIdentityBody;
+const outputPathEn = path.join(root, 'src', 'services', 'readingPersonaData.en.ts');
+const sourceEn = `// Generated from mobile/src/identity/assistants/reading-family/*/identity.en.md and common.en.md (TR fallback when missing). Do not edit by hand.\n\nexport const COMMON_READING_IDENTITY_BODY_EN = ${JSON.stringify(commonIdentityBodyEn, null, 2)};\n\nexport const READING_PERSONA_DATA_EN = ${JSON.stringify(dataEn, null, 2)} as Record<string, { assistantId: string; displayName: string; age: number | null; primaryDomainLabel: string; systemBody: string; closingLibrary: Record<string, string[]> }>;\n`;
+fs.writeFileSync(outputPathEn, sourceEn, 'utf8');
+console.log(
+  `Generated ${path.relative(root, outputPathEn)} (${entriesEn.length} personas, ${enFallbackCount} TR-fallback).`,
+);

@@ -1,4 +1,5 @@
 import { COMMON_READING_IDENTITY_BODY } from './readingPersonaData';
+import { getCommonReadingIdentityBody } from './personaDataI18n';
 
 type ReadingCommonDomain = 'coffee' | 'palm' | 'paw' | 'general';
 
@@ -14,6 +15,14 @@ export const COMMON_READING_GUARDRAIL_BODY = stripMarkdownSection(
   stripMarkdownSection(COMMON_READING_IDENTITY_BODY, 'Vision Protocol'),
   'Implementation Notes',
 );
+
+/** Dil-duyarlı guardrail gövdesi (Faz 4): aktif dil EN ise common.en.md kaynaklı. */
+export function getCommonReadingGuardrailBody(): string {
+  return stripMarkdownSection(
+    stripMarkdownSection(getCommonReadingIdentityBody(), 'Vision Protocol'),
+    'Implementation Notes',
+  );
+}
 
 function coffeeVisionProtocol() {
   return [
@@ -56,5 +65,5 @@ export function commonReadingPromptForDomain(domain: ReadingCommonDomain) {
         : domain === 'paw'
           ? pawVisionProtocol()
           : '';
-  return [vision, COMMON_READING_GUARDRAIL_BODY].filter(Boolean).join('\n\n');
+  return [vision, getCommonReadingGuardrailBody()].filter(Boolean).join('\n\n');
 }

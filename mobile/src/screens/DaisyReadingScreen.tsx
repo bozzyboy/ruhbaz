@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Dimensions, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import Svg, { Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
@@ -14,6 +15,7 @@ const CARD_WIDTH = Math.min(Dimensions.get('window').width * 0.82, 360);
 const CARD_HEIGHT = (CARD_WIDTH * 650) / 400;
 
 export function DaisyReadingScreen({}: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [session, setSession] = useState<DaisyReadingSession | null>(null);
   const [pluckedCount, setPluckedCount] = useState(0);
@@ -72,9 +74,9 @@ export function DaisyReadingScreen({}: Props) {
             </View>
 
             <View style={styles.cardContent}>
-              <Text style={styles.title} adjustsFontSizeToFit numberOfLines={2}>Papatya ile Hızlı EVET/HAYIR Ritüeli</Text>
-              <Text style={styles.prompt}>Aklındaki soru için</Text>
-              <Text style={styles.yesNo}>EVET / HAYIR</Text>
+              <Text style={styles.title} adjustsFontSizeToFit numberOfLines={2}>{t('readings.daisyTitle')}</Text>
+              <Text style={styles.prompt}>{t('readings.daisyPrompt')}</Text>
+              <Text style={styles.yesNo}>{t('readings.daisyYesNoCaption')}</Text>
 
               <TouchableOpacity style={styles.daisyTouchArea} activeOpacity={0.92} onPress={pluckPetal} disabled={finished || !session}>
                 <Svg viewBox="0 0 260 260" width="100%" height="100%">
@@ -120,12 +122,19 @@ export function DaisyReadingScreen({}: Props) {
               <View style={styles.stateBox}>
                 {finished ? (
                   <Text style={styles.resultText}>
-                    Aklındaki sorunun yanıtı <Text style={styles.resultStrong}>{lastAnswer}</Text>
+                    {t('readings.daisyResultPrefix')}{' '}
+                    <Text style={styles.resultStrong}>
+                      {lastAnswer === 'EVET' ? t('readings.daisyAnswerYes') : t('readings.daisyAnswerNo')}
+                    </Text>
                   </Text>
                 ) : (
                   <>
-                    <Text style={styles.counterText}>{remaining} yaprak kaldı</Text>
-                    <Text style={styles.nextText}>Sıradaki yaprak: {nextAnswer}</Text>
+                    <Text style={styles.counterText}>{t('readings.daisyPetalsLeft', { count: remaining })}</Text>
+                    <Text style={styles.nextText}>
+                      {t('readings.daisyNextPetal', {
+                        answer: nextAnswer ? (nextAnswer === 'EVET' ? t('readings.daisyAnswerYes') : t('readings.daisyAnswerNo')) : '',
+                      })}
+                    </Text>
                   </>
                 )}
               </View>
@@ -134,7 +143,7 @@ export function DaisyReadingScreen({}: Props) {
         </View>
 
         <TouchableOpacity style={styles.primaryButton} onPress={() => void startNew()}>
-          <Text style={styles.primaryButtonText}>Yeni Papatya</Text>
+          <Text style={styles.primaryButtonText}>{t('readings.daisyNewButton')}</Text>
         </TouchableOpacity>
       </BrandedScrollView>
     </SafeAreaView>

@@ -2,6 +2,7 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedPicker } from '../components/BrandedPicker';
@@ -17,6 +18,7 @@ import {
 type Props = NativeStackScreenProps<RootStackParamList, 'SunCompatibility'>;
 
 export function SunCompatibilityScreen({}: Props) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [firstSign, setFirstSign] = useState<ZodiacSignId>('aries');
   const [secondSign, setSecondSign] = useState<ZodiacSignId>('libra');
@@ -32,16 +34,16 @@ export function SunCompatibilityScreen({}: Props) {
       <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Genel Burç Uyumu</Text>
+          <Text style={styles.panelTitle}>{t('readings.sunCompatibilityTitle')}</Text>
           <Text style={styles.helperText}>
-            Detaysız genel uyumdur; yalnızca iki kişinin Güneş burcu seçilir ve hiçbir LLM çağrısı yapılmaz.
+            {t('readings.sunCompatibilityHelper')}
           </Text>
-          <Text style={styles.label}>1. kişinin Güneş burcu</Text>
+          <Text style={styles.label}>{t('readings.firstPersonSunSign')}</Text>
           <BrandedPicker selectedValue={firstSign} onValueChange={setFirstSign} options={ZODIAC_SIGNS.map((sign) => ({ label: sign.label, value: sign.id }))} />
-          <Text style={styles.label}>2. kişinin Güneş burcu</Text>
+          <Text style={styles.label}>{t('readings.secondPersonSunSign')}</Text>
           <BrandedPicker selectedValue={secondSign} onValueChange={setSecondSign} options={ZODIAC_SIGNS.map((sign) => ({ label: sign.label, value: sign.id }))} />
           <TouchableOpacity style={styles.primaryButton} onPress={() => void prepareReading()}>
-            <Text style={styles.primaryButtonText}>Uyumu Göster</Text>
+            <Text style={styles.primaryButtonText}>{t('readings.showCompatibility')}</Text>
           </TouchableOpacity>
         </View>
 

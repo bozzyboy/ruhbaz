@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
@@ -21,25 +23,27 @@ type GenericResult = {
   percentages: Record<string, number>;
 };
 
-const TEST_SELECTION: Array<{
+function buildTestSelection(t: TFunction): Array<{
   id: 'mbti' | PersonalityTestId;
   title: string;
   meta: string;
   description: string;
-}> = [
-  {
-    id: 'mbti',
-    title: 'MBTI Kişilik Testi',
-    meta: '32 soru, yaklaşık 12-15 dakika',
-    description: 'Karar alma, enerji toplama ve dünyayı algılama biçimini 16 kişilik tipi üzerinden tanır.',
-  },
-  ...Object.values(PERSONALITY_TESTS).map((test) => ({
-    id: test.id,
-    title: test.title,
-    meta: test.meta,
-    description: test.intro,
-  })),
-];
+}> {
+  return [
+    {
+      id: 'mbti',
+      title: t('tests.mbtiTitle'),
+      meta: t('tests.mbtiMeta'),
+      description: t('tests.mbtiSelectDescription'),
+    },
+    ...Object.values(PERSONALITY_TESTS).map((test) => ({
+      id: test.id,
+      title: test.title,
+      meta: test.meta,
+      description: test.intro,
+    })),
+  ];
+}
 
 const QUESTIONS: MbtiQuestion[] = [
   { id: 1, left: 'Günlük işlerimde liste yaparım', right: 'Günlük işlerimde hafızama güvenirim' },
@@ -353,19 +357,11 @@ function calculateResult(answers: Record<number, number>) {
   return { type, scores };
 }
 
-function dimensionMeaning(type: string) {
-  const introExtro = type[0] === 'E'
-    ? 'E - Dışadönüklük: Enerjini çoğu zaman dış dünyadan, hareketten ve insanlarla temas etmekten toplarsın.'
-    : 'I - İçedönüklük: Enerjini çoğu zaman iç dünyandan, düşünme alanından ve daha seçici temaslardan toplarsın.';
-  const sensingIntuition = type[1] === 'N'
-    ? 'N - Sezgi: Olayların arkasındaki örüntüleri, ihtimalleri ve gelecekte açılabilecek yolları hızlı fark edersin.'
-    : 'S - Duyumsama: Somut bilgi, yaşanmış deneyim, ayrıntı ve gerçekçi uygulama senin için güçlü referanslardır.';
-  const feelingThinking = type[2] === 'T'
-    ? 'T - Düşünme: Kararlarda mantık, tutarlılık, neden-sonuç ve adalet duygusu belirgin çalışır.'
-    : 'F - Hissetme: Kararlarda değerler, ilişki etkisi, empati ve insani sonuçlar belirgin çalışır.';
-  const judgingPerceiving = type[3] === 'P'
-    ? 'P - Algılama: Seçenekleri açık tutmak, esnemek ve süreç içinde yön bulmak seni rahatlatır.'
-    : 'J - Yargılama: Netleşmek, plan yapmak, karar almak ve tamamlanmışlık hissi seni rahatlatır.';
+function dimensionMeaning(type: string, t: TFunction) {
+  const introExtro = type[0] === 'E' ? t('tests.dimExtraversion') : t('tests.dimIntroversion');
+  const sensingIntuition = type[1] === 'N' ? t('tests.dimIntuition') : t('tests.dimSensing');
+  const feelingThinking = type[2] === 'T' ? t('tests.dimThinking') : t('tests.dimFeeling');
+  const judgingPerceiving = type[3] === 'P' ? t('tests.dimPerceiving') : t('tests.dimJudging');
   return [introExtro, sensingIntuition, feelingThinking, judgingPerceiving];
 }
 
@@ -397,6 +393,7 @@ function GenericPersonalityTestScreen({
   profileId: string;
   test: PersonalityTestDefinition;
 }) {
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResult, setShowResult] = useState(false);
   const [savedResultType, setSavedResultType] = useState<string | null>(null);
@@ -463,24 +460,24 @@ function GenericPersonalityTestScreen({
       <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
         <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
           <View style={styles.resultPanel}>
-            <Text style={styles.eyebrow}>Test sonucu</Text>
+            <Text style={styles.eyebrow}>{t('tests.resultEyebrow')}</Text>
             <Text style={styles.resultName}>{resultDetail.title}</Text>
             <Text style={styles.resultText}>{resultDetail.description}</Text>
             <View style={styles.detailStack}>
               <View style={styles.detailBlock}>
-                <Text style={styles.detailTitle}>Güçlü Yanların</Text>
+                <Text style={styles.detailTitle}>{t('tests.strengthsTitle')}</Text>
                 <Text style={styles.detailText}>{resultDetail.strengths}</Text>
               </View>
               <View style={styles.detailBlock}>
-                <Text style={styles.detailTitle}>Gelişim Alanı</Text>
+                <Text style={styles.detailTitle}>{t('tests.growthTitle')}</Text>
                 <Text style={styles.detailText}>{resultDetail.growth}</Text>
               </View>
               <View style={styles.detailBlock}>
-                <Text style={styles.detailTitle}>İlişkilerde</Text>
+                <Text style={styles.detailTitle}>{t('tests.relationshipsTitle')}</Text>
                 <Text style={styles.detailText}>{resultDetail.relationships}</Text>
               </View>
               <View style={styles.detailBlock}>
-                <Text style={styles.detailTitle}>Sana İyi Gelen Ritim</Text>
+                <Text style={styles.detailTitle}>{t('tests.rhythmTitle')}</Text>
                 <Text style={styles.detailText}>{resultDetail.rhythm}</Text>
               </View>
             </View>
@@ -492,7 +489,7 @@ function GenericPersonalityTestScreen({
               ))}
             </View>
             <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.primaryButtonText}>Kişiye Özel Sayfasına Dön</Text>
+              <Text style={styles.primaryButtonText}>{t('tests.backToPersonal')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.secondaryButton}
@@ -502,7 +499,7 @@ function GenericPersonalityTestScreen({
                 setSavedResultType(null);
               }}
             >
-              <Text style={styles.secondaryButtonText}>Testi Yeniden Çöz</Text>
+              <Text style={styles.secondaryButtonText}>{t('tests.retakeTest')}</Text>
             </TouchableOpacity>
           </View>
         </BrandedScrollView>
@@ -516,7 +513,7 @@ function GenericPersonalityTestScreen({
         <View style={styles.headerPanel}>
           <Text style={styles.title}>{test.title}</Text>
           <Text style={styles.meta}>{test.meta}</Text>
-          <Text style={styles.helper}>{test.intro} Doğru ya da yanlış cevap yok; son haftalardaki doğal eğilimini işaretle.</Text>
+          <Text style={styles.helper}>{test.intro} {t('tests.genericHelperSuffix')}</Text>
           <Text style={styles.progress}>{answeredCount} / {test.questions.length}</Text>
         </View>
 
@@ -525,12 +522,12 @@ function GenericPersonalityTestScreen({
             key={question.id}
             style={[styles.questionCard, typeof answers[question.id] === 'number' && styles.questionCardAnswered]}
           >
-            <Text style={styles.questionNumber}>{question.id}. soru</Text>
+            <Text style={styles.questionNumber}>{t('tests.questionNumber', { id: question.id })}</Text>
             <Text style={styles.questionText}>{question.text}</Text>
             <FivePointSlider value={answers[question.id]} onChange={(value) => setAnswer(question.id, value)} />
             <View style={styles.scaleLabelRow}>
               <Text style={styles.scaleLabel}>{test.lowLabel}</Text>
-              <Text style={styles.scaleLabel}>Ortada</Text>
+              <Text style={styles.scaleLabel}>{t('tests.scaleMiddle')}</Text>
               <Text style={styles.scaleLabel}>{test.highLabel}</Text>
             </View>
           </View>
@@ -541,12 +538,12 @@ function GenericPersonalityTestScreen({
           disabled={answeredCount < test.questions.length}
           onPress={() => void saveAndShowResult()}
         >
-          <Text style={styles.primaryButtonText}>{isSaving ? 'Kaydediliyor...' : 'Sonucu Göster'}</Text>
+          <Text style={styles.primaryButtonText}>{isSaving ? t('tests.saving') : t('tests.showResult')}</Text>
         </TouchableOpacity>
         {missingQuestionIds.length ? (
           <Text style={styles.missingText}>
-            Eksik sorular: {missingQuestionIds.slice(0, 8).join(', ')}
-            {missingQuestionIds.length > 8 ? ` ve ${missingQuestionIds.length - 8} soru daha` : ''}
+            {t('tests.missingQuestions', { ids: missingQuestionIds.slice(0, 8).join(', ') })}
+            {missingQuestionIds.length > 8 ? t('tests.andMoreQuestions', { count: missingQuestionIds.length - 8 }) : ''}
           </Text>
         ) : null}
       </BrandedScrollView>
@@ -573,15 +570,17 @@ function PersonalityTestSelectScreen({
   navigation: Props['navigation'];
   profileId: string;
 }) {
+  const { t } = useTranslation();
+  const testSelection = useMemo(() => buildTestSelection(t), [t]);
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.headerPanel}>
-          <Text style={styles.title}>Testler</Text>
-          <Text style={styles.helper}>Profilin kişilik, bağlanma, değerler, uyum ve başa çıkma eğilimlerini anlamak için bir test seç.</Text>
+          <Text style={styles.title}>{t('tests.title')}</Text>
+          <Text style={styles.helper}>{t('tests.selectHelper')}</Text>
         </View>
         <View style={styles.testGrid}>
-          {TEST_SELECTION.map((test) => (
+          {testSelection.map((test) => (
             <TouchableOpacity
               key={test.id}
               style={styles.testCard}
@@ -600,6 +599,7 @@ function PersonalityTestSelectScreen({
 }
 
 function MbtiOnlyTestScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showResult, setShowResult] = useState(false);
   const [savedResultType, setSavedResultType] = useState<string | null>(null);
@@ -666,12 +666,12 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
   if (showResult && answeredCount === QUESTIONS.length) {
     const detail = TYPE_DETAIL[result.type];
     const archetype = TYPE_ARCHETYPES[result.type];
-    const dimensions = dimensionMeaning(result.type);
+    const dimensions = dimensionMeaning(result.type, t);
     return (
       <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
         <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
           <View style={styles.resultPanel}>
-            <Text style={styles.eyebrow}>MBTI sonucu</Text>
+            <Text style={styles.eyebrow}>{t('tests.mbtiResultEyebrow')}</Text>
             <Text style={styles.resultType}>{result.type}</Text>
             {archetype ? <Text style={styles.resultName}>{archetype.name}</Text> : null}
             <Text style={styles.resultText}>{TYPE_DESCRIPTIONS[result.type]}</Text>
@@ -679,48 +679,48 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
               <View style={styles.detailStack}>
                 {archetype ? (
                   <View style={styles.detailBlock}>
-                    <Text style={styles.detailTitle}>Tip Benzetmesi Neden Böyle?</Text>
+                    <Text style={styles.detailTitle}>{t('tests.archetypeWhyTitle')}</Text>
                     <Text style={styles.detailText}>{archetype.reason}</Text>
                   </View>
                 ) : null}
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Harfler Ne Anlama Geliyor?</Text>
+                  <Text style={styles.detailTitle}>{t('tests.lettersMeaningTitle')}</Text>
                   {dimensions.map((item) => (
                     <Text key={item.slice(0, 1)} style={styles.dimensionText}>{item}</Text>
                   ))}
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Ana Tema</Text>
+                  <Text style={styles.detailTitle}>{t('tests.mainThemeTitle')}</Text>
                   <Text style={styles.detailText}>{detail.theme}</Text>
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Kendini Tanıma</Text>
+                  <Text style={styles.detailTitle}>{t('tests.selfKnowledgeTitle')}</Text>
                   <Text style={styles.detailText}>
-                    {detail.self} Bu bölüm sonucu bir etiket gibi değil, kendini gözlemlemek için bir ayna gibi düşünmek daha doğru olur. Tipin, her durumda böyle davranacağını söylemez; hangi yöne daha doğal aktığını gösterir.
+                    {detail.self} {t('tests.selfSuffix')}
                   </Text>
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Güçlü Yanların</Text>
+                  <Text style={styles.detailTitle}>{t('tests.strengthsTitle')}</Text>
                   <Text style={styles.detailText}>
-                    {detail.strengths} Bu güçlü yanlar özellikle baskı altında, ilişkilerde karar verirken ve yeni bir hedefe başlarken kendini belli eder. Farkında olduğunda bunları daha bilinçli kullanabilirsin.
+                    {detail.strengths} {t('tests.strengthsSuffix')}
                   </Text>
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Zorlanma ve Gelişim Alanı</Text>
+                  <Text style={styles.detailTitle}>{t('tests.mbtiGrowthTitle')}</Text>
                   <Text style={styles.detailText}>
-                    {detail.growth} Buradaki amaç kendini eleştirmek değil; otomatikleşen tarafını fark edip gerektiğinde başka bir kası da devreye alabilmek.
+                    {detail.growth} {t('tests.growthSuffix')}
                   </Text>
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>İlişkilerde</Text>
+                  <Text style={styles.detailTitle}>{t('tests.relationshipsTitle')}</Text>
                   <Text style={styles.detailText}>
-                    {detail.relationships} Yakın ilişkilerde bu tipin hem sevgi gösterme biçimini hem de kırıldığında nasıl geri çekildiğini anlamak çok işe yarar.
+                    {detail.relationships} {t('tests.relationshipsSuffix')}
                   </Text>
                 </View>
                 <View style={styles.detailBlock}>
-                  <Text style={styles.detailTitle}>Çalışma ve Yaşam Ritmi</Text>
+                  <Text style={styles.detailTitle}>{t('tests.workRhythmTitle')}</Text>
                   <Text style={styles.detailText}>
-                    {detail.rhythm} Kendini verimli hissettiğin koşulları bilmek, hedeflerini daha gerçekçi kurmana ve gereksiz sürtünmeleri azaltmana yardım eder.
+                    {detail.rhythm} {t('tests.rhythmSuffix')}
                   </Text>
                 </View>
               </View>
@@ -732,7 +732,7 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
               <Text style={styles.scoreText}>J/P: {result.scores.JP > 24 ? 'P' : 'J'}</Text>
             </View>
             <TouchableOpacity style={styles.primaryButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.primaryButtonText}>Kişiye Özel Sayfasına Dön</Text>
+              <Text style={styles.primaryButtonText}>{t('tests.backToPersonal')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.secondaryButton}
@@ -742,7 +742,7 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
               setSavedResultType(null);
             }}
             >
-              <Text style={styles.secondaryButtonText}>Testi Yeniden Çöz</Text>
+              <Text style={styles.secondaryButtonText}>{t('tests.retakeTest')}</Text>
             </TouchableOpacity>
           </View>
         </BrandedScrollView>
@@ -754,10 +754,10 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.headerPanel}>
-          <Text style={styles.title}>MBTI Kişilik Testi</Text>
-          <Text style={styles.meta}>32 soru, yaklaşık 12-15 dakika</Text>
+          <Text style={styles.title}>{t('tests.mbtiTitle')}</Text>
+          <Text style={styles.meta}>{t('tests.mbtiMeta')}</Text>
           <Text style={styles.helper}>
-            Açık kaynak OEJTS mantığıyla iki uç arasında kendini nereye yakın hissettiğini işaretle. Doğru ya da yanlış cevap yok.
+            {t('tests.mbtiHelper')}
           </Text>
           <Text style={styles.progress}>{answeredCount} / {QUESTIONS.length}</Text>
         </View>
@@ -767,16 +767,16 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
             key={question.id}
             style={[styles.questionCard, typeof answers[question.id] === 'number' && styles.questionCardAnswered]}
           >
-            <Text style={styles.questionNumber}>{question.id}. soru</Text>
+            <Text style={styles.questionNumber}>{t('tests.questionNumber', { id: question.id })}</Text>
             <View style={styles.pairRow}>
               <Text style={styles.pairText}>{question.left}</Text>
               <Text style={[styles.pairText, styles.pairTextRight]}>{question.right}</Text>
             </View>
             <FivePointSlider value={answers[question.id]} onChange={(value) => setAnswer(question.id, value)} />
             <View style={styles.scaleLabelRow}>
-              <Text style={styles.scaleLabel}>Sol</Text>
-              <Text style={styles.scaleLabel}>Ortada</Text>
-              <Text style={styles.scaleLabel}>Sağ</Text>
+              <Text style={styles.scaleLabel}>{t('tests.scaleLeft')}</Text>
+              <Text style={styles.scaleLabel}>{t('tests.scaleMiddle')}</Text>
+              <Text style={styles.scaleLabel}>{t('tests.scaleRight')}</Text>
             </View>
           </View>
         ))}
@@ -786,12 +786,12 @@ function MbtiOnlyTestScreen({ navigation, route }: Props) {
           disabled={answeredCount < QUESTIONS.length}
           onPress={() => void saveAndShowResult()}
         >
-          <Text style={styles.primaryButtonText}>{isSaving ? 'Kaydediliyor...' : 'Sonucu Göster'}</Text>
+          <Text style={styles.primaryButtonText}>{isSaving ? t('tests.saving') : t('tests.showResult')}</Text>
         </TouchableOpacity>
         {missingQuestionIds.length ? (
           <Text style={styles.missingText}>
-            Eksik sorular: {missingQuestionIds.slice(0, 8).join(', ')}
-            {missingQuestionIds.length > 8 ? ` ve ${missingQuestionIds.length - 8} soru daha` : ''}
+            {t('tests.missingQuestions', { ids: missingQuestionIds.slice(0, 8).join(', ') })}
+            {missingQuestionIds.length > 8 ? t('tests.andMoreQuestions', { count: missingQuestionIds.length - 8 }) : ''}
           </Text>
         ) : null}
       </BrandedScrollView>

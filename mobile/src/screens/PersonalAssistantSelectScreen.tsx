@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { AVAILABLE_ASSISTANTS, applyAssistantPreset } from '../config/constants';
@@ -10,6 +11,7 @@ import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalAssistantSelect'>;
 
 export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { devSettings, profileId, readingType } = route.params;
   const [soonVisible, setSoonVisible] = useState(false);
   const defaultAssistantId = useMemo(() => {
@@ -26,27 +28,27 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
   }, [defaultAssistantId]);
 
   const selectedReadingLabel = useMemo(() => {
-    if (readingType === 'coffee') return 'Kahve Yorumu';
-    if (readingType === 'palm') return 'El / Pati Okuması';
-    if (readingType === 'astro-personal') return 'Astroloji';
-    if (readingType === 'tarot-personal') return 'Kişiye Özel Tarot';
-    if (readingType === 'numerology-core') return 'Temel Numeroloji Haritası';
-    if (readingType === 'numerology-period') return 'Numeroloji';
-    if (readingType === 'numerology-personal') return 'Kişiye Özel Numeroloji';
-    if (readingType === 'dream-interpretation') return 'Rüya Yorumu';
-    if (readingType === 'angel-personal') return 'Kişiye Özel Melek Kartları';
-    return 'Sohbetli Manifestleme';
-  }, [readingType]);
+    if (readingType === 'coffee') return t('readings.typeCoffee');
+    if (readingType === 'palm') return t('readings.typePalm');
+    if (readingType === 'astro-personal') return t('readings.typeAstro');
+    if (readingType === 'tarot-personal') return t('readings.typeTarotPersonal');
+    if (readingType === 'numerology-core') return t('readings.typeNumerologyCore');
+    if (readingType === 'numerology-period') return t('readings.typeNumerologyPeriod');
+    if (readingType === 'numerology-personal') return t('readings.typeNumerologyPersonal');
+    if (readingType === 'dream-interpretation') return t('readings.typeDream');
+    if (readingType === 'angel-personal') return t('readings.typeAngelPersonal');
+    return t('readings.typeManifestChat');
+  }, [readingType, t]);
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.readingTypeStrip}>
-          <Text style={styles.helperText}>Seçilen okuma tipi: {selectedReadingLabel}</Text>
+          <Text style={styles.helperText}>{t('readings.selectedReadingType', { reading: selectedReadingLabel })}</Text>
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Yorumcu Seçimi</Text>
+          <Text style={styles.panelTitle}>{t('readings.assistantSelectTitle')}</Text>
           <View style={styles.assistantGrid}>
             {AVAILABLE_ASSISTANTS.map((assistant) => {
               const selected = selectedAssistantId === assistant.id;
@@ -57,7 +59,7 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
                   onPress={() => setSelectedAssistantId(assistant.id)}
                 >
                   <Text style={styles.assistantName}>{assistant.label}</Text>
-                  <Text style={styles.assistantMeta}>Uzmanlık: {assistant.specialty}</Text>
+                  <Text style={styles.assistantMeta}>{t('readings.assistantSpecialty', { specialty: assistant.specialty })}</Text>
                   <Text style={styles.assistantTagline}>{assistant.tagline}</Text>
                 </TouchableOpacity>
               );
@@ -112,15 +114,15 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
               });
             }}
           >
-            <Text style={styles.primaryButtonText}>Yoruma Geç</Text>
+            <Text style={styles.primaryButtonText}>{t('readings.goToReading')}</Text>
           </TouchableOpacity>
         </View>
       </BrandedScrollView>
       <BrandedConfirmModal
         visible={soonVisible}
-        title="Yakında"
-        message="Bu alanın seçim modeli hazır; okuma motoruna bağlantısını sonraki adımda ekleyeceğiz."
-        confirmLabel="Tamam"
+        title={t('modals.comingSoonTitle')}
+        message={t('modals.comingSoonEngineMessage')}
+        confirmLabel={t('common.ok')}
         cancelLabel={null}
         onConfirm={() => setSoonVisible(false)}
         onCancel={() => setSoonVisible(false)}

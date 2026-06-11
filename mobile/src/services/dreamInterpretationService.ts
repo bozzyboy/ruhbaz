@@ -8,6 +8,7 @@ import {
 } from '../config/llmTokenPolicy';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import { READING_PERSONA_DATA } from './readingPersonaData';
+import { getReadingPersonaData } from './personaDataI18n';
 import {
   appendHealthProfessionalReminder,
   completeWithRememberedPersonaClosing,
@@ -129,7 +130,7 @@ function selectDreamClosing(params: {
       usedClosings: params.usedClosings,
     });
   }
-  const library = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const library = getReadingPersonaData()[id].closingLibrary as Record<string, readonly string[]>;
   const used = new Set((params.usedClosings || []).map((item) => item.trim()).filter(Boolean));
   const options = Object.values(library)
     .flatMap((items) => [...items])
@@ -234,7 +235,7 @@ function buildBaseSystem(params: {
   isAnimalProfile?: boolean;
 }) {
   const id = personaId(params.assistantId);
-  const identity = READING_PERSONA_DATA[id];
+  const identity = getReadingPersonaData()[id];
   const isAnimalDream = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
     identity.systemBody,

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { AssistantLoading } from '../components/AssistantLoading';
@@ -40,6 +41,7 @@ function astroPeriod(id: GeneralReadingId) {
 }
 
 export function GeneralReadingResultScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { profileId, readingId, title } = route.params;
   const [isLoading, setIsLoading] = useState(true);
   const [errorText, setErrorText] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
       const accountState = await loadAccountState();
       const profile = accountState.profiles.find((item) => item.profileId === profileId);
       if (!profile) {
-        throw new Error('Profil bulunamadı. Lütfen profil seçimini kontrol edip tekrar dene.');
+        throw new Error(t('readings.profileNotFound'));
       }
 
       if (isAstroId(readingId)) {
@@ -92,7 +94,7 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
           profile,
         });
         if (!result) {
-          throw new Error('Genel astro şu an hazırlanamadı. Lütfen birazdan tekrar dene.');
+          throw new Error(t('readings.generalAstroNotReady'));
         }
         setReadingText(result.text);
         setAstroReveal({ title, text: result.text });
@@ -133,11 +135,11 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
       }
     } catch (err: any) {
       const retryMessage = isRetryableLlmError(err) ? getRetryLaterMessage('general-astro', readingId) : null;
-      setErrorText(retryMessage?.message || err?.message || 'Şu an metin üretilemedi, lütfen tekrar dene.');
+      setErrorText(retryMessage?.message || err?.message || t('readings.textGenerationFailed'));
     } finally {
       setIsLoading(false);
     }
-  }, [profileId, readingId, title]);
+  }, [profileId, readingId, t, title]);
 
   useEffect(() => {
     void loadReading();
@@ -176,12 +178,12 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
         <View style={styles.panel}>
           <Text style={styles.title}>{title}</Text>
           {isLoading ? (
-            <AssistantLoading label="Hazırlanıyor" detail="Yorum hazırlanırken bu ekranda bekleyebilirsin." />
+            <AssistantLoading label={t('readings.preparingLabel')} detail={t('readings.preparingDetail')} />
           ) : errorText ? (
             <>
               <Text style={styles.errorText}>{errorText}</Text>
               <TouchableOpacity style={styles.primaryButton} onPress={() => void loadReading()}>
-                <Text style={styles.primaryButtonText}>Tekrar Dene</Text>
+                <Text style={styles.primaryButtonText}>{t('common.tryAgain')}</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -194,7 +196,7 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
 
         {!isLoading ? (
           <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.secondaryButtonText}>Genel Okumalara Dön</Text>
+            <Text style={styles.secondaryButtonText}>{t('readings.backToGeneralReadings')}</Text>
           </TouchableOpacity>
         ) : null}
       </BrandedScrollView>

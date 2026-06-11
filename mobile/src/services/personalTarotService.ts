@@ -1,6 +1,8 @@
 import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
 import type { SubjectProfile, ProfileMemorySnippet } from '../types/memory';
-import { TAROT_CARDS, type TarotCard } from '../data/divinationData';
+import { type TarotCard } from '../data/divinationData';
+import { getTarotCards } from '../data/divinationDataI18n';
+import { getAppLanguage } from '../i18n';
 import { TAROT_TR_NAMES } from '../data/tarotNamesTR';
 import { getTarotSpread, type TarotSpread } from '../data/tarotSpreads';
 import {
@@ -10,6 +12,7 @@ import {
   PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
 } from '../config/llmTokenPolicy';
 import { READING_PERSONA_DATA } from './readingPersonaData';
+import { getReadingPersonaData } from './personaDataI18n';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import {
   appendHealthProfessionalReminder,
@@ -137,7 +140,7 @@ export function drawTarotSpreadCards(params: {
 }) {
   const spread = getTarotSpread(params.spreadId);
   const random = seededRandom(`${params.profileId}:${params.assistantId}:${spread.id}:${params.nonce || Date.now()}`);
-  const deck = [...TAROT_CARDS];
+  const deck = [...getTarotCards()];
   const drawn = spread.positions.map((position) => {
     const index = Math.floor(random() * deck.length);
     const card = deck.splice(index, 1)[0] as TarotCard;
@@ -166,7 +169,7 @@ export function drawTarotSpreadCards(params: {
       positionMeaning: position.meaning,
       guideQuestion: position.guideQuestion,
       cardName: card.name,
-      cardNameTr: TAROT_TR_NAMES[card.name] || card.name,
+      cardNameTr: getAppLanguage() === 'en' ? card.name : TAROT_TR_NAMES[card.name] || card.name,
       orientation: reversed ? 'reversed' : 'upright',
       meaning: reversed ? card.reversed : card.upright,
       advice: reversed ? card.adviceReversed : card.advice,
@@ -250,7 +253,7 @@ function buildBaseSystem(params: {
   isAnimalProfile?: boolean;
 }) {
   const id = personaId(params.assistantId);
-  const identity = READING_PERSONA_DATA[id];
+  const identity = getReadingPersonaData()[id];
   const isAnimalTarot = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
     identity.systemBody,

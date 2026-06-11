@@ -10,6 +10,7 @@ import {
 import { generateGeminiTextDirect } from './geminiDirectService';
 import { isRetryableLlmError } from './llmRetryMessages';
 import { READING_PERSONA_DATA } from './readingPersonaData';
+import { getReadingPersonaData } from './personaDataI18n';
 import { selectNumerologyLifeEvents } from './readingSpecificityBank';
 import { loadAccountState } from './profileMemoryService';
 import {
@@ -717,7 +718,7 @@ function numerologySafePersonaText(text?: string) {
 }
 
 function assistantPersonaContext(assistantId: string) {
-  const identity = READING_PERSONA_DATA[assistantId as keyof typeof READING_PERSONA_DATA];
+  const identity = getReadingPersonaData()[assistantId as keyof typeof READING_PERSONA_DATA];
   if (!identity?.systemBody) return '';
   const voice = numerologySafePersonaText(
     identity.systemBody.match(/# Voice And Temperament\n\n([\s\S]*?)(?:\n\n# |$)/)?.[1]?.trim()

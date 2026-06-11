@@ -1,6 +1,7 @@
 ﻿import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
@@ -12,6 +13,7 @@ import type { ReadingSummary } from '../types/memory';
 type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
 
 export function HistoryScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { profileId, profileName } = route.params;
   const [readings, setReadings] = useState<ReadingSummary[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ReadingSummary | null>(null);
@@ -24,9 +26,9 @@ export function HistoryScreen({ route, navigation }: Props) {
   }, [profileId]);
 
   useEffect(() => {
-    navigation.setOptions({ title: `${profileName} - Son Kayıtlar` });
+    navigation.setOptions({ title: t('history.navTitle', { name: profileName }) });
     refresh();
-  }, [navigation, profileName, refresh]);
+  }, [navigation, profileName, refresh, t]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', refresh);
@@ -38,7 +40,7 @@ export function HistoryScreen({ route, navigation }: Props) {
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         {readings.length ? (
           <TouchableOpacity style={styles.deleteAllButton} activeOpacity={0.82} onPress={() => setDeleteAllVisible(true)}>
-            <Text style={styles.deleteAllButtonText}>Son Okumaların Hepsini Sil</Text>
+            <Text style={styles.deleteAllButtonText}>{t('history.deleteAllButton')}</Text>
           </TouchableOpacity>
         ) : null}
         {readings.length ? (
@@ -49,17 +51,17 @@ export function HistoryScreen({ route, navigation }: Props) {
                 onPress={() => navigation.navigate('ReadingDetail', { reading, profileName })}
               >
                 <Text style={styles.assistant}>
-                  {reading.readingType === 'personality-test' ? 'Testler' : getAssistantLabel(reading.assistantId)}
+                  {reading.readingType === 'personality-test' ? t('history.testsLabel') : getAssistantLabel(reading.assistantId)}
                 </Text>
                 <Text style={styles.meta}>{getReadingTypeLabel(reading)}</Text>
                 <Text style={styles.metaMuted}>
                   {reading.readingType === 'personality-test'
                     ? reading.testResult?.resultCode
-                      ? `Sonuç: ${reading.testResult.resultCode}`
-                      : 'Test sonucu'
+                      ? t('history.resultCode', { code: reading.testResult.resultCode })
+                      : t('history.testResultLabel')
                     : reading.transcript?.length
-                      ? `${reading.transcript.length} mesaj kaydı`
-                      : 'Eski kayıt'}
+                      ? t('history.messageCount', { count: reading.transcript.length })
+                      : t('history.legacyRecord')}
                 </Text>
                 <Text style={styles.date}>{new Date(reading.createdAt).toLocaleString('tr-TR')}</Text>
               </TouchableOpacity>
@@ -67,23 +69,23 @@ export function HistoryScreen({ route, navigation }: Props) {
                 style={styles.deletePill}
                 onPress={() => setDeleteTarget(reading)}
               >
-                <Text style={styles.deletePillText}>Sil</Text>
+                <Text style={styles.deletePillText}>{t('history.deletePill')}</Text>
               </TouchableOpacity>
             </View>
           ))
         ) : (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Henüz kayıt yok</Text>
-            <Text style={styles.emptyText}>Bu profil için biten okumalar ve test sonuçları burada listelenecek.</Text>
+            <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('history.emptyText')}</Text>
           </View>
         )}
       </BrandedScrollView>
       <BrandedConfirmModal
         visible={Boolean(deleteTarget)}
-        title="Okumayı Sil"
-        message="Bu kaydı cihazından silmek istediğine emin misin?"
-        confirmLabel="Evet, Sil"
-        cancelLabel="Hayır, Silme"
+        title={t('history.deleteReadingTitle')}
+        message={t('history.deleteReadingMessage')}
+        confirmLabel={t('history.yesDelete')}
+        cancelLabel={t('history.noKeep')}
         onConfirm={async () => {
           if (deleteTarget) {
             await deleteReading(deleteTarget.readingId);
@@ -95,10 +97,10 @@ export function HistoryScreen({ route, navigation }: Props) {
       />
       <BrandedConfirmModal
         visible={deleteAllVisible}
-        title="Tüm Son Okumaları Sil"
-        message="Bu profilin cihazdaki tüm son okuma kayıtlarını silmek istediğine emin misin? Bu işlem şimdilik yalnız cihazdaki kayıtları temizler; Google Drive yedekleme daha sonra eklenecek."
-        confirmLabel="Evet, Hepsini Sil"
-        cancelLabel="Hayır, Vazgeç"
+        title={t('history.deleteAllTitle')}
+        message={t('history.deleteAllMessage')}
+        confirmLabel={t('history.yesDeleteAll')}
+        cancelLabel={t('history.noCancel')}
         onConfirm={async () => {
           await deleteAllReadingsForProfile(profileId);
           setDeleteAllVisible(false);

@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet } from '../types/memory';
 import { READING_PERSONA_DATA } from './readingPersonaData';
+import { getReadingPersonaData } from './personaDataI18n';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 export type PersonalReadingDomain = 'coffee' | 'palm' | 'astro' | 'numerology' | 'tarot' | 'dream';
@@ -236,7 +237,7 @@ export function isHealthClosingSentence(sentence: string) {
 
 function safeClosingOptions(id: PersonaId, domain: PersonalReadingDomain, allowHealthClosing = false) {
   const forbidden = DOMAIN_FORBIDDEN_TERMS[domain];
-  const library = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const library = getReadingPersonaData()[id].closingLibrary as Record<string, readonly string[]>;
   const options = Object.values(library)
     .flatMap((items) => [...items])
     .filter(
@@ -418,7 +419,14 @@ export function sanitizeRestrictedReadingTerms(text: string) {
     .replace(/\bgeleceğ(?:i|ini|e)\s+(?:görmek|görme|okumak|okuma|bilmek|bilirim|biliyorum)\b/giu, 'olasılıkları sezgisel yorumlamak')
     .replace(/\bgelecek\s+(?:okuması|yorumu|analizi|öngörüsü)\b/giu, 'sembolik içgörü')
     .replace(/\b(?:vaat|vaad)\s+ed(?:er|iyor|iyorum|eceğim|eceğiz|en|ilmez)\b/giu, 'sunar')
-    .replace(/\b(?:vaat|vaad)(?:im|in|i|ler|leri|te|ten)?\b/giu, 'söz');
+    .replace(/\b(?:vaat|vaad)(?:im|in|i|ler|leri|te|ten)?\b/giu, 'söz')
+    // EN sözlüğü (Faz 4): EN çıktıda da yasaklı kavramlar ikame edilir (677 çerçevesi tutarlı).
+    .replace(/\bfortune[- ]?tell(?:er|ers|ing)\b/giu, 'symbolic reader')
+    .replace(/\bfortune\s+reading\b/giu, 'symbolic reading')
+    .replace(/\bpsychic(?:s)?\b/giu, 'intuitive reader')
+    .replace(/\bprophec(?:y|ies)\b/giu, 'symbolic insight')
+    .replace(/\bI\s+(?:can\s+)?(?:see|know|predict)\s+(?:your|the)\s+future\b/giu, 'I read the symbols around you')
+    .replace(/\bpredict(?:ing|ion|ions)?\s+(?:your|the)\s+future\b/giu, 'reflecting on the possibilities ahead');
 }
 
 export function sanitizePublicReadingLanguage(text: string) {
@@ -491,7 +499,7 @@ function canUseFamilyAddress(params: {
   assistantId?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
 }) {
-  const assistantAge = READING_PERSONA_DATA[personaId(params.assistantId || undefined)]?.age;
+  const assistantAge = getReadingPersonaData()[personaId(params.assistantId || undefined)]?.age;
   const profileAge = profileAgeFromMemory(params.memorySnippet);
   return Boolean(
     ['suzan', 'teoman', 'ayse'].includes(params.assistantId || '') &&

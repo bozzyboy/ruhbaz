@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
@@ -13,6 +14,7 @@ import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 type Props = NativeStackScreenProps<RootStackParamList, 'ReadingDetail'>;
 
 export function ReadingDetailScreen({ route, navigation }: Props) {
+  const { t } = useTranslation();
   const { reading, profileName } = route.params;
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const mainText = (() => {
@@ -44,7 +46,7 @@ export function ReadingDetailScreen({ route, navigation }: Props) {
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.metaCard}>
           <Text style={styles.assistant}>
-            {reading.readingType === 'personality-test' ? 'Testler' : getAssistantLabel(reading.assistantId)}
+            {reading.readingType === 'personality-test' ? t('history.testsLabel') : getAssistantLabel(reading.assistantId)}
           </Text>
           <Text style={styles.meta}>{getReadingTypeLabel(reading)}</Text>
           <Text style={styles.meta}>{profileName}</Text>
@@ -52,34 +54,36 @@ export function ReadingDetailScreen({ route, navigation }: Props) {
         </View>
 
         <View style={styles.readingCard}>
-          <Text style={styles.sectionTitle}>{reading.readingType === 'personality-test' ? 'Test Özeti' : 'Okuma Özeti'}</Text>
+          <Text style={styles.sectionTitle}>
+            {reading.readingType === 'personality-test' ? t('history.testSummaryTitle') : t('history.readingSummaryTitle')}
+          </Text>
           <SelectableFormattedText text={mainText} style={styles.readingText} />
         </View>
 
         {qaPairs.length ? (
           <View style={styles.readingCard}>
-            <Text style={styles.sectionTitle}>Soru-Cevap</Text>
+            <Text style={styles.sectionTitle}>{t('history.qaTitle')}</Text>
             {qaPairs.map((item, index) => (
               <View key={`${index}-${item.question.slice(0, 16)}`} style={styles.qaBlock}>
-                <Text style={styles.qaLabel}>Soru</Text>
+                <Text style={styles.qaLabel}>{t('history.questionLabel')}</Text>
                 <SelectableFormattedText text={item.question} style={styles.readingText} />
-                <Text style={[styles.qaLabel, styles.qaLabelTop]}>Cevap</Text>
-                <SelectableFormattedText text={item.answer || 'Bu soruya kayıtlı cevap bulunamadı.'} style={styles.readingText} />
+                <Text style={[styles.qaLabel, styles.qaLabelTop]}>{t('history.answerLabel')}</Text>
+                <SelectableFormattedText text={item.answer || t('history.noAnswerRecorded')} style={styles.readingText} />
               </View>
             ))}
           </View>
         ) : null}
 
         <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-          <Text style={styles.deleteButtonText}>Bu Okumayı Sil</Text>
+          <Text style={styles.deleteButtonText}>{t('history.deleteThisReading')}</Text>
         </TouchableOpacity>
       </BrandedScrollView>
       <BrandedConfirmModal
         visible={deleteConfirmVisible}
-        title="Okumayı Sil"
-        message="Bu okuma kaydını cihazından silmek istediğine emin misin?"
-        confirmLabel="Evet, Sil"
-        cancelLabel="Hayır, Silme"
+        title={t('history.deleteReadingTitle')}
+        message={t('history.deleteReadingDetailMessage')}
+        confirmLabel={t('history.yesDelete')}
+        cancelLabel={t('history.noKeep')}
         onConfirm={async () => {
           await deleteReading(reading.readingId);
           setDeleteConfirmVisible(false);

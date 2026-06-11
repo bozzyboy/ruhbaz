@@ -1,6 +1,8 @@
 ﻿import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -19,14 +21,15 @@ function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | nul
   });
 }
 
-function profileBadge(profile: SubjectProfile) {
-  if (profile.relationshipPrimary === 'kendi') return 'Kendim';
-  if (profile.relationshipPrimary === 'es') return 'Eş';
-  if (profile.relationshipPrimary === 'cocuk') return 'Çocuk';
+function profileBadge(profile: SubjectProfile, t: TFunction) {
+  if (profile.relationshipPrimary === 'kendi') return t('profile.relationshipSelf');
+  if (profile.relationshipPrimary === 'es') return t('profile.relationshipSpouse');
+  if (profile.relationshipPrimary === 'cocuk') return t('profile.relationshipChild');
   return profile.relationshipPrimary;
 }
 
 export function PersonalProfileSelectScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { devSettings } = route.params;
   const [profiles, setProfiles] = useState<SubjectProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -53,8 +56,8 @@ export function PersonalProfileSelectScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>2. Profil Seçim Ekranı</Text>
-          <Text style={styles.helperText}>Kimin için baktıracağını seç. Devam ile markalı onay penceresi açılır.</Text>
+          <Text style={styles.panelTitle}>{t('readings.profileSelectTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.profileSelectHelper')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {profiles.map((profile) => {
               const selected = profile.profileId === selectedProfileId;
@@ -65,14 +68,14 @@ export function PersonalProfileSelectScreen({ navigation, route }: Props) {
                   onPress={() => setSelectedProfileId(profile.profileId)}
                 >
                   <Text style={styles.profileName}>{profile.displayName}</Text>
-                  <Text style={styles.profileMeta}>{profileBadge(profile)}</Text>
+                  <Text style={styles.profileMeta}>{profileBadge(profile, t)}</Text>
                 </TouchableOpacity>
               );
             })}
           </ScrollView>
           {!profiles.length ? (
             <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('ProfileSettings')}>
-              <Text style={styles.secondaryButtonText}>Profil Oluştur</Text>
+              <Text style={styles.secondaryButtonText}>{t('profile.createProfile')}</Text>
             </TouchableOpacity>
           ) : null}
           <TouchableOpacity
@@ -85,17 +88,21 @@ export function PersonalProfileSelectScreen({ navigation, route }: Props) {
               setConfirmVisible(true);
             }}
           >
-            <Text style={styles.primaryButtonText}>{selectedProfile ? 'Evet - Devam' : 'Profil Ayarlarına Git'}</Text>
+            <Text style={styles.primaryButtonText}>{selectedProfile ? t('readings.yesContinue') : t('profile.goToProfileSettings')}</Text>
           </TouchableOpacity>
         </View>
       </BrandedScrollView>
 
       <BrandedConfirmModal
         visible={confirmVisible}
-        title="Profil Onayı"
-        message={selectedProfile ? `${selectedProfile.displayName} için bakıyoruz. Emin misin?` : 'Önce bir profil seçmelisin.'}
-        confirmLabel="Evet - Devam"
-        cancelLabel="Hayır"
+        title={t('readings.profileConfirmTitle')}
+        message={
+          selectedProfile
+            ? t('readings.profileConfirmMessage', { name: selectedProfile.displayName })
+            : t('readings.selectProfileFirst')
+        }
+        confirmLabel={t('readings.yesContinue')}
+        cancelLabel={t('common.no')}
         onCancel={() => setConfirmVisible(false)}
         onConfirm={() => {
           if (!selectedProfile) return;

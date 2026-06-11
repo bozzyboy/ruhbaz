@@ -1,6 +1,7 @@
 ﻿import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
@@ -16,6 +17,7 @@ type ReadingTypeItem = {
 };
 
 export function PersonalReadingTypeSelectScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { devSettings, profileId } = route.params;
   const [selectedTypeId, setSelectedTypeId] = useState<ReadingTypeItem['id'] | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -24,48 +26,48 @@ export function PersonalReadingTypeSelectScreen({ navigation, route }: Props) {
     () => [
       {
         id: 'coffee',
-        title: 'Kahve Yorumu',
-        description: 'Mevcut kahve akışı: fotoğraf yükleme, analiz ve geri bildirim.',
+        title: t('readings.typeCoffee'),
+        description: t('readings.descCoffeeSelect'),
         currentlyAvailable: true,
       },
       {
         id: 'palm',
-        title: 'El / Pati Okuması',
-        description: 'Mevcut el-pati akışı: fotoğraf yükleme, analiz ve geri bildirim.',
+        title: t('readings.typePalm'),
+        description: t('readings.descPalmSelect'),
         currentlyAvailable: true,
       },
       {
         id: 'astro-personal',
-        title: 'Astroloji',
-        description: 'Doğum haritası ve profil bazlı periyodik astro yorumları.',
+        title: t('readings.typeAstro'),
+        description: t('readings.descAstroSelect'),
         currentlyAvailable: true,
       },
       {
         id: 'tarot-personal',
-        title: 'Kişiye Özel Tarot',
-        description: '3 Kart, 5 Kart Köprü Açılımı, 9 Kart Celtic Cross Açılımı.',
+        title: t('readings.typeTarotPersonal'),
+        description: t('readings.descTarotSelect'),
         currentlyAvailable: false,
       },
       {
         id: 'numerology-personal',
-        title: 'Kişiye Özel Numeroloji',
-        description: 'Doğum tarihi ve isim üzerinden kişisel sayı haritası.',
+        title: t('readings.typeNumerologyPersonal'),
+        description: t('readings.descNumerologySelect'),
         currentlyAvailable: true,
       },
       {
         id: 'angel-personal',
-        title: 'Kişiye Özel Melek Kartları',
-        description: '3 kartlık melek kartı okumaları.',
+        title: t('readings.typeAngelPersonal'),
+        description: t('readings.descAngelSelect'),
         currentlyAvailable: false,
       },
       {
         id: 'manifest-chat',
-        title: 'Sohbetli Manifestleme',
-        description: 'Canlı sohbet ve ileri medya yetenekleri için hazır alan.',
+        title: t('readings.typeManifestChat'),
+        description: t('readings.descManifestSelect'),
         currentlyAvailable: false,
       },
     ],
-    [],
+    [t],
   );
 
   const selectedType = types.find((item) => item.id === selectedTypeId) || null;
@@ -74,8 +76,8 @@ export function PersonalReadingTypeSelectScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>3. Okuma Tipi Seçimi</Text>
-          <Text style={styles.helperText}>Okuma tipini seç. Devam butonunda markalı onay penceresi açılır.</Text>
+          <Text style={styles.panelTitle}>{t('readings.readingTypeSelectTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.readingTypeSelectHelper')}</Text>
           {types.map((item) => {
             const selected = selectedTypeId === item.id;
             return (
@@ -87,7 +89,7 @@ export function PersonalReadingTypeSelectScreen({ navigation, route }: Props) {
                 <View style={styles.rowBetween}>
                   <Text style={styles.typeTitle}>{item.title}</Text>
                   <Text style={item.currentlyAvailable ? styles.availableTag : styles.soonTag}>
-                    {item.currentlyAvailable ? 'Şimdi aktif' : 'Yakında'}
+                    {item.currentlyAvailable ? t('readings.activeNowTag') : t('readings.comingSoonTag')}
                   </Text>
                 </View>
                 <Text style={styles.typeText}>{item.description}</Text>
@@ -103,20 +105,24 @@ export function PersonalReadingTypeSelectScreen({ navigation, route }: Props) {
             onPress={() => setConfirmVisible(true)}
             disabled={!selectedType || !selectedType.currentlyAvailable}
           >
-            <Text style={styles.primaryButtonText}>Evet - Devam</Text>
+            <Text style={styles.primaryButtonText}>{t('readings.yesContinue')}</Text>
           </TouchableOpacity>
           {selectedType && !selectedType.currentlyAvailable ? (
-            <Text style={styles.blockedHint}>Bu okuma tipi yakında aktif olacak.</Text>
+            <Text style={styles.blockedHint}>{t('readings.readingTypeSoonHint')}</Text>
           ) : null}
         </View>
       </BrandedScrollView>
 
       <BrandedConfirmModal
         visible={confirmVisible}
-        title="Okuma Tipi Onayı"
-        message={selectedType ? `${selectedType.title} seçildi. Emin misin?` : 'Önce bir okuma tipi seçmelisin.'}
-        confirmLabel="Evet - Devam"
-        cancelLabel="Hayır"
+        title={t('readings.readingTypeConfirmTitle')}
+        message={
+          selectedType
+            ? t('readings.readingTypeConfirmMessage', { reading: selectedType.title })
+            : t('readings.selectReadingTypeFirst')
+        }
+        confirmLabel={t('readings.yesContinue')}
+        cancelLabel={t('common.no')}
         onCancel={() => setConfirmVisible(false)}
         onConfirm={() => {
           if (!selectedType) return;

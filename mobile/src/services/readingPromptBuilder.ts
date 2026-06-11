@@ -2,6 +2,7 @@ import type { DevSettings } from '../types';
 import type { ProfileMemorySnippet } from '../types/memory';
 import { PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION, PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION } from '../config/llmTokenPolicy';
 import { READING_PERSONA_DATA } from './readingPersonaData';
+import { getReadingPersonaData } from './personaDataI18n';
 import { buildSpecificityContext } from './readingSpecificityBank';
 import { isHealthClosingSentence, sanitizeRestrictedReadingTerms, selectAnimalClosingSentence, userAskedHealthConcern } from './personaClosingService';
 import { FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
@@ -105,7 +106,7 @@ function personaId(value?: string): PersonaId {
 }
 
 function closingLibrary(id: PersonaId) {
-  const base = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const base = getReadingPersonaData()[id].closingLibrary as Record<string, readonly string[]>;
   const out: Record<string, string[]> = {};
   Object.entries(base).forEach(([tone, options]) => {
     out[tone] = [...options];
@@ -200,7 +201,7 @@ function buildAddressPolicy(id: PersonaId, memorySnippet?: ProfileMemorySnippet 
       'Cinsiyetli insan hitapları, romantik/evlilik dili ve insan kariyeri dili yasak.',
     ].join('\n');
   }
-  const identity = READING_PERSONA_DATA[id];
+  const identity = getReadingPersonaData()[id];
   const assistantAge = identity.age || ASSISTANT_AGE_FALLBACKS[id];
   const profileGender = memorySnippet?.profileInfo?.gender || memorySnippet?.profileGender;
   const subjectAge = ageFromBirthDate(memorySnippet?.birthChartData?.birthDate);
@@ -323,7 +324,7 @@ export function buildReadingPrompt(params: {
   palmValidation?: { isInnerPalm?: boolean; handVisibleEnough?: boolean } | null;
 }) {
   const id = personaId(params.devSettings.assistantId);
-  const identity = READING_PERSONA_DATA[id];
+  const identity = getReadingPersonaData()[id];
   const imageHint = [
     params.images.cup ? 'kullanıcı fincan görseli gönderdi' : '',
     params.images.cup2 ? 'kullanıcı ikinci kahve görseli gönderdi' : '',

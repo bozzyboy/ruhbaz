@@ -1,15 +1,18 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import {
-  ANGEL_CARDS,
-  ANGEL_NUMBERS,
-  INSPIRATION_PARTS,
-  ICHING_HEXAGRAMS,
-  NUMEROLOGY_MEANINGS,
-  RUNES,
-  TAROT_CARDS,
   type AngelCard,
   type AngelNumber
 } from '../data/divinationData';
+import {
+  getAngelCards,
+  getAngelNumbers,
+  getIChingHexagrams,
+  getInspirationParts,
+  getNumerologyMeanings,
+  getRunes,
+  getTarotCards,
+} from '../data/divinationDataI18n';
+import { getAppLanguage } from '../i18n';
 import { TAROT_TR_NAMES } from '../data/tarotNamesTR';
 import { 
   AFFIRMATION_OPENERS,
@@ -314,9 +317,10 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     const mIdx = Math.floor(shuffled / L) % L;
     const cIdx = Math.floor(shuffled / (L * L)) % L;
 
-    const o = INSPIRATION_PARTS.openers[oIdx] || INSPIRATION_PARTS.openers[0];
-    const m = INSPIRATION_PARTS.middles[mIdx] || INSPIRATION_PARTS.middles[0];
-    const c = INSPIRATION_PARTS.closers[cIdx] || INSPIRATION_PARTS.closers[0];
+    const inspiration = getInspirationParts();
+    const o = inspiration.openers[oIdx] || inspiration.openers[0];
+    const m = inspiration.middles[mIdx] || inspiration.middles[0];
+    const c = inspiration.closers[cIdx] || inspiration.closers[0];
     
     return { 
       text: `${o}\n\n${m}\n\n${c}`,
@@ -324,9 +328,15 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     };
   }
   if (type === 'daily-runes') {
-    const rune = pick(RUNES, sequence, 5);
+    const rune = pick(getRunes(), sequence, 5);
+    const enRune = getAppLanguage() === 'en';
     return { 
-      text: `Günün Runesi:\n\n${rune.rune} (${rune.keyword})\n\nMesaj:\n${rune.message}`,
+      text: `${enRune ? "Today's Rune" : 'Günün Runesi'}:
+
+${rune.rune} (${rune.keyword})
+
+${enRune ? 'Message' : 'Mesaj'}:
+${rune.message}`,
       fingerprint: `rune:${rune.rune}`,
       meta: {
         rune: { path: rune.path, keyword: rune.keyword, message: rune.message, runeName: rune.rune }
@@ -349,8 +359,9 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     const baseBinary = lines.map(l => (l === 7 || l === 9) ? '1' : '0').join('');
     const endBinary = lines.map(l => (l === 7 || l === 6) ? '1' : '0').join('');
     
-    const baseHex = ICHING_HEXAGRAMS.find(h => h.binary === baseBinary) || ICHING_HEXAGRAMS[0];
-    const endHex = ICHING_HEXAGRAMS.find(h => h.binary === endBinary) || ICHING_HEXAGRAMS[0];
+    const hexagrams = getIChingHexagrams();
+    const baseHex = hexagrams.find(h => h.binary === baseBinary) || hexagrams[0];
+    const endHex = hexagrams.find(h => h.binary === endBinary) || hexagrams[0];
     
     const changingLinesInfo = lines
       .map((l, idx) => (l === 6 || l === 9) ? { index: idx + 1, val: l } : null)
@@ -359,13 +370,56 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     // Başlık ile açıklama arasına BOŞ SATIR (\n\n) konur: kart başlığı bold gösterir,
     // açıklama bir satır altında yeni paragrafta başlar. "Dönüşüm Süreci / eril-dişil"
     // bölümü Ozan talebiyle tamamen kaldırıldı (teknik/kafa karıştırıcı).
-    let text = `Günün I-Ching Okuması:\n\nŞimdiki Durum: ${baseHex.name}\n\n${baseHex.situation}`;
+    const enIching = getAppLanguage() === 'en';
+    let text = enIching
+      ? `Today's I-Ching Reading:
+
+Present State: ${baseHex.name}
+
+${baseHex.situation}`
+      : `Günün I-Ching Okuması:
+
+Şimdiki Durum: ${baseHex.name}
+
+${baseHex.situation}`;
 
     if (changingLinesInfo.length > 0) {
-      text += `\n\nGelecek Potansiyeli ve Tavsiye: ${endHex.name}\n\n${endHex.situation}`;
-      text += `\n\nYol Gösterici Mesaj:\n\n${endHex.advice}`;
+      text += enIching
+        ? `
+
+Unfolding Potential and Guidance: ${endHex.name}
+
+${endHex.situation}`
+        : `
+
+Gelecek Potansiyeli ve Tavsiye: ${endHex.name}
+
+${endHex.situation}`;
+      text += enIching ? `
+
+Guiding Message:
+
+${endHex.advice}` : `
+
+Yol Gösterici Mesaj:
+
+${endHex.advice}`;
     } else {
-      text += `\n\n(Bugün hiçbir değişen çizgi çıkmadı; durumunuz stabil ve enerjiniz tamamen mevcut hexagrama odaklı.)\n\nTavsiye:\n\n${baseHex.advice}`;
+      text += enIching
+        ? `
+
+(No changing lines appeared today; your situation is steady and your energy rests fully on the present hexagram.)
+
+Guidance:
+
+${baseHex.advice}`
+        : `
+
+(Bugün hiçbir değişen çizgi çıkmadı; durumunuz stabil ve enerjiniz tamamen mevcut hexagrama odaklı.)
+
+Tavsiye:
+
+${baseHex.advice}`;
     }
     
     return {
@@ -384,10 +438,11 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     };
   }
   if (type === 'daily-tarot') {
-    const card = pick(TAROT_CARDS, sequence, 7);
+    const card = pick(getTarotCards(), sequence, 7);
     const isReversed = Math.abs((sequence * 13 + 7) % 2) === 1;
+    const enTarot = getAppLanguage() === 'en';
     const trName = TAROT_TR_NAMES[card.name] || card.name;
-    const reverseSuffix = isReversed ? ' (Ters)' : '';
+    const reverseSuffix = isReversed ? (enTarot ? ' (Reversed)' : ' (Ters)') : '';
     
     const meaning = isReversed ? card.reversed : card.upright;
     const advice = isReversed ? card.adviceReversed : card.advice;
@@ -404,26 +459,54 @@ function buildReading(type: GeneralDivinationType, sequence: number, now: Date):
     };
   }
   if (type === 'daily-angel') {
-    const card = pick(ANGEL_CARDS, sequence, 8);
-    const guideText = card.guide ? `\n\nRehber Melek: ${card.guide}` : '';
+    const card = pick(getAngelCards(), sequence, 8);
+    const enAngel = getAppLanguage() === 'en';
+    const guideText = card.guide ? `
+
+${enAngel ? 'Guiding Angel' : 'Rehber Melek'}: ${card.guide}` : '';
     return { 
-      text: `Günün Melek Kartı:\n\n${card.name}${guideText}\n\nMesaj:\n${card.message}\n\nÖneri:\n${card.action}`,
+      text: `${enAngel ? "Today's Angel Card" : 'Günün Melek Kartı'}:
+
+${card.name}${guideText}
+
+${enAngel ? 'Message' : 'Mesaj'}:
+${card.message}
+
+${enAngel ? 'Suggestion' : 'Öneri'}:
+${card.action}`,
       fingerprint: `angel:${card.name}`,
       meta: { angel: card }
     };
   }
   if (type === 'daily-angel-number') {
-    const n = pick(ANGEL_NUMBERS, sequence, 9);
+    const n = pick(getAngelNumbers(), sequence, 9);
+    const enNum = getAppLanguage() === 'en';
     return { 
-      text: `Günün Uğurlu Melek Sayısı:\n\n${n.number}\n\nAnlam:\n${n.meaning}\n\nRehberlik:\n${n.guidance}`,
+      text: `${enNum ? "Today's Angel Number" : 'Günün Uğurlu Melek Sayısı'}:
+
+${n.number}
+
+${enNum ? 'Meaning' : 'Anlam'}:
+${n.meaning}
+
+${enNum ? 'Guidance' : 'Rehberlik'}:
+${n.guidance}`,
       fingerprint: `angelNum:${n.number}`,
       meta: { angelNumber: n }
     };
   }
   const code = momentCode(now);
-  const meaning = NUMEROLOGY_MEANINGS[String(code)] || 'Bugün denge ve netlik enerjisi baskın.';
+  const enNumerology = getAppLanguage() === 'en';
+  const meaning =
+    getNumerologyMeanings()[String(code)] ||
+    (enNumerology ? 'Balance and clarity set the tone today.' : 'Bugün denge ve netlik enerjisi baskın.');
   return { 
-    text: `Günün Numerolojisi:\n\n${code}\n\nAnlam:\n${meaning}`,
+    text: `${enNumerology ? "Today's Numerology" : 'Günün Numerolojisi'}:
+
+${code}
+
+${enNumerology ? 'Meaning' : 'Anlam'}:
+${meaning}`,
     fingerprint: `num:${code}`,
     meta: {
       numerology: {

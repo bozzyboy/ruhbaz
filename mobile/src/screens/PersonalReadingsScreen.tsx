@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
@@ -40,10 +42,10 @@ type InsightCardItem = ReadingTypeItem | {
   currentlyAvailable: true;
 };
 
-function profileBadge(profile: SubjectProfile) {
-  if (profile.relationshipPrimary === 'kendi') return 'Kendim';
-  if (profile.relationshipPrimary === 'cocuk') return 'Çocuk';
-  if (profile.relationshipPrimary === 'es') return 'Eş';
+function profileBadge(profile: SubjectProfile, t: TFunction) {
+  if (profile.relationshipPrimary === 'kendi') return t('profile.relationshipSelf');
+  if (profile.relationshipPrimary === 'cocuk') return t('profile.relationshipChild');
+  if (profile.relationshipPrimary === 'es') return t('profile.relationshipSpouse');
   return profile.relationshipPrimary;
 }
 
@@ -57,6 +59,7 @@ function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | nul
 }
 
 export function PersonalReadingsScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const devSettings = route.params?.devSettings || DEFAULT_DEV_SETTINGS;
   const [profiles, setProfiles] = useState<SubjectProfile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -108,20 +111,20 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
     () => [
       {
         id: 'birth-chart',
-        title: 'Doğum Haritası',
-        shortTitle: 'DOĞUM HARİTASI',
-        description: 'Doğum anındaki gökyüzü yerleşimlerinden karakter, potansiyel ve yaşam temalarını gör.',
+        title: t('readings.typeBirthChart'),
+        shortTitle: t('readings.shortBirthChart'),
+        description: t('readings.descBirthChart'),
         currentlyAvailable: true,
       },
       {
         id: 'numerology-core',
-        title: 'Temel Numeroloji Haritası',
-        shortTitle: 'TEMEL NUMEROLOJİ',
-        description: 'İsim ve doğum tarihinden yaşam yolu, kader, ruh arzusu ve ana sayı haritası çıkarılır.',
+        title: t('readings.typeNumerologyCore'),
+        shortTitle: t('readings.shortNumerologyCore'),
+        description: t('readings.descNumerologyCore'),
         currentlyAvailable: true,
       },
     ],
-    [],
+    [t],
   );
 
   const insightTypes: InsightCardItem[] = useMemo(
@@ -129,61 +132,61 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
       ...oneTimeTypes,
       {
         id: 'tests',
-        title: 'Testler',
-        shortTitle: 'TESTLER',
-        description: 'Kişilik, uyum, bağlanma, değerler ve stresle başa çıkma testleri arasından seçim yap.',
+        title: t('tests.title'),
+        shortTitle: t('readings.shortTests'),
+        description: t('readings.descTests'),
         currentlyAvailable: true,
       },
     ],
-    [oneTimeTypes],
+    [oneTimeTypes, t],
   );
 
   const flowTypes: ReadingTypeItem[] = useMemo(
     () => [
       {
         id: 'astro-personal',
-        title: 'Astroloji',
-        shortTitle: 'ASTROLOJİ',
-        description: 'Profil bilgilerine göre dönemsel etkiler, ilişki dinamikleri ve kişisel gökyüzü yorumu al.',
+        title: t('readings.typeAstro'),
+        shortTitle: t('readings.shortAstro'),
+        description: t('readings.descAstroSalon'),
         currentlyAvailable: true,
       },
       {
         id: 'coffee',
-        title: 'Kahve Yorumu',
-        shortTitle: 'KAHVE',
-        description: 'Fincan ve tabak görsellerinden semboller, yollar, niyetler ve yakın dönem işaretleri okunur.',
+        title: t('readings.typeCoffee'),
+        shortTitle: t('readings.shortCoffee'),
+        description: t('readings.descCoffeeSalon'),
         currentlyAvailable: true,
       },
       {
         id: 'palm',
-        title: 'El / Pati Okuması',
-        shortTitle: 'EL / PATİ',
-        description: 'El çizgileri ya da pati formundan mizacın, içgüdülerin ve yaşam akışın yorumlanır.',
+        title: t('readings.typePalm'),
+        shortTitle: t('readings.shortPalm'),
+        description: t('readings.descPalmSalon'),
         currentlyAvailable: true,
       },
       {
         id: 'tarot-personal',
-        title: 'Kişiye Özel Tarot',
-        shortTitle: 'TAROT',
-        description: 'Seçtiğin açılıma göre kartlar, niyetin ve yorumcu personası birlikte yorumlanır.',
+        title: t('readings.typeTarotPersonal'),
+        shortTitle: t('readings.shortTarot'),
+        description: t('readings.descTarotSalon'),
         currentlyAvailable: true,
       },
       {
         id: 'numerology-period',
-        title: 'Numeroloji',
-        shortTitle: 'NUMEROLOJİ',
-        description: 'Profil sayılarınla birleşen günlük, haftalık ve aylık dönemsel numeroloji yorumları.',
+        title: t('readings.typeNumerologyPeriod'),
+        shortTitle: t('readings.shortNumerologyPeriod'),
+        description: t('readings.descNumerologySalon'),
         currentlyAvailable: true,
       },
       {
         id: 'dream-interpretation',
-        title: 'Rüya Yorumu',
-        shortTitle: 'RÜYA YORUMU',
-        description: 'Rüyanda gördüklerini anlatırsın; semboller, duygu tonu ve kişisel bağlamla yorumlanır.',
+        title: t('readings.typeDream'),
+        shortTitle: t('readings.shortDream'),
+        description: t('readings.descDreamSalon'),
         currentlyAvailable: true,
       },
     ],
-    [],
+    [t],
   );
 
   const handleTypePress = useCallback(
@@ -193,7 +196,7 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         setInfoModal({
           visible: true,
           title: APP_NAME,
-          message: 'Okuma hazırlayabilmemiz için önce bir profil oluşturmalı veya seçmelisin.',
+          message: t('modals.needProfileForReading'),
         });
         return;
       }
@@ -209,8 +212,8 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         setInfoAction(null);
         setInfoModal({
           visible: true,
-          title: 'Yakında',
-          message: `${item.title} çok yakında aktif olacak.`,
+          title: t('modals.comingSoonTitle'),
+          message: t('readings.readingComingSoon', { reading: item.title }),
         });
         return;
       }
@@ -220,9 +223,8 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
           setInfoAction('profile');
           setInfoModal({
             visible: true,
-            title: 'Profil Bilgisi Gerekli',
-            message:
-              'Doğum haritası için bu profilde doğum tarihi, doğum ülkesi ve doğum şehri olmalı. Doğum saati varsa yükselen ve evler de netleşir. Profil Ayarları ekranından tamamlayabilirsin.',
+            title: t('modals.profileInfoRequiredTitle'),
+            message: t('modals.birthChartInfoMessage'),
           });
           return;
         }
@@ -236,9 +238,8 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         setInfoAction('profile');
         setInfoModal({
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message:
-            'Kişiye özel astroloji için bu profilde doğum tarihi, doğum ülkesi ve doğum şehri olmalı. Doğum saati varsa yükselen ve evler de netleşir. Profil Ayarları ekranından tamamlayabilirsin.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('modals.personalAstroInfoMessage'),
         });
         return;
       }
@@ -247,8 +248,8 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         setInfoAction('profile');
         setInfoModal({
           visible: true,
-          title: 'Profil Bilgisi Gerekli',
-          message: 'Kişisel numeroloji için profil adı ve doğum tarihi yeterli. Profil Ayarları ekranından tamamlayabilirsin.',
+          title: t('modals.profileInfoRequiredTitle'),
+          message: t('modals.personalNumerologyInfoMessage'),
         });
         return;
       }
@@ -265,15 +266,15 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
       setPendingType(item);
       setConfirmVisible(true);
     },
-    [navigation, selectedProfile],
+    [navigation, selectedProfile, t],
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Kimin İçin Baktıracaksın?</Text>
-          <Text style={styles.helperText}>Önce profili seç, sonra aşağıdan okumaya geç.</Text>
+          <Text style={styles.panelTitle}>{t('readings.whoForPersonalTitle')}</Text>
+          <Text style={styles.helperText}>{t('readings.whoForPersonalHelper')}</Text>
           {profiles.length ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {profiles.map((profile) => {
@@ -285,20 +286,20 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
                     onPress={() => setSelectedProfileId(profile.profileId)}
                   >
                     <Text style={styles.profileName}>{profile.displayName}</Text>
-                    <Text style={styles.profileMeta}>{profileBadge(profile)}</Text>
+                    <Text style={styles.profileMeta}>{profileBadge(profile, t)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
           ) : (
             <View style={styles.emptyProfileBox}>
-              <Text style={styles.emptyProfileText}>Henüz seçim yapabileceğin bir profil yok. Profil Ayarlarına gidip profil oluşturmalısın.</Text>
+              <Text style={styles.emptyProfileText}>{t('profile.noProfilesYet')}</Text>
               <View style={styles.emptyProfileActions}>
                 <TouchableOpacity style={styles.emptyProfileButton} onPress={() => navigation.navigate('ProfileSettings')}>
-                  <Text style={styles.emptyProfileButtonText}>Profil Ayarlarına Git</Text>
+                  <Text style={styles.emptyProfileButtonText}>{t('profile.goToProfileSettings')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.emptyProfileGhostButton} onPress={() => void loadProfiles()}>
-                  <Text style={styles.emptyProfileGhostButtonText}>Profilleri Yenile</Text>
+                  <Text style={styles.emptyProfileGhostButtonText}>{t('profile.refreshProfiles')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -306,9 +307,9 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         </View>
 
         <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Salon Okumaları</Text>
+          <Text style={styles.panelTitle}>{t('readings.salonReadingsTitle')}</Text>
           <Text style={styles.sectionHelperText}>
-            Burada dönemsel ya da konu odaklı yorum alabilir, fotoğraf yükleyerek sembolleri okutabilir, rüyanı anlatabilir veya hazırlanan okuma üzerinden takip soruları sorabilirsin. Kesin öngörü iddiası içermez; sezgisel, sembolik ve eğlence amaçlı yapay zeka destekli içgörüler sunar.
+            {t('readings.salonReadingsHelper')}
           </Text>
           <View style={styles.grid}>
             {flowTypes.map((item) => (
@@ -331,11 +332,11 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         title={APP_NAME}
         message={
           pendingType && selectedProfile
-            ? `${selectedProfile.displayName} için ${pendingType.title} seçildi. Devam edelim mi?`
-            : 'Bu profil için devam edelim mi?'
+            ? t('readings.salonConfirmMessage', { name: selectedProfile.displayName, reading: pendingType.title })
+            : t('readings.salonConfirmFallback')
         }
-        confirmLabel="Evet"
-        cancelLabel="Hayır"
+        confirmLabel={t('common.yes')}
+        cancelLabel={t('common.no')}
         onConfirm={() => {
           if (!pendingType || !selectedProfile) return;
           const selectedType = pendingType;
@@ -363,9 +364,9 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         visible={infoModal.visible}
         title={infoModal.title}
         message={infoModal.message}
-        confirmLabel={infoAction === 'profile' ? null : 'Tamam'}
-        cancelLabel="Kapat"
-        extraActionLabel={infoAction === 'profile' ? 'Profil Ayarlarına Git' : null}
+        confirmLabel={infoAction === 'profile' ? null : t('common.ok')}
+        cancelLabel={t('common.close')}
+        extraActionLabel={infoAction === 'profile' ? t('profile.goToProfileSettings') : null}
         onExtraAction={infoAction === 'profile' ? handleInfoExtraAction : undefined}
         onConfirm={closeInfoModal}
         onCancel={closeInfoModal}
