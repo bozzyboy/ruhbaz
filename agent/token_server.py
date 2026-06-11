@@ -279,20 +279,6 @@ def gemini_embed():
     )
 
 
-@app.get("/gemini-api-key")
-def gemini_api_key():
-    if not GEMINI_API_KEY:
-        return jsonify({"ok": False, "error": "Yorum anahtarı yok."}), 503
-    return jsonify(
-        {
-            "ok": True,
-            "apiKey": GEMINI_API_KEY,
-            "model": GEMINI_MODEL,
-            "embeddingModel": GEMINI_EMBEDDING_MODEL,
-        }
-    )
-
-
 @app.get("/health")
 def health():
     now = _now()

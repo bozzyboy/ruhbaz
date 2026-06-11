@@ -40,8 +40,9 @@ Backend prompt üretmez; mobil uygulama promptu cihazda kurar. `token_server.py`
 
 - `POST /gemini-generate`
 - `POST /gemini-embed`
-- `GET /gemini-api-key`
 - `GET /health`
+
+API anahtarını dışarı veren bir endpoint YOKTUR ve eklenmemelidir (`/gemini-api-key` Faz 0'da güvenlik nedeniyle kaldırıldı; anahtar yalnızca server içinde kalır).
 
 `/general-astro` şu an zorunlu backend endpoint'i değildir. Mobil taraf bunu opsiyonel server cache olarak dener; endpoint yoksa Gemini üretimi veya lokal fallback akışına düşer.
 
