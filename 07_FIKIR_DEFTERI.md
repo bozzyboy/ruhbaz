@@ -70,6 +70,7 @@ Durumlar: 📥 ham · 📋 işlendi (karar/doküman referansıyla) · 🅿️ pa
 | 2026-06-11 | Embedding modeli = gemini-embedding-2 (bulut); yerel aday EmbeddingGemma ~300M/LiteRT; "sayaçta 0" = ÖLÇÜM AÇIĞI bulundu | 📋 | 11 + Bakılacaklar B-6 |
 | 2026-06-11 | Persona renklendirme/görsel ayrıştırma — nasıl yapılacak (her personaya kimlik rengi/atmosfer) | 📋 | K44 + Brand Book (Faz 3) |
 | 2026-06-11 | Persona HİTAP sistemi: bakılan profilin yaş verisini alıp persona kendi yaşıyla kıyaslayıp hitap seçmeli (sen/siz, abla/teyze/evladım...); TR kültürü ile Batı kültürü FARKLI çalışır | 📋 | K45 + F10 |
+| 2026-06-11 | `MemoryDebugScreen` ürün mü debug mi? Profil Ayarları'nda "Hafıza Özeti" düğmesiyle KULLANICIYA açık; adı "Debug" ama kullanıcıya hafıza şeffaflığı değerli olabilir (bağ stratejisiyle uyumlu). Faz 0 debug-kapısına BİLEREK dahil edilmedi | ❓ | Ozan karar verecek: ürünleşecekse adı/UX'i değişir; debug'sa `ENABLE_DEVELOPER_DEBUG_UI` kapısına alınır |
 
 ---
 

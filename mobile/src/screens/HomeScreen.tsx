@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME, DEFAULT_DEV_SETTINGS } from '../config/constants';
 import { DevControls } from '../components/DevControls';
+import { ENABLE_DEVELOPER_DEBUG_UI } from '../config/featureFlags';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { loadAccountState } from '../services/profileMemoryService';
 import {
@@ -171,6 +172,7 @@ export function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
+        {ENABLE_DEVELOPER_DEBUG_UI ? (
         <View style={styles.panel}>
           <TouchableOpacity
             style={styles.tokenHeaderRow}
@@ -392,11 +394,14 @@ export function HomeScreen({ navigation }: Props) {
             </>
           ) : null}
         </View>
+        ) : null}
 
+        {ENABLE_DEVELOPER_DEBUG_UI ? (
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Geliştirici Ayarları</Text>
           <DevControls settings={devSettings} onSettingsChange={setDevSettings} />
         </View>
+        ) : null}
       </BrandedScrollView>
     </SafeAreaView>
   );
