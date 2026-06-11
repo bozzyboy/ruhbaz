@@ -1,0 +1,52 @@
+Tüm user mesajlarını parse ederek baktım. Memory / retrieval / graph / on-device hafıza için örnek diye verdiğin ana linkler şunlar:
+
+**GitHub / Gist**
+- [bradwmorris/ra-h_os](https://github.com/bradwmorris/ra-h_os)  
+  SQLite + sqlite-vec, knowledge base, semantic search hattı için.
+
+- [karpathy LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)  
+  Raw data -> wiki/schema gibi LLM wiki fikri için.
+
+- [rohitg00 gist](https://gist.github.com/rohitg00/2067ab416f7bbe447c1977edaaa681e2)  
+  Compression / context küçültme / memory maliyeti fikriyle beraber geçmiş.
+
+- [MemPalace/mempalace](https://github.com/MemPalace/mempalace)  
+  Memory palace ve context sikistirma yaklaşımı için.
+
+- [juliusbrussee/caveman](https://github.com/juliusbrussee/caveman)  
+  Caveman sıkıştırması / kısa ama anlam koruyan context fikri için.
+
+- [garrytan/gbrain](https://github.com/garrytan/gbrain)  
+  Hybrid search, graph, MCP/headless brain-service fikri için.
+-Second Brain (Henry Daum)	https://github.com/henrydaum/second-brain	Agentic framework, local-first AI runtime, Karpathy modeli
+-SimpleMem (Aiming Lab)	https://github.com/aiming-lab/SimpleMem	3 retrieval tipi (semantic, graph, episodic), 30x token reduction
+-Caveman (Julius Brussee)	https://github.com/JuliusBrussee	Token compression (60-75%), Cavemem SQLite FTS5
+- Headroom	(https://github.com/chopratejas/headroom)	Context compression, sliding window management
+
+- [google-ai-edge/gallery](https://github.com/google-ai-edge/gallery)  
+  Gemma 4 E2B / local brain / cihaz üstü çalışma referansı olarak geçti.
+
+- [google-ai-edge/LiteRT-LM](https://github.com/google-ai-edge/LiteRT-LM)  
+  Yerel model runtime, Gemma 4 E2B ve ileride embedding/local IQ yolu için.
+
+- [google-ai-edge/LiteRT dispatch](https://github.com/google-ai-edge/LiteRT/tree/main/litert/runtime/dispatch)  
+  LiteRT runtime/dispatch tarafı için ayrıca geçti.
+
+**YouTube**
+- [dxq7WtWxi44](https://www.youtube.com/watch?v=dxq7WtWxi44&t=1878s)  
+  LLM wiki / self-learning / memory architecture düşünürken birkaç kez referans verdin.
+
+- [z02Y-1OvWSM](https://youtu.be/z02Y-1OvWSM?si=d-fRNZiIOTzU9v8c)  
+  Knowledge graph/context çıkarma, kullanıcıya “seni tanıyoruz” hissini göze sokmadan verme yaklaşımı için.
+
+- [2K7VVAMUYPw](https://youtu.be/2K7VVAMUYPw?si=_1YlcWp2_oKUQZWG)  
+  MCP / Gemini agent / app’i dış ajanlarla kullandırma fikri bağlamında geçti.
+
+- [2K7VVAMUYPw playlist URL](https://www.youtube.com/watch?v=2K7VVAMUYPw&list=PLOz9UlR2yq_Rf_63JU4uDhSHfwQBm-r2P)  
+  Aynı konu: Gemini ile Android/app functions/MCP benzeri kullanım.
+
+Memory dışına biraz taşan ama local brain / TTS / realtime persona deneyimiyle bağlantılı videolar da vardı:
+- [pbsTTxKTuts](https://youtu.be/pbsTTxKTuts?si=R9-6ZEFyx_moS1e9)
+- [nVhdDgYf_rI](https://youtu.be/nVhdDgYf_rI?si=HZ-nu6-jHH6MSyF1)
+- [8F_5pdcD3HY](https://youtu.be/8F_5pdcD3HY?si=sGYJdZJJ0gmxp5GD)
+- [oUtiZbrehrw](https://youtu.be/oUtiZbrehrw?si=sKhPZtKIcJYkXvNU)
