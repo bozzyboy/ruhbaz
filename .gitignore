@@ -6,6 +6,7 @@ agent/.env
 .env
 *.env.local
 .env.*
+!.env.example
 
 .expo/
 mobile/.expo/
