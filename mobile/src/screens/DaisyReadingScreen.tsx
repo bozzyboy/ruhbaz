@@ -4,22 +4,22 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Defs, Ellipse, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
-import { createDaisyFortuneSession, daisyAnswerForPetal, type DaisyFortuneSession } from '../services/daisyFortuneService';
+import { createDaisyReadingSession, daisyAnswerForPetal, type DaisyReadingSession } from '../services/daisyReadingService';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'DaisyFortune'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'DaisyReading'>;
 
 const CARD_WIDTH = Math.min(Dimensions.get('window').width * 0.82, 360);
 const CARD_HEIGHT = (CARD_WIDTH * 650) / 400;
 
-export function DaisyFortuneScreen({}: Props) {
+export function DaisyReadingScreen({}: Props) {
   const insets = useSafeAreaInsets();
-  const [session, setSession] = useState<DaisyFortuneSession | null>(null);
+  const [session, setSession] = useState<DaisyReadingSession | null>(null);
   const [pluckedCount, setPluckedCount] = useState(0);
   const [lastAnswer, setLastAnswer] = useState<'EVET' | 'HAYIR' | null>(null);
 
   const startNew = useCallback(async () => {
-    const next = await createDaisyFortuneSession();
+    const next = await createDaisyReadingSession();
     setSession(next);
     setPluckedCount(0);
     setLastAnswer(null);

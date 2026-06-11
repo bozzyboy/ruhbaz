@@ -1,5 +1,5 @@
 import type { LoreEdge, LoreGraph, LoreNode } from '../types/memory';
-import { COMMON_FORTUNE_IDENTITY_BODY, FORTUNE_PERSONA_DATA } from './fortunePersonaData';
+import { COMMON_READING_IDENTITY_BODY, READING_PERSONA_DATA } from './readingPersonaData';
 import { indexLoreGraph } from './memorySqliteService';
 
 let cachedLoreGraph: LoreGraph | null = null;
@@ -26,10 +26,10 @@ export function buildLoreGraph(): LoreGraph {
   if (cachedLoreGraph) return cachedLoreGraph;
   const nodes: LoreNode[] = [];
   const edges: LoreEdge[] = [];
-  for (const [personaId, persona] of Object.entries(FORTUNE_PERSONA_DATA)) {
+  for (const [personaId, persona] of Object.entries(READING_PERSONA_DATA)) {
     const voice = bulletSummary(section(persona.systemBody, 'Voice And Temperament'), 5);
     const domain = bulletSummary(section(persona.systemBody, 'Domain Rules'), 4);
-    const safety = bulletSummary(section(COMMON_FORTUNE_IDENTITY_BODY, 'Safety And Boundaries'), 4);
+    const safety = bulletSummary(section(COMMON_READING_IDENTITY_BODY, 'Safety And Boundaries'), 4);
     const personaRoot = makeLoreId('persona', personaId);
     nodes.push({
       loreId: personaRoot,

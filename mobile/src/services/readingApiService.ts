@@ -2,17 +2,17 @@ import type { DevSettings } from '../types';
 import type { ProfileMemorySnippet } from '../types/memory';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import { PERSONAL_FOLLOW_UP_MAX_OUTPUT_TOKENS, PERSONAL_INITIAL_READING_MAX_OUTPUT_TOKENS } from '../config/llmTokenPolicy';
-import type { SpecificityUsage } from './fortuneSpecificityBank';
+import type { SpecificityUsage } from './readingSpecificityBank';
 import {
-  buildFortunePrompt,
+  buildReadingPrompt,
   buildCoffeeMultiImageContinuityInstruction,
   type CoffeeImageAnalysis,
   type CoffeeImageSlot,
   type CoffeeMode,
-  type FortuneImages,
-  type FortuneMessage as BuilderFortuneMessage,
-  type FortuneReadingType,
-} from './fortunePromptBuilder';
+  type ReadingImages,
+  type ReadingMessage as BuilderReadingMessage,
+  type ReadingReadingType,
+} from './readingPromptBuilder';
 import {
   appendHealthProfessionalReminder,
   sanitizeGenderedAddress,
@@ -21,24 +21,24 @@ import {
 } from './personaClosingService';
 import { cleanFollowUpReply, getSimpleFollowUpReply } from './followUpResponseService';
 
-export type FortuneMessage = BuilderFortuneMessage;
+export type ReadingMessage = BuilderReadingMessage;
 
-interface FortuneRequest {
+interface ReadingRequest {
   sessionId: string;
   devSettings: DevSettings;
   profileId: string;
   profileName: string;
   profileIsSelf?: boolean;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   coffeeMode?: CoffeeMode;
   focusQuestion?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
-  messages: FortuneMessage[];
+  messages: ReadingMessage[];
   isFollowUp?: boolean;
-  images?: FortuneImages;
+  images?: ReadingImages;
 }
 
-export interface FortuneReplyResult {
+export interface ReadingReplyResult {
   text: string;
   modelName?: string;
   specificityUsage?: SpecificityUsage;
@@ -49,17 +49,17 @@ export interface FortuneReplyResult {
   };
 }
 
-type GeminiUsage = FortuneReplyResult['usage'];
+type GeminiUsage = ReadingReplyResult['usage'];
 
 const PHOTO_RETRY_MESSAGE =
   'Fotoğraf şu an net okunamadı canım. Işığı biraz artırıp telveyi ya da avuç içini daha yakından göstererek yeniden deneyelim.';
 const FRIENDLY_FALLBACK =
   'Bu fotoğraf bu okuma türü için uygun görünmüyor canım. Uygun okuma türünü seçip fotoğrafı yeniden yükleyelim.';
-const SURFACE_INITIAL_MIN_OUTPUT_TOKENS: Partial<Record<FortuneReadingType, number>> = {
+const SURFACE_INITIAL_MIN_OUTPUT_TOKENS: Partial<Record<ReadingReadingType, number>> = {
   coffee: 900,
   palm: 750,
 };
-const SURFACE_INITIAL_EXPAND_MAX_OUTPUT_TOKENS: Partial<Record<FortuneReadingType, number>> = {
+const SURFACE_INITIAL_EXPAND_MAX_OUTPUT_TOKENS: Partial<Record<ReadingReadingType, number>> = {
   coffee: 1700,
   palm: 1400,
 };
@@ -209,7 +209,7 @@ function addSurfaceFromCode(surfaces: Array<'cup' | 'saucer'>, surfaceCode: Coff
 // karışımda (fincan / tabak / fincan+tabak) olabilir. EN AZ 1 telveli görsel
 // yeterlidir — telvesiz/alakasız ek kareler okumayı DÜŞÜRMEZ, sadece dışarıda kalır.
 // (Bekçi: mobile/scripts/check-image-contract.js — bu işaretleri ve yapıyı doğrular.)
-async function validateCoffeeImages(images: FortuneImages) {
+async function validateCoffeeImages(images: ReadingImages) {
   const surfaces: Array<'cup' | 'saucer'> = [];
   const analyses: CoffeeImageAnalysis[] = [];
   const usage = emptyUsage();
@@ -362,7 +362,7 @@ function speciesTr(species?: string | null, fallback?: string | null) {
   }[species || ''] || fallback || 'evcil hayvan';
 }
 
-async function validatePalmImage(images: FortuneImages, memorySnippet?: ProfileMemorySnippet | null) {
+async function validatePalmImage(images: ReadingImages, memorySnippet?: ProfileMemorySnippet | null) {
   const image = images.palm;
   const usage = emptyUsage();
   if (!image) throw jsonPayloadError('El/pati okuması için fotoğraf gerekli.', usage);
@@ -414,7 +414,7 @@ function appendClosing(text: string, closingSentence: string) {
 function completeWithRememberedPersonaClosing(params: {
   text: string;
   closingSentence: string;
-  messages: FortuneMessage[];
+  messages: ReadingMessage[];
 }) {
   const sessionText = params.messages.map((message) => message.text || '').join(' ');
   if (!params.closingSentence || sessionText.includes(params.closingSentence)) return (params.text || '').trim();
@@ -452,7 +452,7 @@ function diversifyTimeNumbers(text: string, sessionId: string) {
   });
 }
 
-function stripExplicitAstroLeaks(text: string, readingType: FortuneReadingType) {
+function stripExplicitAstroLeaks(text: string, readingType: ReadingReadingType) {
   if (readingType !== 'coffee' && readingType !== 'palm') return text;
   const sentences = (text || '').trim().split(/(?<=[.!?])\s+/);
   const kept = sentences.filter(
@@ -464,7 +464,7 @@ function stripExplicitAstroLeaks(text: string, readingType: FortuneReadingType) 
   return kept.length >= Math.max(2, Math.floor(sentences.length * 0.45)) ? kept.join(' ').trim() : text;
 }
 
-function stripUnaskedPaceTheme(text: string, messages: FortuneMessage[]) {
+function stripUnaskedPaceTheme(text: string, messages: ReadingMessage[]) {
   const sessionText = messages.map((message) => message.text || '').join(' ');
   if (/\b(telaş|acele|yetiş|yetişem|panik|koştur|koşuştur)\b/i.test(sessionText)) return text;
   const sentences = (text || '').trim().split(/(?<=[.!?])\s+/);
@@ -483,7 +483,7 @@ function stripFollowUpReopeners(text: string) {
   return sentences.join(' ').trim() || text;
 }
 
-function looksLikeImageRetryRequest(text: string, readingType: FortuneReadingType) {
+function looksLikeImageRetryRequest(text: string, readingType: ReadingReadingType) {
   const normalized = (text || '').toLocaleLowerCase('tr-TR');
   const asksUpload = /\b(fotoğraf|görsel|yükle|gönder)\b/.test(normalized);
   if (!asksUpload) return false;
@@ -493,7 +493,7 @@ function looksLikeImageRetryRequest(text: string, readingType: FortuneReadingTyp
   return /\b(avuç|el|pati|ayak)\b/.test(normalized);
 }
 
-function compactImageRetryReply(text: string, readingType: FortuneReadingType) {
+function compactImageRetryReply(text: string, readingType: ReadingReadingType) {
   if (!looksLikeImageRetryRequest(text, readingType)) return text;
   const sentences = (text || '').trim().split(/(?<=[.!?])\s+/).filter(Boolean);
   const useful = sentences.filter((sentence) =>
@@ -503,7 +503,7 @@ function compactImageRetryReply(text: string, readingType: FortuneReadingType) {
 }
 
 function shouldExpandInitialSurfaceReading(params: {
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   coffeeMode?: CoffeeMode;
   isFollowUp?: boolean;
   outputTokens: number;
@@ -520,7 +520,7 @@ function shouldExpandInitialSurfaceReading(params: {
 async function expandShortInitialSurfaceReading(params: {
   prompt: string;
   draftText: string;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   devSettings: DevSettings;
 }) {
   const target = params.readingType === 'coffee' ? '1400-1700' : '1000-1400';
@@ -553,14 +553,14 @@ async function expandShortInitialSurfaceReading(params: {
   );
 }
 
-function cleanFortuneText(params: {
+function cleanReadingText(params: {
   text: string;
   closingSentence: string;
-  messages: FortuneMessage[];
+  messages: ReadingMessage[];
   memorySnippet?: ProfileMemorySnippet | null;
   devSettings: DevSettings;
   sessionId: string;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   isFollowUp?: boolean;
   focusQuestion?: string | null;
 }) {
@@ -593,10 +593,10 @@ function cleanFortuneText(params: {
 }
 
 function buildContents(params: {
-  messages: FortuneMessage[];
-  images: FortuneImages;
+  messages: ReadingMessage[];
+  images: ReadingImages;
   isFollowUp?: boolean;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   validatedSurfaces?: Array<'cup' | 'saucer' | 'palm'>;
   coffeeImageAnalyses?: CoffeeImageAnalysis[] | null;
   memorySnippet?: ProfileMemorySnippet | null;
@@ -650,7 +650,7 @@ function buildContents(params: {
   return contents;
 }
 
-export async function getFortuneReply(body: FortuneRequest): Promise<FortuneReplyResult> {
+export async function getReadingReply(body: ReadingRequest): Promise<ReadingReplyResult> {
   const usage = emptyUsage();
   const images = body.images || {};
   try {
@@ -668,7 +668,7 @@ export async function getFortuneReply(body: FortuneRequest): Promise<FortuneRepl
       validatedSurfaces = ['palm'];
       palmValidation = result.validation;
     }
-    const prompt = buildFortunePrompt({
+    const prompt = buildReadingPrompt({
       sessionId: body.sessionId,
       devSettings: body.devSettings,
       profileName: body.profileName,
@@ -731,7 +731,7 @@ export async function getFortuneReply(body: FortuneRequest): Promise<FortuneRepl
       : '';
     const responseText = simpleFollowUp || (body.isFollowUp ? cleanFollowUpReply(rawReplyText) : rawReplyText);
     return {
-      text: cleanFortuneText({
+      text: cleanReadingText({
         text: responseText,
         closingSentence: prompt.closingSentence,
         messages: body.messages,

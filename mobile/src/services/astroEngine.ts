@@ -9,7 +9,7 @@ import {
 } from '../config/llmTokenPolicy';
 import { resolveAstroLocation } from './astroLocationService';
 import { generateGeminiTextDirect } from './geminiDirectService';
-import { FORTUNE_PERSONA_DATA } from './fortunePersonaData';
+import { READING_PERSONA_DATA } from './readingPersonaData';
 import {
   appendHealthProfessionalReminder,
   completeWithRememberedPersonaClosing,
@@ -1523,7 +1523,7 @@ function astroSafePersonaText(text?: string) {
 }
 
 function assistantPersonaContext(assistantId: string) {
-  const identity = FORTUNE_PERSONA_DATA[assistantId as keyof typeof FORTUNE_PERSONA_DATA];
+  const identity = READING_PERSONA_DATA[assistantId as keyof typeof READING_PERSONA_DATA];
   if (!identity?.systemBody) return '';
   const voice = astroSafePersonaText(
     identity.systemBody.match(/# Voice And Temperament\n\n([\s\S]*?)(?:\n\n# |$)/)?.[1]?.trim()

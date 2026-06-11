@@ -33,7 +33,7 @@ import { TarotReadingScreen } from './src/screens/TarotReadingScreen';
 import { MbtiTestScreen } from './src/screens/MbtiTestScreen';
 import { AstroRelationshipReadingScreen } from './src/screens/AstroRelationshipReadingScreen';
 import { SunCompatibilityScreen } from './src/screens/SunCompatibilityScreen';
-import { DaisyFortuneScreen } from './src/screens/DaisyFortuneScreen';
+import { DaisyReadingScreen } from './src/screens/DaisyReadingScreen';
 import { APP_NAME } from './src/config/constants';
 import type { TarotDeckId } from './src/data/tarotImageMap';
 import type { DevSettings, SessionConfig } from './src/types';
@@ -52,7 +52,7 @@ export type RootStackParamList = {
     title: string;
   };
   SunCompatibility: undefined;
-  DaisyFortune: undefined;
+  DaisyReading: undefined;
   PersonalReadings: { devSettings: DevSettings } | undefined;
   PersonalProfileSelect: { devSettings: DevSettings };
   PersonalReadingTypeSelect: { devSettings: DevSettings; profileId: string };
@@ -207,7 +207,7 @@ export default function App() {
           <Stack.Screen name="GeneralReadings" component={GeneralReadingsScreen} options={{ title: 'İkram Masası' }} />
           <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: 'Genel Okuma' }} />
           <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: 'Genel Burç Uyumu' }} />
-          <Stack.Screen name="DaisyFortune" component={DaisyFortuneScreen} options={{ title: 'Papatya Ritüeli' }} />
+          <Stack.Screen name="DaisyReading" component={DaisyReadingScreen} options={{ title: 'Papatya Ritüeli' }} />
           <Stack.Screen name="PersonalReadings" component={PersonalReadingsScreen} options={{ title: 'Senin Evin' }} />
           <Stack.Screen name="SelfKnowledge" component={SelfKnowledgeScreen} options={{ title: 'Kendini Tanı' }} />
           <Stack.Screen name="SimyaLab" component={SimyaLabScreen} options={{ title: 'Simya Laboratuvarı' }} />

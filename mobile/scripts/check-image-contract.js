@@ -20,7 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const TARGET = path.resolve(__dirname, '..', 'src', 'services', 'fortuneApiService.ts');
+const TARGET = path.resolve(__dirname, '..', 'src', 'services', 'readingApiService.ts');
 const failures = [];
 
 if (!fs.existsSync(TARGET)) {
@@ -96,23 +96,23 @@ const classifyRegion = classifyRegionRaw
 });
 
 // --- Okuma prompt'ları: baskı/desen yasağı + "aynı fincanın farklı açıları" ---
-const PROMPT_BUILDER = path.resolve(__dirname, '..', 'src', 'services', 'fortunePromptBuilder.ts');
-const COMMON_PROMPT = path.resolve(__dirname, '..', 'src', 'services', 'fortuneCommonPrompt.ts');
+const PROMPT_BUILDER = path.resolve(__dirname, '..', 'src', 'services', 'readingPromptBuilder.ts');
+const COMMON_PROMPT = path.resolve(__dirname, '..', 'src', 'services', 'readingCommonPrompt.ts');
 const builderSrc = fs.existsSync(PROMPT_BUILDER) ? fs.readFileSync(PROMPT_BUILDER, 'utf8') : '';
 const commonSrc = fs.existsSync(COMMON_PROMPT) ? fs.readFileSync(COMMON_PROMPT, 'utf8') : '';
-must(Boolean(builderSrc), 'fortunePromptBuilder.ts bulunamadı (taşındıysa bekçiyi güncelle).');
-must(Boolean(commonSrc), 'fortuneCommonPrompt.ts bulunamadı (taşındıysa bekçiyi güncelle).');
+must(Boolean(builderSrc), 'readingPromptBuilder.ts bulunamadı (taşındıysa bekçiyi güncelle).');
+must(Boolean(commonSrc), 'readingCommonPrompt.ts bulunamadı (taşındıysa bekçiyi güncelle).');
 must(
   builderSrc.includes('farklı açılardan çekilmiş kareleri olarak kabul et'),
-  "Okuma prompt'undan 'birden fazla kare = aynı fincanın farklı açıları' kuralı silinmiş (fortunePromptBuilder).",
+  "Okuma prompt'undan 'birden fazla kare = aynı fincanın farklı açıları' kuralı silinmiş (readingPromptBuilder).",
 );
 must(
   builderSrc.includes('üretim desenleri') && builderSrc.includes('yorum unsuru değildir'),
-  "Okuma prompt'undan 'fincan/tabak üzerindeki üretim desenleri yorum unsuru değildir' yasağı silinmiş (fortunePromptBuilder).",
+  "Okuma prompt'undan 'fincan/tabak üzerindeki üretim desenleri yorum unsuru değildir' yasağı silinmiş (readingPromptBuilder).",
 );
 must(
   commonSrc.includes('baskı/dekorları, markaları veya aksesuarları yorum kanıtı yapma'),
-  "Ortak prompt'tan 'hazır baskı/dekor/marka yorum kanıtı yapılmaz' yasağı silinmiş (fortuneCommonPrompt).",
+  "Ortak prompt'tan 'hazır baskı/dekor/marka yorum kanıtı yapılmaz' yasağı silinmiş (readingCommonPrompt).",
 );
 
 if (failures.length) {

@@ -1,5 +1,5 @@
 import type { ProfileMemorySnippet } from '../types/memory';
-import type { CoffeeMode, FortuneMessage, FortuneReadingType } from './fortunePromptBuilder';
+import type { CoffeeMode, ReadingMessage, ReadingReadingType } from './readingPromptBuilder';
 import { userAskedHealthConcern } from './personaClosingService';
 
 type SpecificityItem = {
@@ -1390,7 +1390,7 @@ const ANIMAL_LIFE_EVENT_BANK: SpecificityItem[] = Object.entries(ANIMAL_LIFE_EVE
   labels.slice(0, ITEMS_PER_GROUP).map((label) => ({ group, label })),
 );
 
-function recentText(memorySnippet?: ProfileMemorySnippet | null, messages: FortuneMessage[] = []) {
+function recentText(memorySnippet?: ProfileMemorySnippet | null, messages: ReadingMessage[] = []) {
   return [
     ...(memorySnippet?.readingTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
     ...(memorySnippet?.readingTopics || []),
@@ -1527,10 +1527,10 @@ function selectCues(seedText: string, recent: string) {
 export function buildSpecificityContext(params: {
   sessionId: string;
   profileName: string;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   coffeeMode: CoffeeMode;
   assistantId?: string;
-  messages: FortuneMessage[];
+  messages: ReadingMessage[];
   focusQuestion?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
   isFollowUp?: boolean;

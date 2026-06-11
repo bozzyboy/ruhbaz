@@ -1,6 +1,6 @@
-import { COMMON_FORTUNE_IDENTITY_BODY } from './fortunePersonaData';
+import { COMMON_READING_IDENTITY_BODY } from './readingPersonaData';
 
-type FortuneCommonDomain = 'coffee' | 'palm' | 'paw' | 'general';
+type ReadingCommonDomain = 'coffee' | 'palm' | 'paw' | 'general';
 
 function stripMarkdownSection(body: string, heading: string) {
   const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -10,8 +10,8 @@ function stripMarkdownSection(body: string, heading: string) {
     .trim();
 }
 
-export const COMMON_FORTUNE_GUARDRAIL_BODY = stripMarkdownSection(
-  stripMarkdownSection(COMMON_FORTUNE_IDENTITY_BODY, 'Vision Protocol'),
+export const COMMON_READING_GUARDRAIL_BODY = stripMarkdownSection(
+  stripMarkdownSection(COMMON_READING_IDENTITY_BODY, 'Vision Protocol'),
   'Implementation Notes',
 );
 
@@ -47,7 +47,7 @@ function pawVisionProtocol() {
   ].join('\n');
 }
 
-export function commonFortunePromptForDomain(domain: FortuneCommonDomain) {
+export function commonReadingPromptForDomain(domain: ReadingCommonDomain) {
   const vision =
     domain === 'coffee'
       ? coffeeVisionProtocol()
@@ -56,5 +56,5 @@ export function commonFortunePromptForDomain(domain: FortuneCommonDomain) {
         : domain === 'paw'
           ? pawVisionProtocol()
           : '';
-  return [vision, COMMON_FORTUNE_GUARDRAIL_BODY].filter(Boolean).join('\n\n');
+  return [vision, COMMON_READING_GUARDRAIL_BODY].filter(Boolean).join('\n\n');
 }

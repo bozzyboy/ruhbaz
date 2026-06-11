@@ -8,7 +8,7 @@ import {
   PERSONAL_INITIAL_READING_MAX_OUTPUT_TOKENS,
   PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
 } from '../config/llmTokenPolicy';
-import { FORTUNE_PERSONA_DATA } from './fortunePersonaData';
+import { READING_PERSONA_DATA } from './readingPersonaData';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import {
   appendHealthProfessionalReminder,
@@ -23,7 +23,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
 
-type PersonaId = keyof typeof FORTUNE_PERSONA_DATA;
+type PersonaId = keyof typeof READING_PERSONA_DATA;
 
 export type DrawnTarotCard = {
   id: string;
@@ -46,7 +46,7 @@ export type TarotFollowUpMessage = {
 const TAROT_MAX_OUTPUT_TOKENS = PERSONAL_INITIAL_READING_MAX_OUTPUT_TOKENS;
 const TAROT_FOLLOW_UP_MAX_OUTPUT_TOKENS = PERSONAL_FOLLOW_UP_MAX_OUTPUT_TOKENS;
 function personaId(value?: string): PersonaId {
-  return (value && value in FORTUNE_PERSONA_DATA ? value : 'suzan') as PersonaId;
+  return (value && value in READING_PERSONA_DATA ? value : 'suzan') as PersonaId;
 }
 
 function hashString(value: string) {
@@ -249,7 +249,7 @@ function buildBaseSystem(params: {
   isAnimalProfile?: boolean;
 }) {
   const id = personaId(params.assistantId);
-  const identity = FORTUNE_PERSONA_DATA[id];
+  const identity = READING_PERSONA_DATA[id];
   const isAnimalTarot = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
     identity.systemBody,

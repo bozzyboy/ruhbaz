@@ -45,7 +45,7 @@ Yanıt başlıksız, listesiz ve sohbet gibi akan düz yazı olmalıdır. Üslup
 
 # Implementation Notes
 
-Bu ortak dosya fortune-family assistant kimliklerinin ortak sistem kuralları içindir; kullanıcı profili değildir.
+Bu ortak dosya reading-family assistant kimliklerinin ortak sistem kuralları içindir; kullanıcı profili değildir.
 
 1. Kullanıcının gerçek bilgileri, tercihleri, hafıza kayıtları veya onun oluşturduğu diğer kimlikler burada tutulmaz; bunlar `mobile/src/identity/users/` altında yaşamalıdır.
 2. Persona ayrımı `System Identity`, `Voice And Temperament`, `Domain Rules`, `Conversation Structure` ve `Persona Closing Library` bölümlerinde kalır.

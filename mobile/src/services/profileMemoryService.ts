@@ -2843,10 +2843,10 @@ export async function appendReadingSummary(
     readingMemoryFile(reading.profileId),
     emptyReadingDerivedMemory(reading.profileId, state.accountId),
   );
-  const isSurfaceFortune = reading.readingType === 'coffee' || reading.readingType === 'palm';
+  const isSurfaceReading = reading.readingType === 'coffee' || reading.readingType === 'palm';
   const nextReadingMemory = dampenReadingDerivedMemory(updateMemoryFromText(currentReadingMemory, reading.summary, {
-    includeTopics: !isSurfaceFortune,
-    includePatterns: !isSurfaceFortune,
+    includeTopics: !isSurfaceReading,
+    includePatterns: !isSurfaceReading,
     includePeople: false,
   }));
   await writeJsonFile(readingMemoryFile(reading.profileId), nextReadingMemory);

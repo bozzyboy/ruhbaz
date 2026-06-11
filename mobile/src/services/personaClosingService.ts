@@ -1,8 +1,8 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet } from '../types/memory';
-import { FORTUNE_PERSONA_DATA } from './fortunePersonaData';
+import { READING_PERSONA_DATA } from './readingPersonaData';
 
-type PersonaId = keyof typeof FORTUNE_PERSONA_DATA;
+type PersonaId = keyof typeof READING_PERSONA_DATA;
 export type PersonalReadingDomain = 'coffee' | 'palm' | 'astro' | 'numerology' | 'tarot' | 'dream';
 
 const DOMAIN_FORBIDDEN_TERMS: Record<PersonalReadingDomain, RegExp> = {
@@ -152,7 +152,7 @@ const ANIMAL_PERSONA_CLOSINGS: Record<string, string[]> = {
 };
 
 function personaId(value?: string): PersonaId {
-  return (value && value in FORTUNE_PERSONA_DATA ? value : 'suzan') as PersonaId;
+  return (value && value in READING_PERSONA_DATA ? value : 'suzan') as PersonaId;
 }
 
 function hashString(value: string) {
@@ -236,7 +236,7 @@ export function isHealthClosingSentence(sentence: string) {
 
 function safeClosingOptions(id: PersonaId, domain: PersonalReadingDomain, allowHealthClosing = false) {
   const forbidden = DOMAIN_FORBIDDEN_TERMS[domain];
-  const library = FORTUNE_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const library = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
   const options = Object.values(library)
     .flatMap((items) => [...items])
     .filter(
@@ -491,7 +491,7 @@ function canUseFamilyAddress(params: {
   assistantId?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
 }) {
-  const assistantAge = FORTUNE_PERSONA_DATA[personaId(params.assistantId || undefined)]?.age;
+  const assistantAge = READING_PERSONA_DATA[personaId(params.assistantId || undefined)]?.age;
   const profileAge = profileAgeFromMemory(params.memorySnippet);
   return Boolean(
     ['suzan', 'teoman', 'ayse'].includes(params.assistantId || '') &&

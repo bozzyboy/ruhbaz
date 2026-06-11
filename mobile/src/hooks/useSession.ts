@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { SessionConfig, SessionState, ChatMessage } from '../types';
 import { compressImage } from '../services/imageService';
-import { getFortuneReply, type FortuneMessage } from '../services/fortuneApiService';
+import { getReadingReply, type ReadingMessage } from '../services/readingApiService';
 import { appendReadingSpecificityUsage, appendUserConversationMemory, loadAccountState, loadProfileMemorySnippet } from '../services/profileMemoryService';
 import {
   addPendingInputTokens,
@@ -106,8 +106,8 @@ export function useSession() {
     setState((s) => ({ ...s, isUserSpeaking: false }));
   }, []);
 
-  const toFortuneMessages = useCallback(
-    (messages: ChatMessage[]): FortuneMessage[] =>
+  const toReadingMessages = useCallback(
+    (messages: ChatMessage[]): ReadingMessage[] =>
       messages
         .filter((m) => Boolean(m.text?.trim()))
         .map((m) => ({ role: m.role, text: m.text })),
@@ -194,7 +194,7 @@ export function useSession() {
               )
               .catch(() => config.memorySnippet)
           : config.memorySnippet;
-        const text = await getFortuneReply({
+        const text = await getReadingReply({
           sessionId: sessionIdRef.current,
           devSettings: config.devSettings,
           profileId: config.profileId,
@@ -203,7 +203,7 @@ export function useSession() {
           readingType: config.readingType,
           coffeeMode: config.coffeeMode,
           memorySnippet: semanticMemorySnippet,
-          messages: toFortuneMessages(nextMessages),
+          messages: toReadingMessages(nextMessages),
           isFollowUp: Boolean(options?.isFollowUp),
           images: imagesRef.current,
           focusQuestion: config.focusQuestion,
@@ -261,7 +261,7 @@ export function useSession() {
         setState((s) => ({ ...s, isAiSpeaking: false, status: 'active' }));
       }
     },
-    [addMessage, toFortuneMessages],
+    [addMessage, toReadingMessages],
   );
 
   const startSession = useCallback(

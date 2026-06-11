@@ -1,8 +1,8 @@
 import type { DevSettings } from '../types';
 import type { ProfileMemorySnippet } from '../types/memory';
 import { PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION, PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION } from '../config/llmTokenPolicy';
-import { FORTUNE_PERSONA_DATA } from './fortunePersonaData';
-import { buildSpecificityContext } from './fortuneSpecificityBank';
+import { READING_PERSONA_DATA } from './readingPersonaData';
+import { buildSpecificityContext } from './readingSpecificityBank';
 import { isHealthClosingSentence, sanitizeRestrictedReadingTerms, selectAnimalClosingSentence, userAskedHealthConcern } from './personaClosingService';
 import { FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
 import { buildAnimalProfileInstructionFromMemory, isAnimalMemorySnippet } from './animalProfilePrompt';
@@ -10,7 +10,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { ensureLoreGraphIndexed, selectLoreCrumbs } from './loreGraphService';
 
-export type FortuneMessage = { role: 'user' | 'assistant'; text: string };
+export type ReadingMessage = { role: 'user' | 'assistant'; text: string };
 export type CoffeeImageSlot = 'cup' | 'cup2' | 'saucer';
 export type CoffeeSurfaceCode = 'fincan' | 'tabak' | 'fincan+tabak';
 export type CoffeeImageAnalysis = {
@@ -20,14 +20,14 @@ export type CoffeeImageAnalysis = {
   hasCoffeeGrounds: boolean;
   groundsAmount?: 'none' | 'trace' | 'light' | 'visible' | 'heavy';
 };
-export type FortuneImages = { cup?: string; cup2?: string; saucer?: string; palm?: string };
-export type FortuneReadingType = 'coffee' | 'palm';
+export type ReadingImages = { cup?: string; cup2?: string; saucer?: string; palm?: string };
+export type ReadingReadingType = 'coffee' | 'palm';
 export type CoffeeMode = 'upload' | 'ai-brew';
 
-type PersonaId = keyof typeof FORTUNE_PERSONA_DATA;
-type ClosingTone = keyof (typeof FORTUNE_PERSONA_DATA)[PersonaId]['closingLibrary'];
+type PersonaId = keyof typeof READING_PERSONA_DATA;
+type ClosingTone = keyof (typeof READING_PERSONA_DATA)[PersonaId]['closingLibrary'];
 
-export function buildCoffeeMultiImageContinuityInstruction(images: FortuneImages) {
+export function buildCoffeeMultiImageContinuityInstruction(images: ReadingImages) {
   const coffeeImageCount = [images.cup, images.cup2, images.saucer].filter(Boolean).length;
   if (coffeeImageCount < 2) return '';
   return [
@@ -101,11 +101,11 @@ const ASSISTANT_AGE_FALLBACKS: Record<string, number> = {
 };
 
 function personaId(value?: string): PersonaId {
-  return (value && value in FORTUNE_PERSONA_DATA ? value : 'suzan') as PersonaId;
+  return (value && value in READING_PERSONA_DATA ? value : 'suzan') as PersonaId;
 }
 
 function closingLibrary(id: PersonaId) {
-  const base = FORTUNE_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const base = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
   const out: Record<string, string[]> = {};
   Object.entries(base).forEach(([tone, options]) => {
     out[tone] = [...options];
@@ -133,7 +133,7 @@ function ageFromBirthDate(value?: string | null) {
   return match ? new Date().getFullYear() - Number(match[1]) : null;
 }
 
-function selectClosingTone(messages: FortuneMessage[], library: Record<string, string[]>) {
+function selectClosingTone(messages: ReadingMessage[], library: Record<string, string[]>) {
   const messageText = messages.map((message) => message.text || '').join(' ').toLocaleLowerCase('tr-TR');
   const heuristics: Array<[string, string[]]> = [
     ['warning', ['aldat', 'yalan', 'nazar', 'kavga', 'dikkat', 'dusman', 'engel', 'kork']],
@@ -145,7 +145,7 @@ function selectClosingTone(messages: FortuneMessage[], library: Record<string, s
   return hit?.[0] || (library.warm ? 'warm' : Object.keys(library)[0] || 'warm');
 }
 
-function selectClosingSentence(id: PersonaId, messages: FortuneMessage[], sessionId: string, allowHealthClosing = false, isAnimalProfile = false) {
+function selectClosingSentence(id: PersonaId, messages: ReadingMessage[], sessionId: string, allowHealthClosing = false, isAnimalProfile = false) {
   const sessionText = messages.map((message) => message.text || '').join(' ');
   const turnCount = messages.filter((message) => (message.text || '').trim()).length;
   if (isAnimalProfile) {
@@ -200,7 +200,7 @@ function buildAddressPolicy(id: PersonaId, memorySnippet?: ProfileMemorySnippet 
       'Cinsiyetli insan hitapları, romantik/evlilik dili ve insan kariyeri dili yasak.',
     ].join('\n');
   }
-  const identity = FORTUNE_PERSONA_DATA[id];
+  const identity = READING_PERSONA_DATA[id];
   const assistantAge = identity.age || ASSISTANT_AGE_FALLBACKS[id];
   const profileGender = memorySnippet?.profileInfo?.gender || memorySnippet?.profileGender;
   const subjectAge = ageFromBirthDate(memorySnippet?.birthChartData?.birthDate);
@@ -228,7 +228,7 @@ function buildAddressPolicy(id: PersonaId, memorySnippet?: ProfileMemorySnippet 
   return lines.join('\n');
 }
 
-export function buildMemoryContext(profileName: string, memorySnippet: ProfileMemorySnippet | null | undefined, readingType: FortuneReadingType, coffeeMode: CoffeeMode, questionText?: string | null) {
+export function buildMemoryContext(profileName: string, memorySnippet: ProfileMemorySnippet | null | undefined, readingType: ReadingReadingType, coffeeMode: CoffeeMode, questionText?: string | null) {
   if (!memorySnippet && !profileName) return '';
   const lines = [
     '## Subject Context',
@@ -307,23 +307,23 @@ export function buildMemoryContext(profileName: string, memorySnippet: ProfileMe
   return lines.join('\n');
 }
 
-export function buildFortunePrompt(params: {
+export function buildReadingPrompt(params: {
   sessionId: string;
   devSettings: DevSettings;
   profileName: string;
-  readingType: FortuneReadingType;
+  readingType: ReadingReadingType;
   coffeeMode: CoffeeMode;
   focusQuestion?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
-  messages: FortuneMessage[];
-  images: FortuneImages;
+  messages: ReadingMessage[];
+  images: ReadingImages;
   isFollowUp?: boolean;
   validatedSurfaces?: Array<'cup' | 'saucer' | 'palm'> | null;
   coffeeImageAnalyses?: CoffeeImageAnalysis[] | null;
   palmValidation?: { isInnerPalm?: boolean; handVisibleEnough?: boolean } | null;
 }) {
   const id = personaId(params.devSettings.assistantId);
-  const identity = FORTUNE_PERSONA_DATA[id];
+  const identity = READING_PERSONA_DATA[id];
   const imageHint = [
     params.images.cup ? 'kullanıcı fincan görseli gönderdi' : '',
     params.images.cup2 ? 'kullanıcı ikinci kahve görseli gönderdi' : '',

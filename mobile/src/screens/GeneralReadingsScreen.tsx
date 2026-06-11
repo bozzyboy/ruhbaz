@@ -501,7 +501,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
         return;
       }
       if (item.id === 'daisy-fortune') {
-        navigation.navigate('DaisyFortune');
+        navigation.navigate('DaisyReading');
         return;
       }
       if (!selectedProfile) {
@@ -533,7 +533,7 @@ export function GeneralReadingsScreen({ navigation }: Props) {
       return;
     }
     if (reading.id === 'daisy-fortune') {
-      navigation.navigate('DaisyFortune');
+      navigation.navigate('DaisyReading');
       return;
     }
     if (!selectedProfile) {

@@ -6,7 +6,7 @@ import {
   PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
 } from '../config/llmTokenPolicy';
 import { generateGeminiTextDirect } from './geminiDirectService';
-import { FORTUNE_PERSONA_DATA } from './fortunePersonaData';
+import { READING_PERSONA_DATA } from './readingPersonaData';
 import {
   appendHealthProfessionalReminder,
   completeWithRememberedPersonaClosing,
@@ -21,7 +21,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 
-type PersonaId = keyof typeof FORTUNE_PERSONA_DATA;
+type PersonaId = keyof typeof READING_PERSONA_DATA;
 
 export type DreamChatMessage = {
   role: 'user' | 'assistant';
@@ -81,7 +81,7 @@ const ANIMAL_DREAM_OPENINGS: Record<string, string[]> = {
 };
 
 function personaId(value?: string): PersonaId {
-  return (value && value in FORTUNE_PERSONA_DATA ? value : 'suzan') as PersonaId;
+  return (value && value in READING_PERSONA_DATA ? value : 'suzan') as PersonaId;
 }
 
 function hashString(value: string) {
@@ -128,7 +128,7 @@ function selectDreamClosing(params: {
       usedClosings: params.usedClosings,
     });
   }
-  const library = FORTUNE_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
+  const library = READING_PERSONA_DATA[id].closingLibrary as Record<string, readonly string[]>;
   const used = new Set((params.usedClosings || []).map((item) => item.trim()).filter(Boolean));
   const options = Object.values(library)
     .flatMap((items) => [...items])
@@ -233,7 +233,7 @@ function buildBaseSystem(params: {
   isAnimalProfile?: boolean;
 }) {
   const id = personaId(params.assistantId);
-  const identity = FORTUNE_PERSONA_DATA[id];
+  const identity = READING_PERSONA_DATA[id];
   const isAnimalDream = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
     identity.systemBody,

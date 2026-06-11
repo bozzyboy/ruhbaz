@@ -121,7 +121,7 @@ function redundantMemoryFilter(snippet?: ProfileMemorySnippet | null) {
   };
 }
 
-function isSurfaceFortuneType(readingType?: string | null) {
+function isSurfaceReadingType(readingType?: string | null) {
   return readingType === 'coffee' || readingType === 'palm';
 }
 
@@ -161,7 +161,7 @@ export function formatPromptMemoryPack(
   const pack = snippet?.promptMemoryPack;
   if (!snippet && !pack) return '';
   const hasUserInput = Boolean(options.questionText?.trim());
-  const surfaceFortune = isSurfaceFortuneType(options.readingType);
+  const surfaceReading = isSurfaceReadingType(options.readingType);
   const lines: string[] = ['## Final Memory Pack'];
   const values = semanticValues(snippet);
   const selection = pack?.semanticSelection;
@@ -185,11 +185,11 @@ export function formatPromptMemoryPack(
     ...(snippet?.userStatedPatterns || []),
     ...(pack?.profileEssence || []),
     ...(values.user || []),
-  ].filter((item) => !surfaceFortune || (surfaceMemoryFilter(item) && (hasUserInput || !looksLikePriorSurfaceReadingSummary(item)))), 220);
+  ].filter((item) => !surfaceReading || (surfaceMemoryFilter(item) && (hasUserInput || !looksLikePriorSurfaceReadingSummary(item)))), 220);
   if (userSignals.length) lines.push(`- USER_SIGNALS=${userSignals.slice(0, 5).join(' | ')}`);
 
   const selfSignals: string[] = [];
-  pushUnique(selfSignals, new Set(), surfaceFortune ? [] : values.self, 220);
+  pushUnique(selfSignals, new Set(), surfaceReading ? [] : values.self, 220);
   if (selfSignals.length) lines.push(`- SELF_KNOWLEDGE=${selfSignals.slice(0, 3).join(' | ')}`);
 
   const relevantSignals: string[] = [];
@@ -198,13 +198,13 @@ export function formatPromptMemoryPack(
     ...(values.persona || []),
   ])
     .filter(keepMemoryLine)
-    .filter((item) => !surfaceFortune || (surfaceMemoryFilter(item) && (hasUserInput || !looksLikePriorSurfaceReadingSummary(item)))), 240);
+    .filter((item) => !surfaceReading || (surfaceMemoryFilter(item) && (hasUserInput || !looksLikePriorSurfaceReadingSummary(item)))), 240);
   if (relevantSignals.length) lines.push(`- SELECTED_MEMORY=${relevantSignals.slice(0, hasUserInput ? 6 : 3).join(' | ')}`);
 
   const backgroundSignals: string[] = [];
   pushUnique(backgroundSignals, new Set(), (selection?.background || [])
     .filter(keepMemoryLine)
-    .filter((item) => !surfaceFortune || (surfaceMemoryFilter(item) && !looksLikePriorSurfaceReadingSummary(item))), 220);
+    .filter((item) => !surfaceReading || (surfaceMemoryFilter(item) && !looksLikePriorSurfaceReadingSummary(item))), 220);
   if (backgroundSignals.length) lines.push(`- BACKGROUND=${backgroundSignals.slice(0, 4).join(' | ')}`);
 
   const avoidSignals: string[] = [];
@@ -212,7 +212,7 @@ export function formatPromptMemoryPack(
     ...(pack?.avoidRepetition || []),
     ...(values.variety || []),
     ...topicAvoidanceLines(snippet),
-  ].filter((item) => !surfaceFortune || surfaceMemoryFilter(item)), 190);
+  ].filter((item) => !surfaceReading || surfaceMemoryFilter(item)), 190);
   if (avoidSignals.length) {
     lines.push(`- AVOID_REPEAT=Kullanıcı özellikle sormadıkça otomatik merkeze alma: ${avoidSignals.slice(0, 5).join(' | ')}`);
   }

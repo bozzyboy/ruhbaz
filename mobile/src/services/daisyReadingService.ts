@@ -5,7 +5,7 @@ type DaisyHistoryFile = {
   recentPetalCounts: number[];
 };
 
-export type DaisyFortuneSession = {
+export type DaisyReadingSession = {
   petalCount: number;
   startsWithYes: boolean;
 };
@@ -46,7 +46,7 @@ function randomPetalCount(recent: number[]) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export async function createDaisyFortuneSession(): Promise<DaisyFortuneSession> {
+export async function createDaisyReadingSession(): Promise<DaisyReadingSession> {
   const history = await readHistory();
   const petalCount = randomPetalCount(history.recentPetalCounts || []);
   history.recentPetalCounts = [petalCount, ...(history.recentPetalCounts || []).filter((count) => count !== petalCount)].slice(0, RECENT_LIMIT);

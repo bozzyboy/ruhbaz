@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
-const identityRoot = path.join(root, 'src', 'identity', 'assistants', 'fortune-family');
+const identityRoot = path.join(root, 'src', 'identity', 'assistants', 'reading-family');
 const commonIdentityPath = path.join(identityRoot, 'common.md');
-const outputPath = path.join(root, 'src', 'services', 'fortunePersonaData.ts');
+const outputPath = path.join(root, 'src', 'services', 'readingPersonaData.ts');
 
 function parseFrontmatter(raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
@@ -105,7 +105,7 @@ const entries = fs
 
 const data = Object.fromEntries(entries);
 const commonIdentityBody = fs.readFileSync(commonIdentityPath, 'utf8').trim();
-const source = `// Generated from mobile/src/identity/assistants/fortune-family/*/identity.md and common.md. Do not edit by hand. Update identity markdown and regenerate.\n\nexport const COMMON_FORTUNE_IDENTITY_BODY = ${JSON.stringify(commonIdentityBody, null, 2)};\n\nexport const FORTUNE_PERSONA_DATA = ${JSON.stringify(data, null, 2)} as Record<string, { assistantId: string; displayName: string; age: number | null; primaryDomainLabel: string; systemBody: string; closingLibrary: Record<string, string[]> }>;\n`;
+const source = `// Generated from mobile/src/identity/assistants/reading-family/*/identity.md and common.md. Do not edit by hand. Update identity markdown and regenerate.\n\nexport const COMMON_READING_IDENTITY_BODY = ${JSON.stringify(commonIdentityBody, null, 2)};\n\nexport const READING_PERSONA_DATA = ${JSON.stringify(data, null, 2)} as Record<string, { assistantId: string; displayName: string; age: number | null; primaryDomainLabel: string; systemBody: string; closingLibrary: Record<string, string[]> }>;\n`;
 
 fs.writeFileSync(outputPath, source, 'utf8');
 console.log(`Generated ${path.relative(root, outputPath)} with ${entries.length} personas.`);
