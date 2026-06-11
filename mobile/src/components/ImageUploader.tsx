@@ -24,12 +24,12 @@ interface ImageUploaderProps {
 
 type PermissionModalState = {
   visible: boolean;
-  stage: 'explain' | 'settings';
+  stage: 'retry' | 'settings';
   message: string;
 };
 
-const CAMERA_EXPLAIN_MESSAGE =
-  'Fotoğraf çekebilmek için kamera izni gerekiyor. Devam dersen telefonun izin penceresi açılır; oradan onay vermen yeterli.';
+const CAMERA_RETRY_MESSAGE =
+  'Fotoğraf çekebilmek için kamera iznine ihtiyaç var. Tekrar dediğinde telefonun izin penceresi yeniden açılır; oradan İzin Ver demen yeterli.';
 const CAMERA_SETTINGS_MESSAGE =
   'Kamera izni kapalı görünüyor. Telefonun Ayarlar > Uygulamalar > Ruhbaz > İzinler bölümünden kamerayı açıp yeniden deneyebilirsin.';
 
@@ -49,7 +49,7 @@ export function ImageUploader({
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isSelectingImage, setIsSelectingImage] = useState(false);
   const [errorModal, setErrorModal] = useState({ visible: false, message: '' });
-  const [permissionModal, setPermissionModal] = useState<PermissionModalState>({ visible: false, stage: 'explain', message: '' });
+  const [permissionModal, setPermissionModal] = useState<PermissionModalState>({ visible: false, stage: 'retry', message: '' });
   const cameraRef = useRef<CameraView>(null);
 
   const isBusy = isTakingPhoto || isSelectingImage;
@@ -64,17 +64,24 @@ export function ImageUploader({
     setShowCameraModal(true);
   };
 
-  const requestCameraAndOpen = async () => {
+  // Kamera iznini DOĞRUDAN ister (sistem sorgusu çıkar — Ozan: "eskisi gibi
+  // kamera sorgusu gelsin"). granted -> kamera açılır; reddedilirse kalıcı redde
+  // ayar yönlendirmesi, geçici redde markalı tekrar-dene. ASLA istemeden ayarlara
+  // gönderme (önceki davranış sahte "ayarlara git" üretiyordu + QR tarayıcı da
+  // aynı kamera iznine muhtaç olduğundan onu da kilitliyordu).
+  const requestCameraPermission = async () => {
     setPermissionModal((prev) => ({ ...prev, visible: false }));
     try {
-      const permission = await Camera.requestCameraPermissionsAsync();
-      if (permission.granted) {
+      const requested = await Camera.requestCameraPermissionsAsync();
+      if (requested.granted) {
         openCameraView();
         return;
       }
-      if (permission.canAskAgain === false) {
-        setPermissionModal({ visible: true, stage: 'settings', message: CAMERA_SETTINGS_MESSAGE });
-      }
+      setPermissionModal({
+        visible: true,
+        stage: requested.canAskAgain === false ? 'settings' : 'retry',
+        message: requested.canAskAgain === false ? CAMERA_SETTINGS_MESSAGE : CAMERA_RETRY_MESSAGE,
+      });
     } catch (e: any) {
       setErrorModal({ visible: true, message: e?.message || 'Kamera açılamadı.' });
     }
@@ -88,13 +95,8 @@ export function ImageUploader({
         openCameraView();
         return;
       }
-      if (current.canAskAgain === false) {
-        setPermissionModal({ visible: true, stage: 'settings', message: CAMERA_SETTINGS_MESSAGE });
-        return;
-      }
-      // Sistem izin penceresinden önce markalı açıklama (Ozan kuralı: beyaz
-      // sistem uyarısına yazı değil, markalı uyarı; emoji yok).
-      setPermissionModal({ visible: true, stage: 'explain', message: CAMERA_EXPLAIN_MESSAGE });
+      // İzin yoksa pre-modal göstermeden doğrudan sistem sorgusunu tetikle.
+      await requestCameraPermission();
     } catch (e: any) {
       setErrorModal({ visible: true, message: e?.message || 'Kamera açılamadı.' });
     }
@@ -239,15 +241,15 @@ export function ImageUploader({
         visible={permissionModal.visible}
         title="Kamera İzni"
         message={permissionModal.message}
-        confirmLabel={permissionModal.stage === 'explain' ? 'Devam' : 'Ayarları Aç'}
+        confirmLabel={permissionModal.stage === 'settings' ? 'Ayarları Aç' : 'Tekrar Dene'}
         cancelLabel="Vazgeç"
         onConfirm={() => {
-          if (permissionModal.stage === 'explain') {
-            void requestCameraAndOpen();
+          if (permissionModal.stage === 'settings') {
+            setPermissionModal((prev) => ({ ...prev, visible: false }));
+            void Linking.openSettings();
             return;
           }
-          setPermissionModal((prev) => ({ ...prev, visible: false }));
-          void Linking.openSettings();
+          void requestCameraPermission();
         }}
         onCancel={() => setPermissionModal((prev) => ({ ...prev, visible: false }))}
       />

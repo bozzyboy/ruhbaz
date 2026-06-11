@@ -182,6 +182,25 @@ PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (vey
 |---|---|---|
 | `mobile/app.json` | name="Ruhbaz Konağı", slug="ruhbaz-konagi", scheme="ruhbaz"; eski EAS projectId kaldırıldı (Faz 2'de `eas init` ile yeni proje); iOS mikrofon izin metninden "fal" dili çıkarıldı (hukuk çerçevesi) | EK3-1, EK3-2 |
 | `mobile/app_0.json`, `app_1.json`, `package_0.json` | Recovery çöpleri `_arsiv/`e taşındı | Cihaz testi gerekmez |
+
+### Grup EK-4: Kamera izni — sistem sorgusu geri geldi (+ QR ile ilişkisi)
+
+> **📦 KURULUM KUTUSU (EK-4):** Yalnız JS değişikliği — **yeni APK GEREKMEZ**, reload (r) yeter. Testten ÖNCE: telefonda Ayarlar > Uygulamalar > Ruhbaz > İzinler > Kamera'yı **"Her seferinde sor"** veya **"İzin verme"** durumuna çek (ilk-izin akışını görmek için).
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| EK4-1 | El okuması → fotoğraf kutusuna dokun → **Kamera** | Telefonun **sistem izin penceresi** açılır (eskisi gibi); seni doğrudan ayarlara YOLLAMAZ | ☐ |
+| EK4-2 | Sistem penceresinde **İzin Ver** | Kamera açılır, fotoğraf çekebilirsin | ☐ |
+| EK4-3 | Sistem penceresinde **Reddet** (bir kez) | Markalı "Tekrar Dene" kutusu çıkar; Tekrar Dene → sistem penceresi yeniden açılır | ☐ |
+| EK4-4 | Kamerayı kalıcı reddet (Android "bir daha sorma") sonra Kamera'ya dokun | Markalı "Ayarları Aç" kutusu (doğrudan ayarlara değil, önce markalı kutu) | ☐ |
+| EK4-5 | **QR bağlantısı:** Kamera izni verildikten sonra dev-client'ta "Scan QR Code" dene | QR tarayıcı açılır ve okur (kamera izni düzelince QR da düzelir — ikisi aynı izne bağlıydı) | ☐ |
+
+**Değişen dosya → test eşlemesi (EK-4):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/src/components/ImageUploader.tsx` | Kamera izni artık DOĞRUDAN isteniyor (sistem sorgusu çıkar); izin-öncesi ayarlara yönlendirme kaldırıldı; markalı modal yalnız ret/kalıcı-ret için | EK4-1..EK4-4 |
+| (dolaylı) dev-client QR tarayıcı | Aynı kamera iznine bağlı — izin düzelince QR da çalışır | EK4-5 |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |

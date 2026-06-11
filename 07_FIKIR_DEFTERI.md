@@ -71,6 +71,7 @@ Durumlar: 📥 ham · 📋 işlendi (karar/doküman referansıyla) · 🅿️ pa
 | 2026-06-11 | Persona renklendirme/görsel ayrıştırma — nasıl yapılacak (her personaya kimlik rengi/atmosfer) | 📋 | K44 + Brand Book (Faz 3) |
 | 2026-06-11 | Persona HİTAP sistemi: bakılan profilin yaş verisini alıp persona kendi yaşıyla kıyaslayıp hitap seçmeli (sen/siz, abla/teyze/evladım...); TR kültürü ile Batı kültürü FARKLI çalışır | 📋 | K45 + F10 |
 | 2026-06-11 | `MemoryDebugScreen` ürün mü debug mi? Profil Ayarları'nda "Hafıza Özeti" düğmesiyle KULLANICIYA açık; adı "Debug" ama kullanıcıya hafıza şeffaflığı değerli olabilir (bağ stratejisiyle uyumlu). Faz 0 debug-kapısına BİLEREK dahil edilmedi | ❓ | Ozan karar verecek: ürünleşecekse adı/UX'i değişir; debug'sa `ENABLE_DEVELOPER_DEBUG_UI` kapısına alınır |
+| 2026-06-11 | Mikrofon (STT) bir çalışıp bir kapanıyor, kendi kendine sönüyor (Android dev build) | 📋 | **K31 (chat ekranı) aşamasına bağlandı** — okuma ekranı bilindik chat'e dönüştürülürken STT akışı baştan ele alınacak; o güne kadar bekletilir, ayrı acil iş açılmaz. Olası kök: `expo-speech-recognition` oturum süre/`no-speech` timeout'u veya izin yenilenmesi. Aşağıda K31 detayına işlendi |
 
 ---
 
@@ -222,3 +223,13 @@ Cevabın püf noktası: **App sosyal medyayı OKUMAZ — çünkü okumasına ger
 5. Çevrimdışı/eski feed durumunda zarif bozulma: bülten yoksa persona yalnız kanonla konuşur — hata değil, sadece daha az güncel.
 
 **Neden güçlü:** Kullanıcı Instagram'da Ayşe'nin tarifini görüp app'e girince Deniz'in "Ayşe'nin tatlısından yedin mi?" demesi — chat LLM'lerinin YAPAMAYACAĞI cross-channel karakter sürekliliği (01/Rakip tanımı, madde 4). Maliyeti ise neredeyse sıfır: içerik zaten üretiliyor, feed zaten var, lore graph zaten kodda.
+
+### K31 — Okuma ekranı → bilindik chat ekranı dönüşümü (kapsam toplama)
+
+Hedef: Okuma + follow-up ekranı, bilindik LLM chat app'leri gibi olsun — konuşma balonları, mikrofon (STT) ile sesli giriş, STT yanlış yazdıysa GÖNDERMEDEN düzenlenebilsin, tüm sohbet (transcript) WhatsApp dâhil paylaşılabilsin (şu an yalnız copy-paste). Bu aşama, dağınık okuma ekranlarını tek tutarlı sohbet paradigmasına taşır.
+
+**Bu aşama açıldığında ele alınacaklar (biriken not havuzu):**
+- **Mikrofon/STT kararlılığı (Ozan, 2026-06-11):** STT Android dev build'de bir çalışıp bir kapanıyor, kendi kendine sönüyor. Chat ekranı yeniden yazılırken STT akışı sıfırdan sağlamlaştırılır — olası kökler: `expo-speech-recognition` oturum süresi/`no-speech` timeout'u, dinleyici aboneliklerinin temizlenmesi, izin yenilenmesi, ön/arka plan geçişi. O güne kadar ayrı acil iş AÇILMAZ (Ozan bilinçli erteledi); burada toplu çözülür.
+- STT düzenlenebilir taslak: tanınan metin doğrudan gönderilmez, kullanıcı düzeltebileceği bir input'a düşer.
+- Transcript paylaşımı: kişisel içerik sızıntısına dikkat (paylaşım kartı disiplini F1 ile uyumlu — kişisel transcript varsayılan paylaşılamaz, kullanıcı seçerek paylaşır).
+- Hitap/persona sesi follow-up'ta korunur (mevcut sözleşme bozulmaz).

@@ -92,6 +92,7 @@
 - [ ] Okuma favorileri (K29): kalp + "Kalplilerim" filtresi + hafızaya beğeni sinyali.
 - [ ] Bekleme sahnesi (K33/F7): atmosfer animasyonu + önden üretilmiş içerik kartları (Konak Akışı havuzundan, statik, sıfır ek gecikme).
 - [ ] Re-engagement bildirimleri (K35): kullanılmayan bölümlere frekans-tavanlı zarif davet push'ları (yerel kullanım verisiyle).
+- [ ] **Uygulama puanlama (rating) push'ları (Ozan notu, 2026-06-11):** doğru anda (ör. beğenilen bir okumadan sonra, frekans-tavanlı) Play Store değerlendirme isteği push'u + in-app review API. Bu, bildirim TÜRLERİNDEN yalnız biri — başka çeşitler de olacak (yeni içerik, streak, kişisel okuma hatırlatması, kampanya/kredi...). **Bildirim türleri taksonomisini bu faza girerken topluca tasarla** (her tür için: tetikleyici, frekans tavanı, kullanıcı kapatabilme, 677-uyumlu dil). Üstünde ayrıca düşünülecek.
 - [ ] Günlük "Aura" dinamik UI teması (K39): gökyüzü verisine göre günlük renk/atmosfer (yerel hesap, erişilebilirlik korunur, sabitleme seçeneği).
 - [ ] El/pati ayrımı + pet personaları + hayvan okumaları (K38/F9).
 - [ ] İçerik Fabrikası yarı-otomatik hattı (K33/F7): batch üretim (script→görsel→persona sesi) + onay kuyruğu; paylaşım elle/zamanlayıcıyla.
