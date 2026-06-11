@@ -14,6 +14,8 @@
 ## 2. İsim ve mekân dili
 
 - Uygulama adı her yerde **Ruhbaz Konağı** (kısaltma gerekirse "Konak").
+- **Kanon (Ozan, 2026-06-11):** Ruhbaz, konakta yaşayan ailenin SOYADIDIR; konak adını aileden alır. Suzan, Teoman, Selin, Berk ve Arın = Ruhbaz; Ayşe = **Gönülbaz** (Suzan'ın kızlık soyadı — TASLAK öneri), Deniz = **Dilbaz** (babasından — TASLAK öneri). Soyadları UI'da gösterilmez; lore katmanında yaşar.
+- **EN app adı: KARAR BEKLİYOR** — öneri sıralaması: "Ruhbaz Manor" > "Ruhbaz Mansion" (BRAND_BOOK güncellenince tüm EN "mansion" geçişleri tek seferde hizalanır).
 - Oda adları (K50, onaylı): **İkram Masası · Salon · Simya Odası · Ayna Odası**. Mekân metaforu tutarlı kullanılır: kullanıcı odalara "girer", içerik "ikram edilir", persona "konağın sakinidir".
 - EN'de oda adları çevrilmez, lokalleştirilir (K45/K13 ile birlikte Faz 4).
 
