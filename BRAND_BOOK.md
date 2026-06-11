@@ -27,7 +27,8 @@
 | Konak duvarı | `#1E1E28` | Header, panel |
 | Altın şamdan | `#D4A574` | Vurgu, başlık, buton çerçevesi |
 | Sıcak mum ışığı | `#E7C190` / `#E8C49A` | İkincil vurgu, buton metni |
-| Gümüş sis | `#C8C8D4` | Gövde metni |
+| Krem fildişi | `#FFF5E8` | Gövde metni (uygulamadaki baskın metin rengi) |
+| Gümüş sis | `#C8C8D4` | Yasal metin grisi (yasal ekranlar) |
 | Uyarı koru | `rgba(214,106,106,…)` | Yıkıcı işlem (silme) |
 
 İlke: koyu zemin + altın vurgu = "gece konağı" atmosferi. Beyaz zemin KULLANILMAZ.
