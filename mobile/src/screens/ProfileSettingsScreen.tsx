@@ -17,6 +17,12 @@ import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { TURKEY_CITY_OPTIONS, TURKEY_DISTRICTS_BY_CITY } from '../data/turkeyLocations';
 import {
+  exportBackupToUserFolder,
+  importBackupFromUri,
+  listBackupsInUserFolder,
+  wipeAllLocalData,
+} from '../services/dataPortabilityService';
+import {
   createProfile,
   deleteProfile,
   getPrimaryProfile,
@@ -306,7 +312,85 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     visible: false,
     message: '',
   });
+  // K40 veri taşınabilirliği + KVKK silme akış durumları
+  const [dataBusy, setDataBusy] = useState(false);
+  const [restoreCandidate, setRestoreCandidate] = useState<{ uri: string; name: string } | null>(null);
+  const [wipeStep, setWipeStep] = useState<0 | 1 | 2>(0);
   const requestedProfileOpenedRef = useRef(false);
+
+  const showDataMessage = useCallback((message: string) => {
+    setValidationModal({ visible: true, message });
+  }, []);
+
+  const handleExportBackup = useCallback(async () => {
+    if (dataBusy) return;
+    setDataBusy(true);
+    try {
+      const result = await exportBackupToUserFolder();
+      if (result.ok) {
+        showDataMessage(`Yedek alındı: ${result.fileName} (${result.fileCount} dosya). Dosya, seçtiğin klasörde.`);
+      } else if (result.reason === 'error') {
+        showDataMessage(`Yedek alınamadı: ${result.message || 'bilinmeyen hata'}`);
+      }
+    } finally {
+      setDataBusy(false);
+    }
+  }, [dataBusy, showDataMessage]);
+
+  const handlePickRestore = useCallback(async () => {
+    if (dataBusy) return;
+    setDataBusy(true);
+    try {
+      const result = await listBackupsInUserFolder();
+      if (!result.ok) {
+        if (result.reason === 'error') {
+          showDataMessage(`Yedekler okunamadı: ${result.message || 'bilinmeyen hata'}`);
+        }
+        return;
+      }
+      if (!result.backups.length) {
+        showDataMessage('Seçtiğin klasörde "ruhbaz-yedek-...json" dosyası bulunamadı.');
+        return;
+      }
+      setRestoreCandidate(result.backups[0]);
+    } finally {
+      setDataBusy(false);
+    }
+  }, [dataBusy, showDataMessage]);
+
+  const handleConfirmRestore = useCallback(async () => {
+    const candidate = restoreCandidate;
+    setRestoreCandidate(null);
+    if (!candidate) return;
+    setDataBusy(true);
+    try {
+      const result = await importBackupFromUri(candidate.uri);
+      if (result.ok) {
+        showDataMessage(
+          `Yedek geri yüklendi (${result.fileCount} dosya). Verilerin tutarlı yüklenmesi için lütfen uygulamayı TAMAMEN KAPATIP yeniden aç.`,
+        );
+      } else {
+        showDataMessage(`Geri yükleme başarısız: ${result.message || 'geçersiz dosya'}`);
+      }
+    } finally {
+      setDataBusy(false);
+    }
+  }, [restoreCandidate, showDataMessage]);
+
+  const handleConfirmWipe = useCallback(async () => {
+    setWipeStep(0);
+    setDataBusy(true);
+    try {
+      const result = await wipeAllLocalData();
+      if (result.ok) {
+        showDataMessage('Tüm verilerin silindi. Uygulamayı tamamen kapatıp yeniden açtığında sıfırdan başlayacaksın.');
+      } else {
+        showDataMessage(`Silme tamamlanamadı: ${result.message || 'bilinmeyen hata'}`);
+      }
+    } finally {
+      setDataBusy(false);
+    }
+  }, [showDataMessage]);
 
   const primaryProfile = state ? getPrimaryProfile(state) : null;
   const selectedProfile = useMemo(
@@ -553,6 +637,39 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
               onPress={() => navigation.navigate('LegalInfo')}
             >
               <Text style={styles.legalLinkButtonText}>Yasal Bilgilendirme</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.dataSectionTitle}>Veri Yönetimi</Text>
+            <Text style={styles.dataSectionHint}>
+              Tüm profillerin, okumaların ve hafızan cihazında saklanır. Buradan kendi deposuna yedek alabilir,
+              yedeği geri yükleyebilir veya tüm verini silebilirsin.
+            </Text>
+            <View style={styles.linkRow}>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.linkButton}
+                disabled={dataBusy}
+                onPress={() => void handleExportBackup()}
+              >
+                <Text style={styles.linkButtonText}>{dataBusy ? 'Bekle...' : 'Yedek Al'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                accessibilityRole="button"
+                style={styles.linkButton}
+                disabled={dataBusy}
+                onPress={() => void handlePickRestore()}
+              >
+                <Text style={styles.linkButtonText}>{dataBusy ? 'Bekle...' : 'Yedeği Geri Yükle'}</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Tüm verimi sil"
+              style={styles.wipeButton}
+              disabled={dataBusy}
+              onPress={() => setWipeStep(1)}
+            >
+              <Text style={styles.wipeButtonText}>Tüm Verimi Sil</Text>
             </TouchableOpacity>
           </View>
         </BrandedScrollView>
@@ -805,6 +922,37 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
         onCancel={() => setValidationModal({ visible: false, message: '' })}
         onConfirm={() => setValidationModal({ visible: false, message: '' })}
       />
+      <BrandedConfirmModal
+        visible={Boolean(restoreCandidate)}
+        title="Yedeği Geri Yükle"
+        message={`"${restoreCandidate?.name || ''}" geri yüklensin mi?\n\nDİKKAT: Cihazdaki MEVCUT profiller, okumalar ve hafıza bu yedekteki verilerle DEĞİŞTİRİLİR. Bu işlem geri alınamaz.`}
+        confirmLabel="Evet, Üzerine Yaz"
+        cancelLabel="Vazgeç"
+        onCancel={() => setRestoreCandidate(null)}
+        onConfirm={() => {
+          void handleConfirmRestore();
+        }}
+      />
+      <BrandedConfirmModal
+        visible={wipeStep === 1}
+        title="Tüm Verimi Sil"
+        message="Cihazdaki TÜM profiller, okumalar, hafıza ve ayarlar silinecek. Bu işlem geri alınamaz. Devam etmeden önce yedek almak isteyebilirsin."
+        confirmLabel="Devam"
+        cancelLabel="Vazgeç"
+        onCancel={() => setWipeStep(0)}
+        onConfirm={() => setWipeStep(2)}
+      />
+      <BrandedConfirmModal
+        visible={wipeStep === 2}
+        title="Son Onay"
+        message="Emin misin? Bu, son adım: tüm verin kalıcı olarak silinecek."
+        confirmLabel="Evet, Hepsini Sil"
+        cancelLabel="Vazgeç"
+        onCancel={() => setWipeStep(0)}
+        onConfirm={() => {
+          void handleConfirmWipe();
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -939,6 +1087,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(212,165,116,0.06)',
   },
   legalLinkButtonText: { color: 'rgba(232,196,154,0.85)', fontSize: 13, fontWeight: '700' },
+  dataSectionTitle: { color: '#D4A574', fontSize: 14, fontWeight: '700', marginTop: 22, marginBottom: 4 },
+  dataSectionHint: { color: 'rgba(200,200,212,0.75)', fontSize: 12, lineHeight: 17, marginBottom: 10 },
+  wipeButton: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(214,106,106,0.55)',
+    borderRadius: 12,
+    paddingVertical: 11,
+    alignItems: 'center',
+    backgroundColor: 'rgba(214,106,106,0.08)',
+  },
+  wipeButtonText: { color: 'rgba(230,140,140,0.95)', fontSize: 13, fontWeight: '700' },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.52)', justifyContent: 'flex-end' },
   modalSheet: {
     width: '100%',
