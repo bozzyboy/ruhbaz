@@ -6,12 +6,14 @@
 
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LEGAL_INFO_SECTIONS } from '../config/legalTexts';
+import { useTranslation } from 'react-i18next';
+import { getLegalInfoSections } from '../config/legalTexts';
 
 export function LegalInfoScreen() {
+  useTranslation(); // dil değişiminde yeniden render
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {LEGAL_INFO_SECTIONS.map((section) => (
+      {getLegalInfoSections().map((section) => (
         <View key={section.title} style={styles.section}>
           <Text style={styles.sectionTitle}>{section.title}</Text>
           <Text style={styles.sectionBody}>{section.body}</Text>

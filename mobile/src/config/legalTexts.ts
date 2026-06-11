@@ -7,6 +7,8 @@
 // Çerçeve cümlesi 04_HUKUK_VE_GUVENLIK.md bölüm 2 ile birebir aynıdır.
 // ============================================================
 
+import { getAppLanguage } from '../i18n';
+
 /** Sözleşme/onay metni sürümü — metin değişirse artır; kullanıcıdan yeniden onay istenir. */
 export const LEGAL_CONSENT_VERSION = 1;
 
@@ -73,3 +75,90 @@ export const LEGAL_INFO_SECTIONS: ReadonlyArray<{ title: string; body: string }>
     body: 'Soruların ve geri bildirimlerin için iletişim kanalları, uygulamanın mağaza sayfasında yer alacaktır.',
   },
 ];
+
+// ============================================================
+// EN sürümler (Faz 4 — ⚠️ TASLAK; avukat görüşmesi sonrası finalize edilir.
+// Çeviri değil lokalleştirme; çerçeve anlamı TR ile birebir aynı kalmalıdır.)
+// ============================================================
+
+export const LEGAL_FRAME_SENTENCE_EN =
+  'All content in Ruhbaz Konağı is AI-generated symbolic interpretation, created for entertainment and personal discovery. ' +
+  'It does not contain information, foresight or promises about the future, and it is not a substitute for medical, legal or financial advice.';
+
+export const READING_DISCLAIMER_SHORT_EN = 'Symbolic interpretation, for entertainment.';
+
+export const ONBOARDING_TITLE_EN = 'Welcome to the Mansion';
+
+export const ONBOARDING_BODY_EN = [
+  'Ruhbaz Konağı is a place of discovery — symbols, stories and quiet reflection. ' +
+    'Before you step in, we want to be clear about what this mansion is, and what it is not:',
+  LEGAL_FRAME_SENTENCE_EN,
+  'The characters of the mansion are fictional readers; what they say is meant to inspire and make you think — ' +
+    'every decision about your life remains yours. For important matters such as health, legal or financial questions, ' +
+    'please consult the relevant professional.',
+  'By continuing, you confirm that you understand and accept this framework.',
+] as const;
+
+export const ONBOARDING_ACCEPT_LABEL_EN = 'I understand and accept';
+
+export const LEGAL_INFO_SECTIONS_EN: ReadonlyArray<{ title: string; body: string }> = [
+  {
+    title: 'What is this app?',
+    body:
+      'Ruhbaz Konağı is an app that offers symbolic interpretations for entertainment and personal discovery. ' +
+      'All readings and conversations are AI-generated; the characters of the mansion are fictional readers.',
+  },
+  {
+    title: 'What does the content mean?',
+    body:
+      LEGAL_FRAME_SENTENCE_EN +
+      ' Interpretations aim to inspire and invite reflection through the language of symbols; ' +
+      'they are not information or foresight about real-life events.',
+  },
+  {
+    title: 'What does it not replace?',
+    body:
+      'Nothing here replaces medical diagnosis or treatment, legal opinion, financial or investment advice, ' +
+      'psychological counselling or therapy. For needs in these areas, please consult the relevant professional. ' +
+      'In an emergency, contact your local emergency services.',
+  },
+  {
+    title: 'Where is your data stored?',
+    body:
+      'Your profiles, readings and the app\'s memory are stored on your device. When an interpretation is generated, ' +
+      'the text you write and the images you upload are sent to the AI service provider to produce the response. ' +
+      'A detailed privacy notice will be published on this screen as the app prepares for store release.',
+  },
+  {
+    title: 'Age requirement',
+    body: 'Ruhbaz Konağı is intended for users aged 18 and over.',
+  },
+  {
+    title: 'Contact',
+    body: 'Contact channels for questions and feedback will be available on the app\'s store page.',
+  },
+];
+
+// --- Dil seçicileri: ekranlar buradan okur; dil değişiminde otomatik güncellenir ---
+
+export function getLegalFrameSentence(): string {
+  return getAppLanguage() === 'en' ? LEGAL_FRAME_SENTENCE_EN : LEGAL_FRAME_SENTENCE;
+}
+
+export function getReadingDisclaimerShort(): string {
+  return getAppLanguage() === 'en' ? READING_DISCLAIMER_SHORT_EN : READING_DISCLAIMER_SHORT;
+}
+
+export function getOnboardingTexts(): {
+  title: string;
+  body: readonly string[];
+  acceptLabel: string;
+} {
+  return getAppLanguage() === 'en'
+    ? { title: ONBOARDING_TITLE_EN, body: ONBOARDING_BODY_EN, acceptLabel: ONBOARDING_ACCEPT_LABEL_EN }
+    : { title: ONBOARDING_TITLE, body: ONBOARDING_BODY, acceptLabel: ONBOARDING_ACCEPT_LABEL };
+}
+
+export function getLegalInfoSections(): ReadonlyArray<{ title: string; body: string }> {
+  return getAppLanguage() === 'en' ? LEGAL_INFO_SECTIONS_EN : LEGAL_INFO_SECTIONS;
+}

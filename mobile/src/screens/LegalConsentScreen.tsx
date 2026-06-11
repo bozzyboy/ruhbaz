@@ -8,7 +8,8 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ONBOARDING_ACCEPT_LABEL, ONBOARDING_BODY, ONBOARDING_TITLE } from '../config/legalTexts';
+import { useTranslation } from 'react-i18next';
+import { getOnboardingTexts } from '../config/legalTexts';
 import { recordLegalConsentAcceptance } from '../services/legalConsentService';
 import { trackEvent } from '../services/analyticsService';
 
@@ -17,6 +18,8 @@ type Props = {
 };
 
 export function LegalConsentScreen({ onAccepted }: Props) {
+  useTranslation(); // dil değişiminde yeniden render
+  const texts = getOnboardingTexts();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleAccept = async () => {
@@ -38,8 +41,8 @@ export function LegalConsentScreen({ onAccepted }: Props) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{ONBOARDING_TITLE}</Text>
-        {ONBOARDING_BODY.map((paragraph, index) => (
+        <Text style={styles.title}>{texts.title}</Text>
+        {texts.body.map((paragraph, index) => (
           <Text key={index} style={index === 1 ? styles.frameParagraph : styles.paragraph}>
             {paragraph}
           </Text>
@@ -48,7 +51,7 @@ export function LegalConsentScreen({ onAccepted }: Props) {
       <View style={styles.footer}>
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={ONBOARDING_ACCEPT_LABEL}
+          accessibilityLabel={texts.acceptLabel}
           activeOpacity={0.82}
           style={styles.acceptButton}
           onPress={handleAccept}
@@ -57,7 +60,7 @@ export function LegalConsentScreen({ onAccepted }: Props) {
           {isSaving ? (
             <ActivityIndicator color="#14141E" />
           ) : (
-            <Text style={styles.acceptButtonText}>{ONBOARDING_ACCEPT_LABEL}</Text>
+            <Text style={styles.acceptButtonText}>{texts.acceptLabel}</Text>
           )}
         </TouchableOpacity>
       </View>

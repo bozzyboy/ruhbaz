@@ -6,12 +6,15 @@
 
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { READING_DISCLAIMER_SHORT } from '../config/legalTexts';
+import { useTranslation } from 'react-i18next';
+import { getReadingDisclaimerShort } from '../config/legalTexts';
 
 export function SymbolicDisclaimer() {
+  // useTranslation: dil değişiminde yeniden render için abonelik.
+  useTranslation();
   return (
     <View style={styles.container} accessibilityRole="text">
-      <Text style={styles.text}>{READING_DISCLAIMER_SHORT}</Text>
+      <Text style={styles.text}>{getReadingDisclaimerShort()}</Text>
     </View>
   );
 }
