@@ -245,7 +245,7 @@ function buildMemoryPayload(body: MemoryAnalysisRequest) {
       'userStated yalnızca kullanıcının doğrudan söylediği bilgileri içersin.',
       'readingDerived yalnızca okuma/yorum metninden çıkan tekrar edilebilir temaları içersin.',
       'Observation nesnelerine sourceType, visibility ve promptUse koy. Kullanıcı onayı/düzeltmesi varsa sourceType=user_input, visibility=internal, promptUse=subtle/core olabilir.',
-      'Falcının tahmininden çıkan observation için sourceType=reading_output, visibility=internal, promptUse=subtle veya avoid kullan; gerçek hayat bilgisi gibi kesinleştirme.',
+      'Personanın okuma/yorum çıktısından çıkan observation için sourceType=reading_output, visibility=internal, promptUse=subtle veya avoid kullan; gerçek hayat bilgisi gibi kesinleştirme.',
       'edges içinde confirmed_by_user, corrected_by_user, derived_from_reading, related_to_person, affects_tone, avoid_repeating gibi typed edge üret; emin değilsen boş bırak.',
       'journalEvents bu oturumda ne olduğunun kısa iç zaman çizgisi olsun. fingerprintPatch tekrar edilmemesi gereken tema/sembol/kalıpları içersin.',
       'Her listeyi en fazla 4 öğe ile sınırla. Emin değilsen boş liste döndür.',

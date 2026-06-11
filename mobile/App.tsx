@@ -1,5 +1,5 @@
 ﻿// ============================================================
-// FALCI - App.tsx (Entry Point)
+// Ruhbaz Konağı - App.tsx (Entry Point)
 // ============================================================
 
 import React, { useCallback, useEffect } from 'react';

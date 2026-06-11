@@ -1,5 +1,5 @@
 // ============================================================
-// FALCI - TokenUsage Component
+// Ruhbaz Konağı - TokenUsage Component
 // Single-row cumulative token + cost display
 // ============================================================
 

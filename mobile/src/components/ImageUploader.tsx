@@ -1,5 +1,5 @@
 ﻿// ============================================================
-// FALCI - ImageUploader Component
+// Ruhbaz Konağı - ImageUploader Component
 // Branded source picker (no crop editor)
 // ============================================================
 

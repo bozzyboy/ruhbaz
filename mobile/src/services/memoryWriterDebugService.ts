@@ -529,7 +529,7 @@ function buildProfileIdentityPayload(params: {
 }) {
   const context = buildMemoryWriterContext(params.snippet, params.bundle, params.state, params.profileId);
   const systemText = [
-    'Sen FALCI uygulamasının görünmez Memory Writer ajanısın.',
+    'Sen Ruhbaz Konağı uygulamasının görünmez Memory Writer ajanısın.',
     'Sadece JSON döndür. Kullanıcıya hitap etme, yorum yazma, fal metni üretme.',
     'Her semantic section atomik olsun; dev paragraf yazma. Aynı anlamı iki kez yazma.',
     'Yazma aşamasında hafızayı küçültme; anlamlı kullanıcı/profil sinyali varsa doğru pageKey, sectionKey, sourceStrength ve edge type ile grupla.',

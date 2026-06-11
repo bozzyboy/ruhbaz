@@ -1,5 +1,5 @@
 // ============================================================
-// FALCI - Image Service
+// Ruhbaz Konağı - Image Service
 // Handles picking, app-side editing helpers, compression, and encoding
 // ============================================================
 

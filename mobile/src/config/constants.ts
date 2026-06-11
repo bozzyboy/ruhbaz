@@ -1,5 +1,5 @@
 // ============================================================
-// FALCI - Configuration Constants
+// Ruhbaz Konağı - Configuration Constants
 // ============================================================
 
 import Constants from 'expo-constants';

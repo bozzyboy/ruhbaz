@@ -1,5 +1,5 @@
 ﻿// ============================================================
-// FALCI — DevControls Component
+// Ruhbaz Konağı — DevControls Component
 // ============================================================
 
 import React, { useState } from 'react';

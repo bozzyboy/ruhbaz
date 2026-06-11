@@ -1,5 +1,5 @@
 // ============================================================
-// FALCI — useTimer Hook
+// Ruhbaz Konağı — useTimer Hook
 // Countdown timer with wind-down warning
 // ============================================================
 

@@ -1,5 +1,5 @@
 // ============================================================
-// FALCI - Type Definitions
+// Ruhbaz Konağı - Type Definitions
 // ============================================================
 
 export interface SessionConfig {
