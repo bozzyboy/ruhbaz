@@ -52,6 +52,8 @@ FALCI v3 (yeni adı **Ruhbaz Konağı**) için kapsamlı doküman seti kuruldu (
 
 **Özerk çalışma kuralları:** Tek faz tam bitmeden diğerine geçme; kırılan tsc/test bırakma; emin olunmayan üründe-his kararlarını yapma, not düşüp atla; her büyük adım önce 00'a "başlıyorum" notu (kesinti sigortası).
 
+**⛔ REGRESYON ÖNLEME PRENSİBİ (Ozan, 2026-06-11 — bağlayıcı):** Önceki fazlarda düzeltilen/karara bağlanan HİÇBİR şey sonraki fazda/değişiklikte bozulmaz. Her değişiklikte: (1) ÖNCE etki analizi — planlanan değişiklik mevcut durumda ve önceki fazlarda nelerle bağlantılı, neyi bozabilir; öngör, gerekirse dokümante et (özellikle paylaşılan bileşen/servis: SelectableFormattedText = tüm okumalar, fortunePromptBuilder = tüm fal türleri, token_server = tüm istemci; ve sözleşmeli davranışlar: görsel uygunluk/desen yasağı, cache anahtarı, hitap, Red Kataloğu). (2) SONRA Claude ön-testi (bekçiler + komşu akışlar). (3) Cihaz testinde ilgili maddenin yanına "regresyon: şunu da kontrol et" notu yazılır ki Ozan bilerek baksın. Otomatik yarısı = bekçiler (image-contract/utf8/tsc); yeni sözleşme çıkınca bekçiye eklenir.
+
 **FAZ BAŞLATMA PROTOKOLÜ (Ozan, 2026-06-11 — "ardarda fazlar"ı revize eder):** Her faz öncesi Ozan'a BRİFİNG sunulur (faz hangi bölümleri ele alıyor / şu an nasıl çalışıyor / ne değişecek / faz ortasında Ozan'a iş düşüyor mu) → Ozan ONAYLAYINCA faz başlar. Brifing sırasında "şu anda nasıl işliyor?" sorularına hazırlıklı olunur. ONAYSIZ KODA BAŞLANMAZ. Geri döndürülebilirlik: her mantıksal adım ayrı, mümkünse bağımsız-revert edilebilir commit. Ayrıca: Claude emin olamadığında Ozan'la kısa interview yapar (niyeti anla → dürüstçe değerlendir → anlat).
 
 ### 📋 FAZ 0 BRİFİNGİ — ✅ SUNULDU, ONAYLANDI ve UYGULANDI (2026-06-11; tarihçe için tutuluyor)

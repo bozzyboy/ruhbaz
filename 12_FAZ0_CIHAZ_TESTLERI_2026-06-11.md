@@ -238,10 +238,12 @@ PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (vey
 ### Grup EK-5: Okuma kalitesi düzeltmeleri (Ozan testleri, 2026-06-11)
 
 > **📦 KURULUM KUTUSU (EK-5):** Yalnız JS/TS değişikliği — **yeni APK GEREKMEZ**, app'te reload (r) yeter (token server + expo açık olsun).
+>
+> **🔁 REGRESYON UYARISI (EK5-1/5/6):** Paragraf düzeltmesi TÜM okumaları besleyen tek formatöre (`SelectableFormattedText`) dokundu. Sadece sıra-sayısını değil, **genel paragraf görünümünü de** kontrol et: herhangi bir okumada paragraflar hâlâ düzgün ayrılıyor mu, metin tek blok olmadı mı, madde/başlık bozulmadı mı? Birkaç farklı okuma tipinde (astro, tarot, kahve, rüya) göz at.
 
 | # | Test | Beklenen | Durum |
 |---|---|---|---|
-| EK5-1 | **Senin Evin** → astroloji okuması al; içinde "7. evdeki", "3. haftada", "12. evindeki" gibi sıra-sayılı ifade olsun | Sayı ile kelime AYNI paragrafta kalır; "7." görünce yeni paragrafa kayma YOK. Paragraflar yine var (okuma kolaylığı korunur) | ☐ |
+| EK5-1 | **Senin Evin** → astroloji okuması al; içinde "7. evdeki", "3. haftada", "12. evindeki" gibi sıra-sayılı ifade olsun. **(Regresyon: başka okuma tiplerinde de paragraflar düzgün mü, bak.)** | Sayı ile kelime AYNI paragrafta kalır; "7." görünce yeni paragrafa kayma YOK. Paragraflar yine var (okuma kolaylığı korunur) | ☐ |
 | EK5-2 | El okuması → elin SIRTINI (tırnaklar kameraya bakacak şekilde) yükle | Nazik ret: avuç içi çizgileri istenir; okuma BAŞLAMAZ (eskiden başlıyordu — düzeltildi) | ☐ |
 | EK5-3 | (Regresyon) El okuması → gerçek avuç içi (çizgiler net) yükle | Okuma normal başlar (güçlendirilmiş prompt gerçek avuç içini reddetmiyor) | ☐ |
 | EK5-4 | Kahve → yalnızca TABAK fotoğrafı yükle → yorum al | Yorum yalnız tabak yüzeyinden bahseder; "fincanın kulbuna yakın" gibi tabakta olmayan parça atfı YOK | ☐ |
