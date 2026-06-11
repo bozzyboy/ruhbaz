@@ -52,6 +52,7 @@
 | `mobile/src/config/featureFlags.ts` | `ENABLE_DEVELOPER_DEBUG_UI` artık `__DEV__` (build-time kapı; release'de otomatik kapalı) | F0-A7 |
 | `mobile/src/screens/HomeScreen.tsx` | Token Sayaçları + Geliştirici Ayarları panelleri bayrağa bağlandı | F0-A7, F0-A8 |
 | — (not) | `MemoryDebugScreen` ("Hafıza Özeti" düğmesi, Profil Ayarları'nda) BİLEREK kapatılmadı — ürün özelliği mi debug mi belirsiz; karar Ozan'ın (07 defterine not düşüldü) | — |
+| `mobile/eslint.config.js` + `package.json` | ESLint kuruldu (`npm run lint`); 0 hata / 223 uyarı başlangıç çizgisi | Cihaz testi gerekmez — statik araç |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |
