@@ -12,7 +12,7 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **Son güncelleme:** 2026-06-11 (oturum: kurulumlar) · **Durum:** Planlama fazı bitti; kod tabanı Ruhbaz_Fable'a kopyalandı — KOD HENÜZ YAZILMADI.
 
-**Checkpoint (2026-06-11, kurulum oturumu):** (a) AGENTS.md yönlendirmeleri (kök+mobile+agent) EKLENDİ ✅. (b) `/fewer-permission-prompts` tarandı; izin listesi + (c) tsc/UTF-8 hook'ları `.claude/settings.json`'a yazılacak — otomatik sınıflandırıcı öz-değişiklik diye engelledi, Ozan onayı bekleniyor. Faz 0 brifingi Ozan'a sunuldu, onay bekleniyor.
+**Checkpoint (2026-06-11, kurulum + Faz 0 oturumu):** (a) AGENTS.md yönlendirmeleri ✅; (b) izin listesi + (c) tsc/UTF-8 hook'ları `.claude/settings.json` + `.claude/hooks/post-edit-check.js` ✅ (Ozan sohbette onayladı); temiz git init + ilk commit `425c705` ✅ (.gitignore güçlendirildi: *.env.local, kişisel txt'ler, settings.local.json). **FAZ 0 BRİFİNGİ SUNULDU → OZAN ONAYLADI (2026-06-11) → FAZ 0 BAŞLADI.** Sıra: kök temizlik (_arsiv) → npm install + tsc baseline → /gemini-api-key söküm → CORS+gizli-header → 0.0.0.0 → B-5 → debug kapısı → tek-sağlayıcı → ESLint → K10 → APK + test listesi → kapanış. Bulgu: bozuk kök package.json node'u kökten kırıyor (hook testi yakaladı) — temizlik öne alındı.
 
 ## ⚠️ KONUM DEĞİŞTİ (2026-06-11)
 Kod tabanı `FALCI v3`'ten BURAYA (`Ruhbaz_Fable`) kopyalandı: `mobile/`, `agent/`, `docs/`, `assets/`, `scripts/`, `src/` artık burada, planlama dokümanlarının (00-09) yanında. Hariç tutulanlar: node_modules (npm install ile gelir), .git (yeni init edilecek), 2.4GB Gemma modelleri (K10 dondu; gerekirse FALCI v3'ten alınır), recovery çöpü. Saf kopya ~25MB.
