@@ -241,18 +241,24 @@ PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (vey
 
 | # | Test | Beklenen | Durum |
 |---|---|---|---|
-| EK5-1 | Astroloji/herhangi bir okuma al; içinde "7. evdeki", "3. haftada", "12. evindeki" gibi sıra-sayılı ifade olsun | Sayı ile kelime AYNI satırda/paragrafta kalır; "7." görünce yeni paragrafa kayma YOK. Paragraflar yine var (okuma kolaylığı korunur) | ☐ |
+| EK5-1 | **Senin Evin** → astroloji okuması al; içinde "7. evdeki", "3. haftada", "12. evindeki" gibi sıra-sayılı ifade olsun | Sayı ile kelime AYNI paragrafta kalır; "7." görünce yeni paragrafa kayma YOK. Paragraflar yine var (okuma kolaylığı korunur) | ☐ |
 | EK5-2 | El okuması → elin SIRTINI (tırnaklar kameraya bakacak şekilde) yükle | Nazik ret: avuç içi çizgileri istenir; okuma BAŞLAMAZ (eskiden başlıyordu — düzeltildi) | ☐ |
 | EK5-3 | (Regresyon) El okuması → gerçek avuç içi (çizgiler net) yükle | Okuma normal başlar (güçlendirilmiş prompt gerçek avuç içini reddetmiyor) | ☐ |
 | EK5-4 | Kahve → yalnızca TABAK fotoğrafı yükle → yorum al | Yorum yalnız tabak yüzeyinden bahseder; "fincanın kulbuna yakın" gibi tabakta olmayan parça atfı YOK | ☐ |
+| EK5-5 | **İkram Masası** → düz-metin sonuçlu bir genel okuma al (tarot/astro kartı olmayan tip), sıra sayısı geçsin | Paragraf düzeltmesi burada da geçerli (bu ekran eskiden formatörü atlıyordu) | ☐ |
+| EK5-6 | **İkram Masası → Genel Burç Uyumu** → uzun bir uyum yorumu al ("1. kişinin / 2. kişinin" geçer) | "1." / "2." sıra sayıları bölünmez; paragraflar düzgün | ☐ |
 
 **Değişen dosya → test eşlemesi (EK-5):**
 
 | Değişen dosya | Değişiklik | Karşılayan test |
 |---|---|---|
-| `mobile/src/components/SelectableFormattedText.tsx` | Sıra-sayısı koruması kelime-listesinden genel kurala çevrildi (rakam+nokta+küçük harf = sıra sayısı, bölme yok); Türkçe ekler artık kaçmıyor | EK5-1 |
+| `mobile/src/components/SelectableFormattedText.tsx` | Sıra-sayısı koruması kelime-listesinden genel kurala çevrildi (rakam+nokta+küçük harf = sıra sayısı, bölme yok); Türkçe ekler artık kaçmıyor | EK5-1, EK5-5, EK5-6 |
+| `mobile/src/screens/GeneralReadingResultScreen.tsx` | İkram Masası düz-metin fallback'i artık `SelectableFormattedText`'ten geçiyor (formatör atlanmıyordu) | EK5-5 |
+| `mobile/src/screens/SunCompatibilityScreen.tsx` | Güneş uyumu bölüm metinleri artık `SelectableFormattedText`'ten geçiyor | EK5-6 |
 | `mobile/src/services/fortuneApiService.ts` | El sınıflandırma prompt'u güçlendirildi: tırnak/boğum/el sırtı → human_hand_back; avuç çizgileri net değilse varsayılan ret | EK5-2, EK5-3 |
 | `mobile/src/services/fortunePromptBuilder.ts` | Yalnız-tabak yüzey kuralı: fincan/kulp gibi olmayan parçalara konum atfı yasaklandı | EK5-4 |
+
+> **Paragraf düzeltmesi kapsamı (Ozan sorusu — "tüm okuma tipleri için genel mi?"):** Düzeltme TEK noktada — `SelectableFormattedText.formatReadableText`. **Senin Evin'in tamamı** (astro, numeroloji, doğum haritası, ilişki, tarot, rüya, kahve/el) ve **İkram Masası'nın tamamı** (genel astro/tarot/I-Ching/ilham kartları + düz-metin fallback + Güneş uyumu) artık bu tek formatörden geçiyor — yukarıdaki iki ekran (GeneralReadingResult fallback + SunCompatibility) bu oturumda eklendi. Not: "Kendini Tanı" altındaki MBTI/kişilik testi açıklamaları STATİK veri (LLM üretimi değil, sıra-sayı riski yok); papatya falı tek-kelime yanıt — kapsam dışı, gerek yok.
 
 ---
 

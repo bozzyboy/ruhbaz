@@ -15,6 +15,7 @@ import InspirationCard from '../components/InspirationCard';
 import MagicSphereCard from '../components/MagicSphereCard';
 import RuneCard from '../components/RuneCard';
 import TarotReadingCard from '../components/TarotReadingCard';
+import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import type { AngelCard, AngelNumber } from '../data/divinationData';
 import { createDailyGeneralReading, type GeneralDivinationType } from '../services/divinationEngine';
 import { fetchGeneralAstroDirect } from '../services/generalAstroApiService';
@@ -184,7 +185,7 @@ export function GeneralReadingResultScreen({ navigation, route }: Props) {
           ) : (
             <>
               {resultCard}
-              {!hidePlainText ? <Text style={styles.readingText}>{readingText}</Text> : null}
+              {!hidePlainText ? <SelectableFormattedText text={readingText} style={styles.readingText} /> : null}
             </>
           )}
         </View>

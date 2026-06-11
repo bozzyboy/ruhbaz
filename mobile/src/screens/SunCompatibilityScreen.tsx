@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { BrandedPicker } from '../components/BrandedPicker';
 import { BrandedScrollView } from '../components/BrandedScrollView';
+import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import {
   createSunCompatibilityReading,
   ZODIAC_SIGNS,
@@ -51,7 +52,7 @@ export function SunCompatibilityScreen({}: Props) {
                   <Text style={styles.sectionTitle}>{section.title}</Text>
                   <Text style={[styles.scoreText, { color: section.color }]}>%{section.score}</Text>
                 </View>
-                <Text style={styles.sectionText}>{section.text}</Text>
+                <SelectableFormattedText text={section.text} style={styles.sectionText} />
               </View>
             ))}
           </View>
