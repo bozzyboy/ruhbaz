@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "Falcı Ailesi Sezuşgiller",
-    "slug": "falci-ailesi-sezusgiller",
+    "name": "Ruhbaz Konağı",
+    "slug": "ruhbaz-konagi",
+    "scheme": "ruhbaz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +18,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "Kahve ve el yorumu için fotoğraf çekebilmek adına kamera izni gerekiyor.",
         "NSPhotoLibraryUsageDescription": "Kahve ve el yorumu için fotoğraf seçebilmek adına galeri izni gerekiyor.",
-        "NSMicrophoneUsageDescription": "Falınıza bakabilmek için sesinizi dinlememiz gerekiyor."
+        "NSMicrophoneUsageDescription": "Sesli soru sorabilmek için mikrofon izni gerekiyor."
       }
     },
     "android": {
@@ -37,11 +38,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "3ade94e0-7335-4992-9485-2a26bed59560"
-      }
     },
     "plugins": [
       "expo-speech-recognition",

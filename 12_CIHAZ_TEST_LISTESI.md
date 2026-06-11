@@ -155,6 +155,22 @@
 | `mobile/src/services/nativeSttService.ts` | Mikrofon izin mesajları: kalıcı redde ayar yolu tarifi | EK2-6 |
 | `mobile/scripts/check-image-contract.js` | Bekçiye eklendi: baskı/desen yasağı + "aynı fincanın farklı açıları" prompt garantileri | EK2-7, EK2-8 + statik ✅ |
 | `mobile/AGENTS.md` | Korunan davranışlara çoklu seçim + markalı izin uyarıları eklendi (doküman) | Cihaz testi gerekmez |
+
+### Grup EK-3: Uygulama kimliği "Ruhbaz Konağı" (eski "Falcı Ailesi" temizliği)
+
+> **📦 KURULUM KUTUSU (EK-3):** Hiçbir şey gerekmez — `expo start` yeterli; mevcut dev APK ile çalışır. (Telefondaki uygulama ETİKETİ "mobile" olarak kalır — o, bir SONRAKİ `expo prebuild` + APK derlemesinde "Ruhbaz Konağı" olur; şimdilik beklenen davranış.)
+
+| # | Test | Beklenen | Durum |
+|---|---|---|---|
+| EK3-1 | `npx expo start` → telefonda app'i aç ve bağlan | Bağlantı normal; terminal/manifest "Ruhbaz Konağı" adını gösterir, hata yok | ☐ |
+| EK3-2 | (Regresyon) Herhangi bir yorum üret | Akışlar isim değişiminden etkilenmedi | ☐ |
+
+**Değişen dosya → test eşlemesi (EK-3):**
+
+| Değişen dosya | Değişiklik | Karşılayan test |
+|---|---|---|
+| `mobile/app.json` | name="Ruhbaz Konağı", slug="ruhbaz-konagi", scheme="ruhbaz"; eski EAS projectId kaldırıldı (Faz 2'de `eas init` ile yeni proje); iOS mikrofon izin metninden "fal" dili çıkarıldı (hukuk çerçevesi) | EK3-1, EK3-2 |
+| `mobile/app_0.json`, `app_1.json`, `package_0.json` | Recovery çöpleri `_arsiv/`e taşındı | Cihaz testi gerekmez |
 | `mobile/src/services/geminiDirectService.ts` | Generate isteğine gizli-header | F0-A1 |
 | `mobile/src/services/geminiEmbeddingService.ts` | Embed isteğine gizli-header | F0-A2 |
 | `mobile/src/services/generalAstroApiService.ts` | General-astro GET'ine gizli-header | F0-A3 |
