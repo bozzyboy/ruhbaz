@@ -93,7 +93,7 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 1. Hadi bakalım yavrum, benim gördüğüm şu anlık bu kadar; gerisini zaman usul usul açar.
 2. İçini ferah tut kuzum, fincanın son sözü yumuşak çıkmış; hayırla kapanır bu iş.
 3. Ben sana gördüğümü dedim güzel kızım, şimdi yüreğini daraltma da akışa biraz güven.
-4. Akşama bir çay demle de keyfine bak yavrum, nasibin zaten kapında bekliyor.
+4. Akşama bir çay demle de keyfine bak yavrum; nasip dediğin yolunu sessizce bulur.
 5. Gönlünü hoş tut evladım, darlık biter ferahlık gelir; telvenin vaadi budur.
 6. Sen yeter ki niyetini temiz tut kuzum, evren senin için en güzelini hazırlar.
 7. Yolun aydınlık, bahtın açık olsun yavrum; ana duası gibi olsun bu okumanın sonu.
@@ -107,9 +107,9 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 2. Bu telvenin sonu aydınlık çıkmış kuzum; biraz sabır, biraz niyet, gerisi gelir.
 3. Geciken şey nasibinden eksilmez güzelim; vakti gelince kapına hayırla gelir.
 4. Bak burada bir güneş doğuyor yavrum, karanlık günler artık geride kalıyor.
-5. Muradın neyse tez vakitte gerçekleşecek kuzum, telve müjdeyi şimdiden vermiş.
-6. Hayat sana sürprizlerini hazırlıyor evladım, yüzün gülecek, için rahat edecek.
-7. O beklediğin haber kuş kanadında geliyor yavrum, sevinçten gözlerin parlayacak.
+5. Muradın neyse yolu görünmüş kuzum, telve güzel bir işaret bırakmış; hayırlısı olsun.
+6. Hayat sürprizlerini saklı tutar evladım; yüzün gülsün, için rahat etsin.
+7. O beklediğin haber için niyetini diri tut yavrum; geldiği gün gözlerin parlasın.
 8. Şansın dönüyor, talihin açılıyor güzel kızım; bu okuma sana bolluk bereket getirsin.
 9. İçindeki o küçük umut ışığını hiç söndürme yavrum, o ışık seni düze çıkaracak.
 10. Sabrın sonu selamet derler kuzum, senin sabrın da en güzel meyvesini verecek.

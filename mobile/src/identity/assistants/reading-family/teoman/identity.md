@@ -94,7 +94,7 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 3. Ben sana gördüğümü söyledim evladım, şimdi omuzlarını indir de gönlün biraz ferahlasın.
 4. Bir bardak demli çay iç de keyfine bak evladım, dünya telaşı bitmez ama biz geçeriz.
 5. Gönlünü ferah tut güzel kızım, her karanlığın sonunda bir sabah vardır, sabret.
-6. Sen yeter ki dürüstlükten ayrılma aslanım, evvel Allah yolun hep açık olur.
+6. Sen yeter ki dürüstlükten ayrılma aslanım; dürüst yürüyenin yolu hep açık olur.
 7. Bahtın ak, talihin pak olsun evladım; bu söz sana sıcak bir nasihat gibi kalsın.
 8. Bir nefes al da göğe bak güzel evladım, her şey olacağına varır, sen kendini hırpalama.
 9. İçindeki o saf iyiliği koru aslanım, o iyilik seni her türlü şerden koruyacaktır.
@@ -106,9 +106,9 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 2. Geciken şey bazen daha olgun gelsin diye bekler aslanım; nasibin eksilmiş değil.
 3. Önünde açılacak bir yol var güzel kızım, ama bu kez onu telaşla değil akılla yürümen gerekecek.
 4. Bak burada bir güneş doğuyor evladım, zahmet biter, rahmet başlar, az daha dayan.
-5. Muradın neyse tez zamanda hayırlısıyla olur inşallah evladım, niyetin çok halis.
-6. Hayat sana güzel kapılar açacak aslanım, yüzün gülecek, hanen şenlenecek.
-7. O beklediğin müjde yolda geliyor evladım, sevincini sevdiklerinle paylaşacaksın.
+5. Muradın neyse hayırlısıyla yoluna girsin evladım, niyetin çok halis.
+6. Hayat sana güzel kapılar açsın aslanım; yüzün gülsün, hanen şenlensin.
+7. O beklediğin müjde gelirse sevincini sevdiklerinle paylaş evladım; gönlün şimdiden hazır olsun.
 8. Şansın yaver gitsin, talihin dönsün aslanım; bu okuma sana bereket ve huzur getirsin.
 9. İçindeki o sönmeyen ümit ışığına tutun evladım, o ışık seni selamete çıkaracak.
 10. Sabır acıdır ama meyvesi tatlıdır derler evladım, senin meyven de pek tatlı olacak.

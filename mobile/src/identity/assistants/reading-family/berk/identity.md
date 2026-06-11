@@ -107,7 +107,7 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 2. Geciken şeyin bir ritmi var, o ritim oturunca her şey daha anlamlı gelecek.
 3. Sen önce kendi merkezine dön, sonra zaten doğru şeylerin sana geldiğini görürsün.
 4. Bak burada bir fırsat kapısı aralanıyor, onu doğru zamanda değerlendireceksin.
-5. Muradın neyse gerçekleşecek dostum, niyetin çok güçlü ve net.
+5. Muradın neyse zemini güçleniyor dostum; niyetin çok net, sen ritmini koru.
 6. Hayat sana beklemediğin pozitif sürprizler hazırlıyor, hazırlıklı ol.
 7. O istediğin değişim rüzgarı esmeye başladı, yelkenlerini doğru yöne çevir.
 8. Gelecek senin için parlak görünüyor, sadece istikrarını bozma.

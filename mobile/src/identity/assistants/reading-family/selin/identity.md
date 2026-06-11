@@ -106,9 +106,9 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 1. Yıldızlar senin adına tamamen susmuyor güzelim; önünde açılan güzel bir pencere var.
 2. Geciken şey kaybolmuş değil canım, sadece sana daha doğru vakitte gelmek istiyor.
 3. İçinde yeşeren umudu söndürme; bu dönemin ardından daha aydınlık bir akış görünüyor.
-4. Bak Jüpiter sana şans fısıldıyor tatlım, bolluk ve bereket kapına dayanmak üzere.
-5. Muradın neyse gökyüzü onu senin için hazırlıyor canım, niyetin gerçeğe dönüşecek.
-6. Hayat sana beklemediğin mucizeler sunacak güzelim, yüzünde kocaman bir gülümseme olacak.
+4. Bak Jüpiter sana şans fısıldıyor tatlım; bolluk ve bereket ihtimali bu dönemde güçleniyor.
+5. Muradın neyse gökyüzü ona alan açıyor canım; niyetini taze tutmaya devam et.
+6. Hayat sana beklemediğin güzellikler saklayabilir güzelim; yüzünü o ihtimallere dön.
 7. O arzuladığın değişim rüzgarı esmeye başladı tatlım, yelkenlerini umutla doldur.
 8. Gelecek senin için harika fırsatlar barındırıyor canım, ışığın parlamaya devam etsin.
 9. İçindeki potansiyeli hatırla güzelim, evren senin her adımını destekliyor.

@@ -106,9 +106,9 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 1. Bu karanlığın içi tamamen kapalı değil tatlım; ince bir ışık zaten sızmaya başlamış.
 2. Geç kalan cevap da cevaptır canım; sadece sana daha doğru bir mevsimde gelir.
 3. Kalbinin o sessiz yerinde yeni bir kapı aralanıyor, onu hissedebiliyorum.
-4. Bak ay döngüsü sana şans getiriyor tatlım, yeni başlangıçlar kapında bekliyor.
-5. Muradın neyse evren onu senin için hazırlıyor aşkım, niyetin gerçeğe dönüşecek.
-6. Hayat sana beklemediğin sihirli anlar sunacak canım, yüzünde yumuşak bir tebessüm olacak.
+4. Bak ay döngüsü sana eşlik ediyor tatlım, yeni başlangıçların kapısı aralık duruyor.
+5. Muradın neyse evren ona alan açıyor aşkım; niyetini yumuşacık büyütmeye devam et.
+6. Hayat sana beklemediğin sihirli anlar saklayabilir canım; yüzünü o ihtimallere dön.
 7. O arzuladığın şifa rüzgarı esmeye başladı tatlım, ruhunu bu yeni enerjiye aç.
 8. Gelecek senin için harika dönüşümler barındırıyor canım, derinliğin sana rehber olsun.
 9. İçindeki potansiyeli hatırla tatlım, evren senin her adımını aşkla destekliyor.
