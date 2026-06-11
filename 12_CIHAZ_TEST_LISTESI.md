@@ -2,12 +2,23 @@
 
 **Nasıl kullanılır:** Claude her kod değişikliğinde buraya test maddesi ekler (değişiklik → test maddesi birebir eşleşir; istisna yok). Sen müsait olduğunda yukarıdan aşağı inersin. Her grubun başındaki **KURULUM kutusu** o grubu koşmadan önce ne yapman gerektiğini söyler — tahmin etmen gereken hiçbir adım yok.
 
-**Test düzeni (senin kararın):** Expo Go YOK. Telefonda **dev build APK** + PC'de **Expo dev server** (`npx expo start`) + **token server** (`cd agent && python token_server.py`).
+**Test düzeni (senin kararın):** Expo Go YOK. Telefonda **dev build APK** + PC'de **Expo dev server** + **token server**.
+
+### 🟢 BAĞLANTI — TEK YOL (bir daha port/QR derdi yok)
+
+PC'de **`baslat.ps1`** dosyasına sağ tıkla → **"Run with PowerShell"** (veya terminalde `powershell -ExecutionPolicy Bypass -File baslat.ps1`). Bu script: eski/asılı süreçleri temizler, token server'ı açar, Expo'yu **HER ZAMAN sabit 8081**'de başlatır ve telefona yazacağın **doğru adresi** ekrana yazar.
+
+**Telefonda:**
+1. Uygulamada **"Recently Opened"** yanında **RESET**'e dokun (eski `:8082` ölü kaydı gitsin — `failed to connect` hatasının sebebi oydu).
+2. **"Enter URL manually"** alanına script'in yazdığı adresi gir: **`http://<PC-IP>:8081`** (şu an `http://192.168.1.127:8081`). ⚠️ **`localhost` YAZMA** — telefonda localhost = telefonun kendisi.
+3. Telefon ve PC **aynı Wi-Fi**'de olmalı.
+
+> ⚠️ Expo bir gün "Port 8081 dolu, 8082'ye geçeyim mi?" derse **`n`** de ve önce `baslat.ps1`'i çalıştır. **8082'yi asla kabul etme** — telefon cache'ine ölü port yazılıp bu hata geri gelir.
 
 **Kurulum kutusu kuralları (hangi değişiklik ne gerektirir):**
 - Native/gradle/modül değişikliği → **YENİ APK** kur.
-- Yalnız JS/TS değişikliği → mevcut APK yeter; `npx expo start` + app'te reload (r).
-- `agent/token_server.py` değişikliği → **token server'ı yeniden başlat** (Ctrl+C → `python token_server.py`).
+- Yalnız JS/TS değişikliği → mevcut APK yeter; app'te reload (r).
+- `agent/token_server.py` değişikliği → **token server'ı yeniden başlat** (en kolayı: `baslat.ps1`'i yeniden çalıştır).
 - Doküman değişikliği → hiçbir şey gerekmez.
 
 ---
