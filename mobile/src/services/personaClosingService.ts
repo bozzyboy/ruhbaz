@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet } from '../types/memory';
 import { READING_PERSONA_DATA } from './readingPersonaData';
 import { getReadingPersonaData } from './personaDataI18n';
+import { getAppLanguage } from '../i18n';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 export type PersonalReadingDomain = 'coffee' | 'palm' | 'astro' | 'numerology' | 'tarot' | 'dream';
@@ -78,6 +79,16 @@ const FALLBACK_CLOSINGS: Record<'astro' | 'numerology', Record<string, string[]>
     ],
   },
 };
+
+// EN modda persona-bagimsiz, sicak hayvan kapanislari (Faz 4; TASLAK - onay: Ozan).
+const ANIMAL_CLOSINGS_EN: string[] = [
+  'Give that sweet companion a gentle scratch from the mansion; some bonds need no words at all.',
+  'May their bowl be full and their naps be long; the love between you reads clearer than any symbol.',
+  'A little extra play, a little extra patience — that is all the guidance this reading really asks for.',
+  'Watch how they greet you at the door tonight; the answer you are looking for often lives right there.',
+  'Keep their world soft and steady; a calm home is the kindest reading of all.',
+  'Trust the quiet language between you two; it has been telling the truth all along.',
+];
 
 const ANIMAL_PERSONA_CLOSINGS: Record<string, string[]> = {
   'suzan': [
@@ -274,8 +285,12 @@ export function selectAnimalClosingSentence(params: {
 }) {
   const id = personaId(params.assistantId);
   const used = new Set((params.usedClosings || []).map((item) => item.trim()).filter(Boolean));
-  const options = (ANIMAL_PERSONA_CLOSINGS[id] || ANIMAL_PERSONA_CLOSINGS['suzan']).filter((sentence) => !used.has(sentence));
-  const pool = options.length ? options : ANIMAL_PERSONA_CLOSINGS[id] || ANIMAL_PERSONA_CLOSINGS['suzan'];
+  const animalPool =
+    getAppLanguage() === 'en'
+      ? ANIMAL_CLOSINGS_EN
+      : ANIMAL_PERSONA_CLOSINGS[id] || ANIMAL_PERSONA_CLOSINGS['suzan'];
+  const options = animalPool.filter((sentence) => !used.has(sentence));
+  const pool = options.length ? options : animalPool;
   return pool[hashString(`animal:${id}:${params.seed}:${used.size}`) % pool.length] || '';
 }
 

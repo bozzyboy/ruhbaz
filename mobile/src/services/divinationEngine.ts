@@ -448,7 +448,21 @@ ${baseHex.advice}`;
     const advice = isReversed ? card.adviceReversed : card.advice;
     
     return {
-      text: `${trName} / ${card.name}${reverseSuffix}\n\nAnlam:\n${meaning}\n\nÖneri:\n${advice}`,
+      text: enTarot
+        ? `${card.name}${reverseSuffix}
+
+Meaning:
+${meaning}
+
+Guidance:
+${advice}`
+        : `${trName} / ${card.name}${reverseSuffix}
+
+Anlam:
+${meaning}
+
+Öneri:
+${advice}`,
       fingerprint: `tarot:${card.name}:${isReversed ? 'rev' : 'up'}`,
       meta: {
         tarot: {
@@ -512,7 +526,9 @@ ${meaning}`,
       numerology: {
         number: String(code),
         meaning: meaning,
-        guidance: 'Numerolojik enerjinizi gün boyu korumak için niyetinizi bu sayıya odaklayın.'
+        guidance: enNumerology
+          ? 'To keep this numerological energy with you through the day, anchor your intention to this number.'
+          : 'Numerolojik enerjinizi gün boyu korumak için niyetinizi bu sayıya odaklayın.'
       }
     }
   };

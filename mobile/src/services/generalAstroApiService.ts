@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
+import { getAppLanguage } from '../i18n';
 import type { SubjectProfile } from '../types/memory';
 import type { AstroPeriod, AstroReadingResult } from './astroEngine';
 import { buildGeneralAstroSkyContext } from './astroEngine';
@@ -295,7 +296,10 @@ function buildGeneralAstroPayload(params: {
   const animalProfile = isAnimalProfile(params.profile);
   const systemText =
     [
-      'Sen Türkçe yazan bir genel astroloji yorumcususun. Yanıtı kısa, akıcı ve kullanıcıya dönük yaz; kesin gelecek iddiası, sağlık/finans garantisi ve korkutucu dil kullanma. Sağlıkta teşhis, tedavi, ilaç, doz, beslenme reçetesi veya kesin iyileşme dili kurma; insan sağlığı endişesinde doktor/uygun sağlık uzmanı, hayvan sağlığı endişesinde veteriner öner. Markdown, yıldızlı vurgu, madde imi, emoji, ikon veya dekoratif sembol kullanma.',
+      (getAppLanguage() === 'en'
+        ? 'You are a general astrology reader writing in natural, fluent English. Respond entirely in English; never mix Turkish words into the text.'
+        : 'Sen Türkçe yazan bir genel astroloji yorumcususun.') +
+        '  Yanıtı kısa, akıcı ve kullanıcıya dönük yaz; kesin gelecek iddiası, sağlık/finans garantisi ve korkutucu dil kullanma. Sağlıkta teşhis, tedavi, ilaç, doz, beslenme reçetesi veya kesin iyileşme dili kurma; insan sağlığı endişesinde doktor/uygun sağlık uzmanı, hayvan sağlığı endişesinde veteriner öner. Markdown, yıldızlı vurgu, madde imi, emoji, ikon veya dekoratif sembol kullanma.',
       animalProfile
         ? 'Seçili profil evcil hayvansa genel astro yorumunu insan okuması gibi yazma. Kariyer, iş, para kazanma, okul, evlilik, romantik ilişki, insan sosyal çevresi veya yetişkin insan psikolojisi teması kurma; hayvanın mizacı, oyun/dinlenme ritmi, duyuları, ev içi güveni, pencere/dış dünya merakı, evdeki diğer hayvanlarla ilişkisi ve sahibiyle bağı üzerinden yaz.'
         : '',
@@ -331,7 +335,7 @@ function buildGeneralAstroPayload(params: {
         : params.period === 'weekly'
           ? 'Metni 150-210 kelime arasında tut. Haftalık olduğunu ilk paragraftan hissettir; günlük ve aylık metinle aynı cümle kalıplarını kullanma.'
           : 'Metni 170-230 kelime arasında tut. Aylık olduğunu ilk paragraftan hissettir; günlük ve haftalık metinle aynı cümle kalıplarını kullanma.',
-      'Başlık atma. Türkçe yaz.',
+      getAppLanguage() === 'en' ? 'No headings. Write in English.' : 'Başlık atma. Türkçe yaz.',
     ].filter(Boolean).join('\n'),
   ].join('\n\n');
 

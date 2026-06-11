@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { getAppLanguage } from '../i18n';
 import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
@@ -61,7 +62,7 @@ function weekRangeLabel(date = new Date()) {
 }
 
 function monthLabel(date = new Date()) {
-  return date.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+  return date.toLocaleDateString(getAppLanguage() === 'en' ? 'en-US' : 'tr-TR', { month: 'long', year: 'numeric' });
 }
 
 function profileBadge(profile: SubjectProfile, t: TFunction) {

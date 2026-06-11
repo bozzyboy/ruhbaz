@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { View, StyleSheet, Dimensions, Platform, Text, ImageBackground, Animated, Easing } from 'react-native';
 import Svg, { 
@@ -30,6 +31,7 @@ const IChingCard: React.FC<IChingCardProps> = ({
   data, 
   width = Dimensions.get('window').width * 0.85 
 }) => {
+  const { t } = useTranslation();
   const height = (width * 650) / 400;
   
   const bounceAnim = React.useRef(new Animated.Value(0)).current;
@@ -116,14 +118,14 @@ const IChingCard: React.FC<IChingCardProps> = ({
                 .map((para) => para.trim())
                 .filter(Boolean)
                 .map((para, idx) => {
-                  const isHeader = /^(Şimdiki Durum|Gelecek Potansiyeli|Yol Gösterici Mesaj|Tavsiye)\b/.test(para);
+                  const isHeader = /^(Şimdiki Durum|Gelecek Potansiyeli|Yol Gösterici Mesaj|Tavsiye|Present State|Unfolding Potential|Guiding Message|Guidance)/.test(para);
                   return (
                     <Text key={idx} style={isHeader ? styles.headerText : styles.messageText}>
                       {isHeader ? para : formatReadableText(para)}
                     </Text>
                   );
                 })}
-              <Text style={styles.scrollHint}>aşağı kaydır</Text>
+              <Text style={styles.scrollHint}>{t('cards.scrollHint')}</Text>
             </BrandedScrollView>
 
             {/* Alt Gradyan (Fade) */}

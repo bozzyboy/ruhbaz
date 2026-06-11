@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { View, StyleSheet, Dimensions, Platform, Text, ImageBackground } from 'react-native';
 import Svg, { 
@@ -18,6 +19,7 @@ const RuneCard: React.FC<RuneCardProps> = ({
   rune, 
   width = Dimensions.get('window').width * 0.75 
 }) => {
+  const { t } = useTranslation();
   const height = (width * 650) / 400;
   
   return (
@@ -65,7 +67,7 @@ const RuneCard: React.FC<RuneCardProps> = ({
               contentContainerStyle={styles.scrollContent}
               nestedScrollEnabled={true}
             >
-              <Text style={styles.messageLabel}>TAŞIN MESAJI:</Text>
+              <Text style={styles.messageLabel}>{t('cards.runeMessageLabel')}</Text>
               <Text style={styles.messageText}>{rune.message}</Text>
             </BrandedScrollView>
           </View>

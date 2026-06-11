@@ -1,3 +1,4 @@
+import { getAppLanguage } from '../i18n';
 export type LlmReadingKind = 'coffee' | 'palm' | 'personal-astro' | 'general-astro' | 'personal-numerology' | 'generic';
 
 type RetryMessage = {
@@ -106,8 +107,14 @@ export function isRetryableLlmError(err: any) {
   return status === 503 || status === 429 || /503|429|unavailable|overloaded|quota|api anahtar|anahtarı|yorum anahtarı|Gemini API anahtarı/i.test(message);
 }
 
+const RETRY_MESSAGES_EN: RetryMessage[] = [
+  { title: 'A Short Pause in the Mansion', message: 'The reading channel is a little busy right now. Try again in a minute or two — nothing is lost.' },
+  { title: 'The Symbols Need a Breath', message: 'The symbols asked for a brief moment to settle. Please try again shortly; your reading will be ready.' },
+  { title: 'One Moment, Please', message: 'A small hiccup on the line. Give it a minute and tap again — we will pick up right where we left off.' },
+];
+
 export function getRetryLaterMessage(kind: LlmReadingKind, seed: string | number = Date.now()): RetryMessage {
-  const pool = RETRY_MESSAGES[kind] || RETRY_MESSAGES.generic;
+  const pool = getAppLanguage() === 'en' ? RETRY_MESSAGES_EN : RETRY_MESSAGES[kind] || RETRY_MESSAGES.generic;
   const index = Math.abs(hashText(`${kind}-${seed}-${Math.random()}`)) % pool.length;
   return pool[index];
 }

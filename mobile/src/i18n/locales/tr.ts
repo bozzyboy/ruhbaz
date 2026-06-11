@@ -54,6 +54,11 @@ export const tr = {
     testValues: 'Değerler Pusulası',
     testCopingStyle: 'Stresle Başa Çıkma Testi',
   },
+  cards: {
+    dailyGuidanceLabel: 'GÜNÜN REHBERLİĞİ',
+    runeMessageLabel: 'TAŞIN MESAJI:',
+    scrollHint: 'aşağı kaydır',
+  },
   home: {
     subtitle: 'Burası giriş lobin. Okuma, içgörü ve yaratım akışlarına buradan geçebilirsin.',
     treatTableTitle: 'İkram Masası',

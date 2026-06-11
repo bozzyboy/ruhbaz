@@ -22,6 +22,7 @@
 // - Tekrarlı ihlalde hesap/oturum kısıtlaması Faz 2 kapsamı DIŞI (iskelet notu).
 
 import { trackEvent } from './analyticsService';
+import { getAppLanguage } from '../i18n';
 
 export type ModerationContext = 'chat' | 'question' | 'dream';
 
@@ -65,7 +66,29 @@ const REPLY: Record<ModerationCategory, string> = {
     'Şans oyunları, sayılar ve tahminler bu konağın işi değil; semboller yön gösterir, sonuç söylemez. Başka neyi merak ediyorsun?',
 };
 
-const MODERATION_REPLY_TEXTS = new Set(Object.values(REPLY));
+// EN yanıtlar (Faz 4; TASLAK — onay: Ozan). Kriz yanıtı yerel acil hattı diliyle.
+const REPLY_EN: Record<ModerationCategory, string> = {
+  crisis:
+    'It sounds like you may be going through a hard place right now, and even writing it down matters. ' +
+    'But what you deserve here is real support, not symbols. Please talk to someone you trust; ' +
+    'if you are thinking of harming yourself, contact your local emergency number right away, ' +
+    'and reach out to a mental health professional. This door is always open — but please take care of yourself first.',
+  csam: 'This content has no place in this mansion, in any form.',
+  sexual: 'The mansion keeps this door closed; everything here stays symbolic and gentle. Shall we open another topic together?',
+  hate: 'No community is spoken of that way in this mansion. Let us turn back to you — what is going on in your world?',
+  religion: 'Matters of faith do not pass through this door; they are neither praised nor debated here. Let us look at your own path instead.',
+  politics: 'Worldly politics stays outside the mansion gate; we look at you here. What is on your mind these days?',
+  violence_threat: 'Violence does not pass through this door. If you want to talk about what is weighing on you, I can read the symbols with you — but let us not speak of harming anyone.',
+  animal_abuse: 'In this mansion, every living being is met with kindness; this topic will not be read here.',
+  harassment: 'We cannot continue in this tone. Let us take a breath and start again, a little more gently.',
+  gambling: "Lottery numbers and betting tips are not the mansion's craft; symbols point to directions, not results. What else is on your mind?",
+};
+
+function replyFor(category: ModerationCategory): string {
+  return getAppLanguage() === 'en' ? REPLY_EN[category] : REPLY[category];
+}
+
+const MODERATION_REPLY_TEXTS = new Set([...Object.values(REPLY), ...Object.values(REPLY_EN)]);
 
 /** Verilen metin bu servisin ürettiği nazik red/kriz yanıtı mı? (Geçmiş süzmede kullanılır.) */
 export function isModerationReplyText(text: string | null | undefined): boolean {
@@ -100,6 +123,10 @@ function nearEachOther(reA: RegExp, reB: RegExp, text: string, maxDistance = 80)
 // --- Sinyal desenleri (lowercase tr-TR metin üzerinde; diakritiksiz varyantlar dahil) ---
 
 // R2 — kriz: NİYET kalıpları. ("ol" gibi geniş ekler bilinçli YOK — "yoluna girecek" tetiklemez.)
+// EN kriz NİYET kalıpları (Faz 4): EN moddaki kullanıcı da korunur.
+const CRISIS_RE_EN =
+  /(kill myself|end my life|end it all|take my own life|suicid(e|al)|want to die|don'?t want to live|hurt myself|harm myself|self[- ]?harm)/i;
+
 const CRISIS_RE =
   /(intihar (etmek istiyorum|edece[ğg]im|etmeyi dü[şs]ünüyorum)|kendimi öldür(mek istiyorum|eceğim|ecegim)|kendime zarar ver(mek istiyorum|eceğim|ecegim)|ya[şs]amak istemiyorum)/iu;
 
@@ -198,9 +225,9 @@ export function moderateUserInput(
     return { verdict: 'allow' };
   }
 
-  if (CRISIS_RE.test(normalized)) {
+  if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) {
     trackEvent({ name: 'moderation_blocked', category: 'crisis' });
-    return { verdict: 'crisis', category: 'crisis', replyText: REPLY.crisis };
+    return { verdict: 'crisis', category: 'crisis', replyText: replyFor('crisis') };
   }
 
   const rules = context === 'dream' ? DREAM_RULES : FULL_RULES;
@@ -208,7 +235,7 @@ export function moderateUserInput(
     if (rule.test(normalized)) {
       // Yalnız kategori adı izlenir; kullanıcı metni ASLA event'e yazılmaz (K34 ilke 1).
       trackEvent({ name: 'moderation_blocked', category: rule.category });
-      return { verdict: 'block', category: rule.category, replyText: REPLY[rule.category] };
+      return { verdict: 'block', category: rule.category, replyText: replyFor(rule.category) };
     }
   }
   return { verdict: 'allow' };
@@ -218,7 +245,7 @@ export function moderateUserInput(
 export function isAllowedUserText(text: string | null | undefined, context: ModerationContext = 'chat'): boolean {
   const normalized = (text || '').trim().toLocaleLowerCase('tr-TR');
   if (!normalized) return true;
-  if (CRISIS_RE.test(normalized)) return false;
+  if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) return false;
   const rules = context === 'dream' ? DREAM_RULES : FULL_RULES;
   return !rules.some((rule) => rule.test(normalized));
 }

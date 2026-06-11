@@ -56,6 +56,11 @@ export const en: TranslationResource = {
     testValues: 'Values Compass',
     testCopingStyle: 'Stress Coping Test',
   },
+  cards: {
+    dailyGuidanceLabel: 'GUIDANCE OF THE DAY',
+    runeMessageLabel: 'MESSAGE OF THE STONE:',
+    scrollHint: 'scroll down',
+  },
   home: {
     subtitle: 'This is your entrance hall. Step into readings, insight and creative flows from here.',
     treatTableTitle: 'Treat Table',

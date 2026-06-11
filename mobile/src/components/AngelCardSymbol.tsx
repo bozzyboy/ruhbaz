@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Easing, Dimensions, Platform, Text, ImageBackground } from 'react-native';
 import Svg, { 
@@ -28,6 +29,7 @@ const AngelCardSymbol: React.FC<AngelCardSymbolProps> = ({
   card, 
   width = Dimensions.get('window').width * 0.75 
 }) => {
+  const { t } = useTranslation();
   const height = (width * 650) / 400; // Aspect ratio 400:650
   
   const glowAnim = useRef(new Animated.Value(0.4)).current;
@@ -177,7 +179,7 @@ const AngelCardSymbol: React.FC<AngelCardSymbolProps> = ({
 
           {/* 6. Günün Rehberliği (Aksiyon Kutusu) */}
           <View style={styles.actionBox}>
-            <Text style={styles.actionTitle}>GÜNÜN REHBERLİĞİ</Text>
+            <Text style={styles.actionTitle}>{t('cards.dailyGuidanceLabel')}</Text>
             <Text style={styles.actionText}>{card.action}</Text>
           </View>
           
