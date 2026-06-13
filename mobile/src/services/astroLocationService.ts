@@ -152,6 +152,11 @@ function countryKey(value: string | null | undefined): string {
   return COUNTRY_CODE_BY_NAME[key] || key;
 }
 
+/** Ülke adı/etiketi/kodu → ISO alpha-2 kanonik kod (UI'de saklanan değeri koda çevirmek için). */
+export function countryCodeFromName(value: string | null | undefined): string {
+  return countryKey(value);
+}
+
 export function resolveAstroLocation(location: BirthLocation): ResolvedAstroLocation | null {
   const country = location.country?.trim();
   const city = location.cityOrRegion?.trim();

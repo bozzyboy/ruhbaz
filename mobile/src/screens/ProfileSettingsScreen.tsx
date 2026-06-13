@@ -19,6 +19,8 @@ import { BrandedPicker } from '../components/BrandedPicker';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { TURKEY_CITY_OPTIONS, TURKEY_DISTRICTS_BY_CITY } from '../data/turkeyLocations';
+import { WORLD_COUNTRIES, WORLD_CITIES_BY_COUNTRY } from '../data/worldLocations';
+import { countryCodeFromName } from '../services/astroLocationService';
 import { moderateUserInput } from '../services/inputModerationService';
 import {
   exportBackupToUserFolder,
@@ -131,8 +133,28 @@ const MONTH_OPTIONS = [
 const DAY_OPTIONS = Array.from({ length: 31 }, (_, index) => String(index + 1).padStart(2, '0'));
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
 const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
-const COUNTRY_OPTIONS = ['Türkiye', 'Almanya', 'Fransa', 'Hollanda', 'Belçika', 'İngiltere', 'ABD', 'Kanada', 'Diğer'];
 const DISTRICT_OTHER_VALUE = '__other__';
+const CITY_OTHER_VALUE = '__city_other__';
+
+/** Cihaz locale'inden ülke kodu (ISO alpha-2 küçük harf) — ülke listesinde en başa alınır. */
+function deviceCountryCode(): string | null {
+  try {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale || '';
+    const match = locale.match(/[-_]([A-Za-z]{2})(?:[-_]|$)/);
+    return match ? match[1].toLowerCase() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** ISO kod → aktif dilde ülke adı (location.country'de saklanır + gösterilir). Bilinmeyen olduğu gibi döner. */
+function countryDisplayName(code: string): string {
+  const c = code.trim();
+  if (!c) return '';
+  const match = WORLD_COUNTRIES.find((item) => item.code === c);
+  if (match) return getAppLanguage() === 'en' ? match.nameEn : match.nameTr;
+  return c;
+}
 
 function sortTurkishLabels<T extends string>(items: readonly T[]): T[] {
   return [...items].sort((a, b) => a.localeCompare(b, 'tr-TR', { sensitivity: 'base' }));
@@ -250,7 +272,7 @@ function draftFromProfile(profile: SubjectProfile): ProfileDraft {
     birthDay,
     birthHour,
     birthMinute,
-    birthCountry: profile.birth.location.country || '',
+    birthCountry: countryCodeFromName(profile.birth.location.country),
     birthCity: profile.birth.location.cityOrRegion || '',
     birthDistrict: profile.birth.location.district || '',
   };
@@ -270,8 +292,8 @@ function buildBirthInfo(draft: ProfileDraft): BirthInfo {
     time,
     timeKnown: Boolean(time),
     location: {
-      country: draft.birthCountry.trim() || null,
-      cityOrRegion: draft.birthCity.trim() || null,
+      country: countryDisplayName(draft.birthCountry) || null,
+      cityOrRegion: draft.birthCity === CITY_OTHER_VALUE ? null : draft.birthCity.trim() || null,
       district,
       subdistrict: null,
       freeform: null,
@@ -292,8 +314,8 @@ function pickerValue(value: string) {
 }
 
 function isTurkeyCountry(value: string) {
-  const v = value.toLocaleLowerCase('tr-TR');
-  return v === 'türkiye' || v === 'turkiye' || v === 'turkey';
+  // value artık ISO kod (draft.birthCountry); eski etiketler için de güvenli.
+  return value === 'tr' || countryCodeFromName(value) === 'tr';
 }
 
 function sortProfiles(profiles: SubjectProfile[], primaryProfileId: string | null) {
@@ -433,6 +455,38 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     isTurkeyBirthCountry &&
     Boolean(profileDraft.birthCity) &&
     (profileDraft.birthDistrict === DISTRICT_OTHER_VALUE || (Boolean(profileDraft.birthDistrict) && !districtIsKnown));
+  // E1 (K-4=B): tüm dünya için lokalize ülke listesi (cihaz ülkesi başa) + ülkeye göre büyük şehir dropdown.
+  const countryOptions = useMemo(() => {
+    const lang = getAppLanguage();
+    const opts = WORLD_COUNTRIES.map((item) => ({ value: item.code, label: lang === 'en' ? item.nameEn : item.nameTr }));
+    opts.sort((a, b) => a.label.localeCompare(b.label, lang === 'en' ? 'en-US' : 'tr-TR', { sensitivity: 'base' }));
+    const device = deviceCountryCode();
+    if (device) {
+      const idx = opts.findIndex((item) => item.value === device);
+      if (idx > 0) {
+        const [first] = opts.splice(idx, 1);
+        opts.unshift(first);
+      }
+    }
+    return opts;
+  }, [t]);
+  const worldCityOptions = useMemo(() => {
+    if (isTurkeyBirthCountry || !profileDraft.birthCountry) return [] as { value: string; label: string }[];
+    const lang = getAppLanguage();
+    const list = WORLD_CITIES_BY_COUNTRY[profileDraft.birthCountry] || [];
+    return list
+      .map((item) => {
+        const name = lang === 'en' ? item.nameEn : item.nameTr;
+        return { value: name, label: name };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label, lang === 'en' ? 'en-US' : 'tr-TR', { sensitivity: 'base' }));
+  }, [isTurkeyBirthCountry, profileDraft.birthCountry, t]);
+  const hasWorldCities = worldCityOptions.length > 0;
+  const cityIsKnownWorld = hasWorldCities && worldCityOptions.some((item) => item.value === profileDraft.birthCity);
+  const showCityFreeform =
+    !isTurkeyBirthCountry &&
+    hasWorldCities &&
+    (profileDraft.birthCity === CITY_OTHER_VALUE || (Boolean(profileDraft.birthCity) && !cityIsKnownWorld));
 
   const loadState = useCallback(async () => {
     setIsLoading(true);
@@ -845,7 +899,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     handleDraftChange('birthCity', '');
                     handleDraftChange('birthDistrict', '');
                   }}
-                  options={[{ label: t('profile.countrySelect'), value: 'sec' }, ...COUNTRY_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                  options={[{ label: t('profile.countrySelect'), value: 'sec' }, ...countryOptions.map((option) => ({ label: option.label, value: option.value }))]}
                 />
                 {isTurkeyBirthCountry ? (
                   <BrandedPicker
@@ -861,6 +915,24 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     }}
                     options={[{ label: t('profile.citySelect'), value: 'sec' }, ...turkeyCities.map((option) => ({ label: option, value: option }))]}
                   />
+                ) : hasWorldCities ? (
+                  <BrandedPicker
+                    selectedValue={cityIsKnownWorld ? profileDraft.birthCity : profileDraft.birthCity ? CITY_OTHER_VALUE : 'sec'}
+                    onValueChange={(value) => {
+                      if (value === 'sec') {
+                        handleDraftChange('birthCity', '');
+                        handleDraftChange('birthDistrict', '');
+                        return;
+                      }
+                      handleDraftChange('birthCity', value);
+                      handleDraftChange('birthDistrict', '');
+                    }}
+                    options={[
+                      { label: t('profile.citySelect'), value: 'sec' },
+                      ...worldCityOptions.map((option) => ({ label: option.label, value: option.value })),
+                      { label: t('profile.cityOther'), value: CITY_OTHER_VALUE },
+                    ]}
+                  />
                 ) : (
                   <TextInput
                     style={styles.textInput}
@@ -871,6 +943,16 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     selectionColor="#D4A574"
                   />
                 )}
+                {showCityFreeform ? (
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder={t('profile.cityPlaceholder')}
+                    placeholderTextColor="rgba(255,255,255,0.35)"
+                    value={profileDraft.birthCity === CITY_OTHER_VALUE ? '' : profileDraft.birthCity}
+                    onChangeText={(value) => handleDraftChange('birthCity', value)}
+                    selectionColor="#D4A574"
+                  />
+                ) : null}
                 {isTurkeyBirthCountry && profileDraft.birthCity && selectedCityDistricts.length ? (
                   <BrandedPicker
                     selectedValue={

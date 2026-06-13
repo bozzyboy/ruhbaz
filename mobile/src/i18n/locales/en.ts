@@ -305,6 +305,7 @@ export const en: TranslationResource = {
     citySelect: 'Select city',
     districtSelect: 'Select district',
     districtOther: 'Other',
+    cityOther: 'City not listed (type it)',
     cityPlaceholder: 'City',
     districtDetailedPlaceholder: 'District, town, subdistrict or borough',
     districtPlaceholder: 'District',

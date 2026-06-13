@@ -303,6 +303,7 @@ export const tr = {
     citySelect: 'Şehir seç',
     districtSelect: 'İlçe seç',
     districtOther: 'Diğer',
+    cityOther: 'Şehir listede yok (elle yaz)',
     cityPlaceholder: 'Şehir',
     districtDetailedPlaceholder: 'İlçe, belde, bucak veya kaza',
     districtPlaceholder: 'İlçe',
