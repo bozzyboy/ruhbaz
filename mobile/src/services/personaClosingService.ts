@@ -318,53 +318,9 @@ function trimIncompleteTail(text: string) {
   return cleaned;
 }
 
-const PACE_REPLACEMENTS = [
-  'gündelik yoğunluk',
-  'sıkışık tempo',
-  'zaman baskısı',
-  'üst üste gelen işler',
-  'zihinsel kalabalık',
-  'günlük ritim',
-  'hareketli gündem',
-  'yoğun gün akışı',
-  'iç sıkışıklığı',
-  'dağınık program',
-  'hızlı akış',
-  'biriken işler',
-  'günün ağırlığı',
-  'düşünce yoğunluğu',
-  'planların sıkışması',
-  'gündem kalabalığı',
-  'zihin yorgunluğu',
-  'sorumluluk yükü',
-  'aynı anda gelen işler',
-  'nefes alanı ihtiyacı',
-  'yoğun iletişim trafiği',
-  'düzen arayışı',
-  'ritim bozulması',
-  'günün sıkışıklığı',
-  'akışın hızlanması',
-  'program yoğunluğu',
-  'dikkat dağınıklığı',
-  'iç gerilim',
-  'toparlanma ihtiyacı',
-  'denge arayışı',
-];
-
-const TURKISH_MALFORMED_WORD_FIXES: Array<[RegExp, string]> = [
-  [/\byoğunlukede\b/giu, 'yoğunlukta'],
-  [/\byoğunlukta?de\b/giu, 'yoğunlukta'],
-  [/\byoğunluk[niı]\b/giu, 'yoğunluk'],
-  [/\byoğunlukın\b/giu, 'yoğunluğun'],
-  [/\byorgunlukede\b/giu, 'yorgunlukta'],
-  [/\btelaşede\b/giu, 'telaşta'],
-  [/\bsakinlikede\b/giu, 'sakinlikte'],
-  [/\bhuzurede\b/giu, 'huzurda'],
-  [/\benerjiede\b/giu, 'enerjide'],
-  [/\britimede\b/giu, 'ritimde'],
-  [/\bdengedede\b/giu, 'dengede'],
-  [/\bdengede de\b/giu, 'dengede'],
-];
+// I-2k (Ozan): PACE_REPLACEMENTS + TURKISH_MALFORMED_WORD_FIXES kaldırıldı —
+// kozmetik kelime-onarımı/band-aid kelimeleri bozuyordu ("yoğunluğunu" → "yoğunluknı").
+// "Telaş" temasının kök nedeni B2'de ses/prompt katmanında ele alınır.
 
 const HUMAN_HEALTH_REMINDERS = [
   'Sağlıkla ilgili bir endişe varsa bunu korkmadan ama ertelemeden bir doktora ya da uygun bir sağlık uzmanına danışman en doğrusu olur.',
@@ -392,14 +348,7 @@ const ANIMAL_HEALTH_REMINDERS = [
   'Can dostunun sağlığı için sezgiyle yetinmeden bir veterinere danışmak iyi olur; böylece için de daha rahat eder.',
 ];
 
-function replacePaceFixation(text: string) {
-  let index = 0;
-  return (text || '').replace(/\b(telaş(?:ı|ın|ını|ının|ında|ından|ınla|tan|a|lı|sız)?|koşuşturma(?:sı|sını|sının|sında|sından|nın|dan|ya|lı)?|koşturma(?:sı|sını|sının|sında|sından|nın|dan|ya|lı)?|koştur(?:up|uyor|uyorsun|uyorum|mak|ma)|koşuştur(?:up|uyor|uyorsun|uyorum|mak|ma))\b/giu, () => {
-    const replacement = PACE_REPLACEMENTS[index % PACE_REPLACEMENTS.length] || 'günlük ritim';
-    index += 1;
-    return replacement;
-  });
-}
+// replacePaceFixation (telaş band-aid'i) I-2k ile kaldırıldı; kök neden B2'de ses katmanında.
 
 const PERSONA_SELF_INTRO_NAME_PATTERN = String.raw`(?:suzan(?:\s+han[ıi]m)?|teoman(?:\s+bey|\s+amca)?|selin(?:\s+han[ıi]m)?|berk(?:\s+bey)?|ar[ıi]n|ay[şs]e|deniz|d[üu]rdane(?:\s+han[ıi]m)?|hikmet(?:\s+bey|\s+amca)?|bahar(?:\s+han[ıi]m)?|mert(?:\s+bey)?|caner)`;
 const PERSONA_SELF_INTRO_ROLE_PATTERN = String.raw`(?:yorumcu|astrolog|astrolo[gğ]|numerolog|numerolo[gğ]|tarot\s+yorumcusu|kahve\s+yorumcusu|kahve\s+fal[ıi]\s+yorumcusu|el\s+yorumcusu|rehber)`;
@@ -457,11 +406,11 @@ export function sanitizeRestrictedReadingTerms(text: string) {
 }
 
 export function sanitizePublicReadingLanguage(text: string) {
-  const fixedMalformedWords = TURKISH_MALFORMED_WORD_FIXES.reduce(
-    (current, [pattern, replacement]) => current.replace(pattern, replacement),
-    text || '',
-  );
-  const withoutSelfIntroduction = stripPersonaSelfIntroduction(fixedMalformedWords);
+  // I-2k (Ozan): kozmetik kelime-onarımı KALDIRILDI (malformed-suffix düzeltme, "telaş"
+  // band-aid'i, büyük-harf normalizasyonu, kul→kulp) — kelimeleri bozuyordu. KORUNAN:
+  // 677 yasal ikame + sağlık/tıbbi güvenlik ikameleri + içerik guard'ları (self-intro,
+  // hafıza ifşası, MBTI/test).
+  const withoutSelfIntroduction = stripPersonaSelfIntroduction(text || '');
   const withoutMemoryDisclosure = withoutSelfIntroduction
     .split(/(?<=[.!?])\s+/)
     .filter(
@@ -471,14 +420,10 @@ export function sanitizePublicReadingLanguage(text: string) {
         !/\bsana\s+daha\s+önce\s+[^.!?]{0,80}\b(?:çıkmıştı|görünmüştü|gelmişti)\b/iu.test(sentence),
     )
     .join(' ');
-  return sanitizeRestrictedReadingTerms(replacePaceFixation(withoutMemoryDisclosure))
+  return sanitizeRestrictedReadingTerms(withoutMemoryDisclosure)
     .replace(/\b(?:INTJ|INTP|ENTJ|ENTP|INFJ|INFP|ENFJ|ENFP|ISTJ|ISFJ|ESTJ|ESFJ|ISTP|ISFP|ESTP|ESFP)\b/giu, 'bu kişilik izi')
     .replace(/\bMBTI\s+(?:sonucu|tipi|kişilik\s+tipi)\b/giu, 'kişilik eğilimi')
     .replace(/\b(?:kişilik|uyumluluk|bağlanma|değerler|stresle\s+başa\s+çıkma)\s+testi\s+sonucu\b/giu, 'kişisel eğilim')
-    .replace(/\b[A-ZÇĞİÖŞÜ]{4,}\b/gu, (word) => {
-      const lower = word.toLocaleLowerCase('tr-TR');
-      return lower.charAt(0).toLocaleUpperCase('tr-TR') + lower.slice(1);
-    })
     .replace(/\b(?:şimdi\s+)?akl[ıi]ma\s+geldi\b/giu, 'burada bir detay öne çıkıyor')
     .replace(/\bkahve\s+demlen(?:ir|mez|di|miş|mişti|iyor|ecek|miş gibi|mişçesine)?\b/giu, 'kahve yapılır')
     .replace(/\bdemlen(?:en|miş|mişti|iyor|ecek|ir)\s+kahve\b/giu, 'yapılmış kahve')
@@ -491,8 +436,6 @@ export function sanitizePublicReadingLanguage(text: string) {
     .replace(/\b(?:şunu|bunu|onu)\s+(?:ye|yiyip|iç|içip)\s+(?:geçer|düzelir|iyi\s+gelir)\b/giu, 'bu konuda bir uzmana danışmak daha doğru olur')
     .replace(/\b(?:ilaç|doz|tedavi|takviye)\s+(?:al|almalısın|kullan|kullanmalısın|başla|başlamalısın)\b/giu, 'bir uzmana danış')
     .replace(/\b(?:ağrın|belirtin|şikayetin|hastalığın)\s+geçer\b/giu, 'bu belirti için bir uzmana görünmek iyi olur')
-    .replace(/\b(fincan(?:ın|daki|da|ın\s+içindeki|ın\s+yanındaki)?|kupa(?:nın|daki)?)\s+kul\b/giu, '$1 kulpu')
-    .replace(/\bkul\s+taraf(?:ı|ında|ından|ına)\b/giu, 'kulp tarafı')
     .replace(/\b(?:bu|şu)\s+fal(?:ın|da|dan|ı|a)?\b/giu, 'bu yorum')
     .replace(/\bfal(?:ın|ım|ını|ımı|ına|ıma|ında|ımda|dan|ımdan|ı|ım|a|da)?\b/giu, 'yorum')
     .replace(/\bfalcı(?:n|yım|yız|sı|sın|lar)?\b/giu, 'yorumcu')
