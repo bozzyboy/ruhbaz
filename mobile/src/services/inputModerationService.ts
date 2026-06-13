@@ -44,11 +44,13 @@ export type ModerationResult =
   | { verdict: 'block'; category: Exclude<ModerationCategory, 'crisis'>; replyText: string };
 
 const REPLY: Record<ModerationCategory, string> = {
+  // Kriz yanıtı (K-1 onayı, Ozan 2026-06-13): nazik reddet + eğlence-yorumuna davet +
+  // TEK nötr güvenlik cümlesi (112/hat ya da "intihar/zarar" gibi tetikleyici sözcük YOK;
+  // "güvendiğin biri / yerel acil servis" dili). App kendini KAPATMAZ; destek/dertleşme tonu YOK.
   crisis:
-    'Şu an zor bir yerden geçiyor olabilirsin ve bunu yazman bile değerli. Ama burada sana sembollerle değil, ' +
-    'gerçek bir destekle yardım edilmeli. Lütfen güvendiğin biriyle konuş; kendine zarar verme düşüncesi içindeysen ' +
-    "112 Acil Çağrı Merkezi'ni arayabilirsin. Bir uzmanla (psikolog ya da psikiyatrist) konuşmak en doğrusu. " +
-    'Bu kapı sana her zaman açık; ama şimdi önce kendine iyi bak.',
+    'Bunu burada sembollerle konuşmak doğru olmaz; bu konak bunun için doğru yer değil. ' +
+    'Zor bir şey yaşıyorsan, güvendiğin birine ya da yerel acil servislere ulaşman iyi olur. ' +
+    'İstersen tamamen eğlence amaçlı, başka bir konuda sembolik bir yorum birlikte açabiliriz.',
   csam: 'Bu içerik bu konakta hiçbir biçimde yer alamaz ve yorumlanmaz.',
   sexual:
     'Konağın kapısı bu konuya kapalı; burada her şey sembolik ve zarif kalır. İstersen aklındaki başka bir konuyu birlikte açalım.',
@@ -66,13 +68,13 @@ const REPLY: Record<ModerationCategory, string> = {
     'Şans oyunları, sayılar ve tahminler bu konağın işi değil; semboller yön gösterir, sonuç söylemez. Başka neyi merak ediyorsun?',
 };
 
-// EN yanıtlar (Faz 4; TASLAK — onay: Ozan). Kriz yanıtı yerel acil hattı diliyle.
+// EN yanıtlar (Faz 4; diğer kategoriler TASLAK — onay: Ozan). Kriz yanıtı K-1 onaylı (2026-06-13):
+// TR ile aynı felsefe — nazik reddet + tek nötr güvenlik cümlesi (no hotline number, no trigger words) + davet.
 const REPLY_EN: Record<ModerationCategory, string> = {
   crisis:
-    'It sounds like you may be going through a hard place right now, and even writing it down matters. ' +
-    'But what you deserve here is real support, not symbols. Please talk to someone you trust; ' +
-    'if you are thinking of harming yourself, contact your local emergency number right away, ' +
-    'and reach out to a mental health professional. This door is always open — but please take care of yourself first.',
+    "This isn't something I can explore with symbols, and the manor isn't the right place for it. " +
+    "If you're going through something hard, reaching out to someone you trust or your local emergency services is a good step. " +
+    'If you like, we can open something else together — purely for entertainment.',
   csam: 'This content has no place in this manor, in any form.',
   sexual: 'The manor keeps this door closed; everything here stays symbolic and gentle. Shall we open another topic together?',
   hate: 'No community is spoken of that way in this manor. Let us turn back to you — what is going on in your world?',
