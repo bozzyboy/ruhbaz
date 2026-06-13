@@ -467,7 +467,8 @@ function stripExplicitAstroLeaks(text: string, readingType: ReadingReadingType) 
 
 function stripUnaskedPaceTheme(text: string, messages: ReadingMessage[]) {
   const sessionText = messages.map((message) => message.text || '').join(' ');
-  if (/\b(telaş|acele|yetiş|yetişem|panik|koştur|koşuştur)\b/i.test(sessionText)) return text;
+  // Kullanıcı yoğunluk/yorgunluk/stres dahil pace temasını kendi anarsa pace cümleleri korunur (B2 backstop).
+  if (/\b(telaş|acele|yetiş|yetişem|panik|koştur|koşuştur|yoğun|yorgun|stres)\b/i.test(sessionText)) return text;
   const sentences = (text || '').trim().split(/(?<=[.!?])\s+/);
   const kept = sentences.filter((sentence) => !/\b(telaş|acele|yetiş|yetişem|panik|koştur|koşuştur)\b/i.test(sentence));
   return kept.length >= Math.max(2, Math.floor(sentences.length * 0.55)) ? kept.join(' ').trim() : text;

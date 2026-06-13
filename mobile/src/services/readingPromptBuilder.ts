@@ -410,7 +410,12 @@ export function buildReadingPrompt(params: {
     );
   }
   if (params.devSettings.systemPrompt?.trim()) parts.push(`## Developer Override\n${params.devSettings.systemPrompt.trim()}`);
-  const memoryContext = buildMemoryContext(params.profileName, params.memorySnippet, params.readingType, params.coffeeMode, focusQuestion);
+  // I-4k: takip mesajı da (focusQuestion gibi) üst kullanıcı sinyali sayılsın — kahve/el
+  // akışında takip chat contents'inden gelir; hafıza sözleşmesine aktif kullanıcı metni
+  // olarak focusQuestion + son kullanıcı mesajı birlikte verilir (astro/tarot zaten böyle).
+  const latestUserMessage = [...params.messages].reverse().find((message) => message.role === 'user')?.text?.replace(/\s+/g, ' ').trim() || '';
+  const activeUserQuestion = [focusQuestion, latestUserMessage].filter(Boolean).join(' ').trim();
+  const memoryContext = buildMemoryContext(params.profileName, params.memorySnippet, params.readingType, params.coffeeMode, activeUserQuestion);
   if (memoryContext) parts.push(memoryContext);
   void ensureLoreGraphIndexed();
   const loreCrumbs = selectLoreCrumbs({
