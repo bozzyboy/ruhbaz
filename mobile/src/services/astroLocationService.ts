@@ -1,5 +1,6 @@
 import type { BirthLocation } from '../types/memory';
 import { TURKEY_CITY_COORDS } from '../data/turkeyLocations';
+import { WORLD_CITIES_BY_COUNTRY, WORLD_COUNTRIES } from '../data/worldLocations';
 
 export type ResolvedAstroLocation = {
   country: string;
@@ -20,8 +21,9 @@ type LocationEntry = {
   districts?: Record<string, { lat: number; lon: number }>;
 };
 
+// Türkiye yüksek-hassasiyet veri (İstanbul ilçe koordinatları dahil). Anahtar ISO 'tr|'.
 const CITY_DATA: Record<string, LocationEntry> = {
-  'turkiye|istanbul': {
+  'tr|istanbul': {
     lat: 41.0082,
     lon: 28.9784,
     timezone: 'Europe/Istanbul',
@@ -38,7 +40,7 @@ const CITY_DATA: Record<string, LocationEntry> = {
       pendik: { lat: 40.8747, lon: 29.235 },
     },
   },
-  'turkiye|ankara': {
+  'tr|ankara': {
     lat: 39.9334,
     lon: 32.8597,
     timezone: 'Europe/Istanbul',
@@ -50,7 +52,7 @@ const CITY_DATA: Record<string, LocationEntry> = {
       etimesgut: { lat: 39.9533, lon: 32.6329 },
     },
   },
-  'turkiye|izmir': {
+  'tr|izmir': {
     lat: 38.4237,
     lon: 27.1428,
     timezone: 'Europe/Istanbul',
@@ -62,32 +64,21 @@ const CITY_DATA: Record<string, LocationEntry> = {
       cesme: { lat: 38.3227, lon: 26.3064 },
     },
   },
-  'turkiye|bursa': { lat: 40.1885, lon: 29.061, timezone: 'Europe/Istanbul' },
-  'turkiye|antalya': { lat: 36.8969, lon: 30.7133, timezone: 'Europe/Istanbul' },
-  'turkiye|adana': { lat: 37.0, lon: 35.3213, timezone: 'Europe/Istanbul' },
-  'turkiye|konya': { lat: 37.8746, lon: 32.4932, timezone: 'Europe/Istanbul' },
-  'turkiye|gaziantep': { lat: 37.0662, lon: 37.3833, timezone: 'Europe/Istanbul' },
-  'turkiye|mersin': { lat: 36.8121, lon: 34.6415, timezone: 'Europe/Istanbul' },
-  'turkiye|kocaeli': { lat: 40.8533, lon: 29.8815, timezone: 'Europe/Istanbul' },
-  'turkiye|diyarbakir': { lat: 37.925, lon: 40.211, timezone: 'Europe/Istanbul' },
-  'turkiye|kayseri': { lat: 38.7205, lon: 35.4826, timezone: 'Europe/Istanbul' },
-  'turkiye|eskisehir': { lat: 39.7767, lon: 30.5206, timezone: 'Europe/Istanbul' },
-  'turkiye|samsun': { lat: 41.2867, lon: 36.33, timezone: 'Europe/Istanbul' },
-  'turkiye|denizli': { lat: 37.7765, lon: 29.0864, timezone: 'Europe/Istanbul' },
-  'turkiye|sakarya': { lat: 40.7731, lon: 30.3948, timezone: 'Europe/Istanbul' },
-  'turkiye|mugla': { lat: 37.2153, lon: 28.3636, timezone: 'Europe/Istanbul' },
-  'turkiye|tekirdag': { lat: 40.978, lon: 27.511, timezone: 'Europe/Istanbul' },
-};
-
-const COUNTRY_DATA: Record<string, LocationEntry> = {
-  turkiye: { lat: 39.0, lon: 35.0, timezone: 'Europe/Istanbul' },
-  almanya: { lat: 51.1657, lon: 10.4515, timezone: 'Europe/Berlin' },
-  fransa: { lat: 46.2276, lon: 2.2137, timezone: 'Europe/Paris' },
-  hollanda: { lat: 52.1326, lon: 5.2913, timezone: 'Europe/Amsterdam' },
-  belcika: { lat: 50.5039, lon: 4.4699, timezone: 'Europe/Brussels' },
-  ingiltere: { lat: 52.3555, lon: -1.1743, timezone: 'Europe/London' },
-  abd: { lat: 39.8283, lon: -98.5795, timezone: 'America/New_York' },
-  kanada: { lat: 56.1304, lon: -106.3468, timezone: 'America/Toronto' },
+  'tr|bursa': { lat: 40.1885, lon: 29.061, timezone: 'Europe/Istanbul' },
+  'tr|antalya': { lat: 36.8969, lon: 30.7133, timezone: 'Europe/Istanbul' },
+  'tr|adana': { lat: 37.0, lon: 35.3213, timezone: 'Europe/Istanbul' },
+  'tr|konya': { lat: 37.8746, lon: 32.4932, timezone: 'Europe/Istanbul' },
+  'tr|gaziantep': { lat: 37.0662, lon: 37.3833, timezone: 'Europe/Istanbul' },
+  'tr|mersin': { lat: 36.8121, lon: 34.6415, timezone: 'Europe/Istanbul' },
+  'tr|kocaeli': { lat: 40.8533, lon: 29.8815, timezone: 'Europe/Istanbul' },
+  'tr|diyarbakir': { lat: 37.925, lon: 40.211, timezone: 'Europe/Istanbul' },
+  'tr|kayseri': { lat: 38.7205, lon: 35.4826, timezone: 'Europe/Istanbul' },
+  'tr|eskisehir': { lat: 39.7767, lon: 30.5206, timezone: 'Europe/Istanbul' },
+  'tr|samsun': { lat: 41.2867, lon: 36.33, timezone: 'Europe/Istanbul' },
+  'tr|denizli': { lat: 37.7765, lon: 29.0864, timezone: 'Europe/Istanbul' },
+  'tr|sakarya': { lat: 40.7731, lon: 30.3948, timezone: 'Europe/Istanbul' },
+  'tr|mugla': { lat: 37.2153, lon: 28.3636, timezone: 'Europe/Istanbul' },
+  'tr|tekirdag': { lat: 40.978, lon: 27.511, timezone: 'Europe/Istanbul' },
 };
 
 function normalizeLocationText(value: string | null | undefined): string {
@@ -107,17 +98,58 @@ function normalizeLocationText(value: string | null | undefined): string {
     .replace(/\s+/g, ' ');
 }
 
+// Ülke adı/kodu → ISO alpha-2 kodu. Registry (WORLD_COUNTRIES) TR+EN adlarını ve kodu
+// kapsar; ek olarak eski profillerde saklanan etiketler + yaygın serbest-metin için alias.
+const COUNTRY_CODE_BY_NAME: Record<string, string> = (() => {
+  const map: Record<string, string> = {};
+  for (const c of WORLD_COUNTRIES) {
+    map[c.code] = c.code;
+    const tr = normalizeLocationText(c.nameTr);
+    const en = normalizeLocationText(c.nameEn);
+    if (tr) map[tr] = c.code;
+    if (en) map[en] = c.code;
+  }
+  // Geriye uyum + serbest metin (eski COUNTRY_OPTIONS etiketleri ve yaygın yazımlar).
+  const aliases: Record<string, string> = {
+    turkey: 'tr',
+    turkiye: 'tr',
+    abd: 'us',
+    amerika: 'us',
+    'amerika birlesik devletleri': 'us',
+    usa: 'us',
+    ingiltere: 'gb',
+    uk: 'gb',
+    britanya: 'gb',
+    'united kingdom': 'gb',
+    almanya: 'de',
+    germany: 'de',
+    fransa: 'fr',
+    france: 'fr',
+    hollanda: 'nl',
+    netherlands: 'nl',
+    belcika: 'be',
+    belgium: 'be',
+    kanada: 'ca',
+    canada: 'ca',
+  };
+  for (const [k, v] of Object.entries(aliases)) {
+    if (!map[k]) map[k] = v;
+  }
+  return map;
+})();
+
+// Ülke kodu → merkez koordinat + temsili saat dilimi (şehir bulunamazsa yaklaşık).
+const COUNTRY_CENTROID: Record<string, { lat: number; lon: number; timezone: string }> = (() => {
+  const map: Record<string, { lat: number; lon: number; timezone: string }> = {};
+  for (const c of WORLD_COUNTRIES) {
+    map[c.code] = { lat: c.lat, lon: c.lon, timezone: c.timezone };
+  }
+  return map;
+})();
+
 function countryKey(value: string | null | undefined): string {
   const key = normalizeLocationText(value);
-  if (key === 'turkey') return 'turkiye';
-  if (key === 'usa' || key === 'amerika' || key === 'amerika birlesik devletleri') return 'abd';
-  if (key === 'united kingdom' || key === 'uk' || key === 'britanya') return 'ingiltere';
-  if (key === 'netherlands') return 'hollanda';
-  if (key === 'belgium') return 'belcika';
-  if (key === 'germany') return 'almanya';
-  if (key === 'france') return 'fransa';
-  if (key === 'canada') return 'kanada';
-  return key;
+  return COUNTRY_CODE_BY_NAME[key] || key;
 }
 
 export function resolveAstroLocation(location: BirthLocation): ResolvedAstroLocation | null {
@@ -128,20 +160,18 @@ export function resolveAstroLocation(location: BirthLocation): ResolvedAstroLoca
   const cKey = countryKey(country);
   const cityKey = normalizeLocationText(city);
   const districtKey = normalizeLocationText(location.district);
-  const cityEntry = CITY_DATA[`${cKey}|${cityKey}`];
-  const turkeyCityName =
-    cKey === 'turkiye' ? Object.keys(TURKEY_CITY_COORDS).find((name) => normalizeLocationText(name) === cityKey) : null;
-  const turkeyCityEntry = turkeyCityName ? TURKEY_CITY_COORDS[turkeyCityName] : null;
-  const countryEntry = COUNTRY_DATA[cKey];
+  const districtTrim = location.district?.trim() || null;
   const warnings: string[] = [];
 
+  // 1) Türkiye yüksek-hassasiyet (İstanbul ilçeleri dahil).
+  const cityEntry = CITY_DATA[`${cKey}|${cityKey}`];
   if (cityEntry) {
     const district = districtKey ? cityEntry.districts?.[districtKey] : null;
     if (district) {
       return {
         country,
         cityOrRegion: city,
-        district: location.district?.trim() || null,
+        district: districtTrim,
         latitude: district.lat,
         longitude: district.lon,
         timezone: cityEntry.timezone,
@@ -150,11 +180,10 @@ export function resolveAstroLocation(location: BirthLocation): ResolvedAstroLoca
         warnings,
       };
     }
-
     return {
       country,
       cityOrRegion: city,
-      district: location.district?.trim() || null,
+      district: districtTrim,
       latitude: cityEntry.lat,
       longitude: cityEntry.lon,
       timezone: cityEntry.timezone,
@@ -164,39 +193,70 @@ export function resolveAstroLocation(location: BirthLocation): ResolvedAstroLoca
     };
   }
 
-  if (turkeyCityEntry) {
+  // 2) Türkiye 81 il koordinatı (ilçe yok).
+  if (cKey === 'tr') {
+    const turkeyCityName = Object.keys(TURKEY_CITY_COORDS).find((name) => normalizeLocationText(name) === cityKey);
+    if (turkeyCityName) {
+      const coords = TURKEY_CITY_COORDS[turkeyCityName];
+      return {
+        country,
+        cityOrRegion: city,
+        district: districtTrim,
+        latitude: coords.lat,
+        longitude: coords.lon,
+        timezone: 'Europe/Istanbul',
+        precision: 'city',
+        label: city,
+        warnings,
+      };
+    }
+  }
+
+  // 3) Dünya büyük şehirleri (Option B). Saklanan ad anahtar/TR/EN olabilir; üçü de denenir.
+  const worldCities = cKey !== 'tr' ? WORLD_CITIES_BY_COUNTRY[cKey] : undefined;
+  const worldCity = worldCities?.find(
+    (entry) =>
+      entry.key === cityKey ||
+      normalizeLocationText(entry.nameTr) === cityKey ||
+      normalizeLocationText(entry.nameEn) === cityKey,
+  );
+  if (worldCity) {
+    // İlçe serbest metindir; koordinat şehir merkezinden alınır (precision: city).
     return {
       country,
       cityOrRegion: city,
-      district: location.district?.trim() || null,
-      latitude: turkeyCityEntry.lat,
-      longitude: turkeyCityEntry.lon,
-      timezone: 'Europe/Istanbul',
+      district: districtTrim,
+      latitude: worldCity.lat,
+      longitude: worldCity.lon,
+      timezone: worldCity.timezone,
       precision: 'city',
-      label: city,
+      label: districtTrim ? `${city} / ${districtTrim}` : city,
       warnings,
     };
   }
 
-  if (countryEntry) {
+  // 4) Şehir bulunamadı → ülke merkezi + temsili saat dilimi.
+  const centroid = COUNTRY_CENTROID[cKey];
+  if (centroid) {
     warnings.push('Şehir koordinatı listede bulunamadı; ülke merkeziyle yaklaşık yorum yapılacak.');
     return {
       country,
       cityOrRegion: city,
-      district: location.district?.trim() || null,
-      latitude: countryEntry.lat,
-      longitude: countryEntry.lon,
-      timezone: countryEntry.timezone,
+      district: districtTrim,
+      latitude: centroid.lat,
+      longitude: centroid.lon,
+      timezone: centroid.timezone,
       precision: 'country',
       label: `${country} / ${city}`,
       warnings,
     };
   }
 
+  // 5) Son çare: konum hiç tanınmadı.
   return {
     country,
     cityOrRegion: city,
-    district: location.district?.trim() || null,
+    district: districtTrim,
     latitude: 39.0,
     longitude: 35.0,
     timezone: 'UTC',
