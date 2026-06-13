@@ -1,4 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
+import { getAppLanguage } from '../i18n';
 
 export type TarotDeckId = 'rider-waite-classic' | 'gilded-dreams';
 
@@ -207,12 +208,36 @@ export const TAROT_DECK_OPTIONS: TarotDeckOption[] = [
   },
 ];
 
+// EN deste seçenekleri: id/görseller AYNI; yalnız kullanıcıya görünen
+// label/description EN. Dil seçimi getTarotDeckOptions()/getTarotDeckOption() ile.
+export const TAROT_DECK_OPTIONS_EN: TarotDeckOption[] = [
+  {
+    id: 'rider-waite-classic',
+    label: 'Rider-Waite Classic',
+    description: 'Classic symbol language and familiar tarot iconography.',
+    previewImage: RIDER_WAITE_DECK_IMAGES.front['The Fool'],
+    backImage: RIDER_WAITE_DECK_IMAGES.back,
+  },
+  {
+    id: 'gilded-dreams',
+    label: 'Gilded Dreams',
+    description: 'A brighter, more mystical and fairy-tale visual atmosphere.',
+    previewImage: GILDED_DREAMS_DECK_IMAGES.front['The Fool'],
+    backImage: GILDED_DREAMS_DECK_IMAGES.back,
+  },
+];
+
 export function getTarotDeckImages(deckId?: string | null) {
   return TAROT_DECK_IMAGE_MAPS[(deckId || DEFAULT_TAROT_DECK_ID) as TarotDeckId] || TAROT_DECK_IMAGE_MAPS[DEFAULT_TAROT_DECK_ID];
 }
 
+export function getTarotDeckOptions(): TarotDeckOption[] {
+  return getAppLanguage() === 'en' ? TAROT_DECK_OPTIONS_EN : TAROT_DECK_OPTIONS;
+}
+
 export function getTarotDeckOption(deckId?: string | null) {
-  return TAROT_DECK_OPTIONS.find((deck) => deck.id === deckId) || TAROT_DECK_OPTIONS[0];
+  const options = getTarotDeckOptions();
+  return options.find((deck) => deck.id === deckId) || options[0];
 }
 
 export const TAROT_BACK_IMAGE: ImageSourcePropType = RIDER_WAITE_DECK_IMAGES.back;

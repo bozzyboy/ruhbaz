@@ -1,22 +1,26 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
-import { TAROT_DECK_OPTIONS, type TarotDeckId } from '../data/tarotImageMap';
-import { TAROT_SPREADS } from '../data/tarotSpreads';
+import { getTarotDeckOptions, type TarotDeckId } from '../data/tarotImageMap';
+import { getTarotSpreads } from '../data/tarotSpreads';
 import { getAssistantLabel } from '../config/constants';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TarotSpreadSelect'>;
 
 export function TarotSpreadSelectScreen({ navigation, route }: Props) {
+  const { t } = useTranslation();
   const { profileId, assistantId } = route.params;
   const assistantLabel = getAssistantLabel(assistantId);
+  const spreads = getTarotSpreads();
+  const deckOptions = getTarotDeckOptions();
   const [pendingSpreadId, setPendingSpreadId] = useState<string | null>(null);
   const pendingSpread = useMemo(
-    () => TAROT_SPREADS.find((spread) => spread.id === pendingSpreadId) || null,
-    [pendingSpreadId],
+    () => spreads.find((spread) => spread.id === pendingSpreadId) || null,
+    [pendingSpreadId, spreads],
   );
 
   const handleDeckSelect = (deckId: TarotDeckId) => {
@@ -35,11 +39,11 @@ export function TarotSpreadSelectScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.headerRow}>
-          <Text style={styles.headerTitle}>Tarot Açılımı Seç</Text>
+          <Text style={styles.headerTitle}>{t('tarot.spreadSelectTitle')}</Text>
           <Text style={styles.headerMeta}>{assistantLabel}</Text>
         </View>
         <View style={styles.grid}>
-          {TAROT_SPREADS.map((spread) => (
+          {spreads.map((spread) => (
             <TouchableOpacity
               key={spread.id}
               style={styles.spreadCard}
@@ -47,7 +51,7 @@ export function TarotSpreadSelectScreen({ navigation, route }: Props) {
             >
               <View style={styles.spreadTopRow}>
                 <Text style={styles.spreadTitle}>{spread.title}</Text>
-                <Text style={styles.cardCount}>{spread.cardCount} kart</Text>
+                <Text style={styles.cardCount}>{spread.cardCount} {t('tarot.cardCountSuffix')}</Text>
               </View>
               <Text style={styles.spreadPurpose}>{spread.purpose}</Text>
             </TouchableOpacity>
@@ -64,12 +68,14 @@ export function TarotSpreadSelectScreen({ navigation, route }: Props) {
       >
         <View style={styles.deckModalOverlay}>
           <View style={styles.deckModalCard}>
-            <Text style={styles.deckModalTitle}>Deste Seç</Text>
+            <Text style={styles.deckModalTitle}>{t('tarot.deckSelectTitle')}</Text>
             <Text style={styles.deckModalSubtitle}>
-              {pendingSpread ? `${pendingSpread.title} açılımı için görsel dili seç.` : 'Açılım için görsel dili seç.'}
+              {pendingSpread
+                ? t('tarot.deckSelectSubtitle', { spread: pendingSpread.title })
+                : t('tarot.deckSelectSubtitleFallback')}
             </Text>
             <View style={styles.deckOptionsRow}>
-              {TAROT_DECK_OPTIONS.map((deck) => (
+              {deckOptions.map((deck) => (
                 <TouchableOpacity
                   key={deck.id}
                   style={styles.deckOption}
@@ -86,7 +92,7 @@ export function TarotSpreadSelectScreen({ navigation, route }: Props) {
               ))}
             </View>
             <TouchableOpacity style={styles.deckCancelButton} onPress={() => setPendingSpreadId(null)}>
-              <Text style={styles.deckCancelText}>Kapat</Text>
+              <Text style={styles.deckCancelText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

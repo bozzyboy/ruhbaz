@@ -657,4 +657,12 @@ export const en: TranslationResource = {
     numerologyCoreEmpty: 'You can prepare the core number chart, or ask questions over the saved reading if it has loaded.',
     numerologyPeriodEmpty: 'You can pick daily, weekly or monthly numerology and prepare the reading.',
   },
+  tarot: {
+    // TarotSpreadSelectScreen
+    spreadSelectTitle: 'Choose a Tarot Spread',
+    cardCountSuffix: 'cards',
+    deckSelectTitle: 'Choose a Deck',
+    deckSelectSubtitle: 'Pick the visual style for the {{spread}} spread.',
+    deckSelectSubtitleFallback: 'Pick the visual style for the spread.',
+  },
 };

@@ -655,6 +655,14 @@ export const tr = {
     numerologyCoreEmpty: 'Temel sayı haritasını hazırlayabilir veya kayıtlı yorumun geldiyse üzerinden soru sorabilirsin.',
     numerologyPeriodEmpty: 'Günlük, haftalık veya aylık numeroloji seçip yorumu hazırlayabilirsin.',
   },
+  tarot: {
+    // TarotSpreadSelectScreen
+    spreadSelectTitle: 'Tarot Açılımı Seç',
+    cardCountSuffix: 'kart',
+    deckSelectTitle: 'Deste Seç',
+    deckSelectSubtitle: '{{spread}} açılımı için görsel dili seç.',
+    deckSelectSubtitleFallback: 'Açılım için görsel dili seç.',
+  },
 };
 
 export type TranslationResource = typeof tr;

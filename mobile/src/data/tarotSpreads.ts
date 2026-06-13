@@ -1,3 +1,6 @@
+import { getAppLanguage } from '../i18n';
+import { TAROT_SPREADS_EN } from './tarotSpreads.en';
+
 export type TarotSpreadId =
   | 'single-insight'
   | 'big-picture'
@@ -198,6 +201,14 @@ export const TAROT_SPREADS: TarotSpread[] = [
   },
 ];
 
+// Dil seçici: aktif uygulama dili EN ise EN açılım verisi döner. Kanonik id/grid
+// her iki dilde AYNI; yalnız kullanıcıya görünen başlık/amaç/pozisyon metni değişir.
+// Yorum üretimi (personalTarotService) zaten getTarotCards() gibi bu yolla dile uyumlu.
+export function getTarotSpreads(): TarotSpread[] {
+  return getAppLanguage() === 'en' ? TAROT_SPREADS_EN : TAROT_SPREADS;
+}
+
 export function getTarotSpread(spreadId: string) {
-  return TAROT_SPREADS.find((spread) => spread.id === spreadId) || TAROT_SPREADS[0];
+  const spreads = getTarotSpreads();
+  return spreads.find((spread) => spread.id === spreadId) || spreads[0];
 }
