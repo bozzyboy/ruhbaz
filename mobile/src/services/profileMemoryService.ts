@@ -2368,6 +2368,10 @@ export async function appendUserReadingIntentMemory(params: {
 }): Promise<void> {
   const trimmed = params.text.trim();
   if (!trimmed) return;
+  // K42: bloklanan/zararlı içerik kalıcı profil hafızasına (ve embedding'e) yazılmaz.
+  // appendUserConversationMemory ile simetri; coffee/palm dahil tüm okuma-niyeti
+  // yazımlarını merkezi korur (ekran kısa-devreleri varsa da defense-in-depth).
+  if (!isAllowedUserText(trimmed)) return;
   const socialOnly = /^(teşekkürler|teşekkür ederim|sağ ol|sağol|harika|tamam|ok|anladım|rica ederim|eyvallah)[.!?\s]*$/iu.test(trimmed);
   if (socialOnly) return;
   const state = await loadAccountState();
