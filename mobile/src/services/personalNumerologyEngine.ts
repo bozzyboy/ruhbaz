@@ -24,6 +24,7 @@ import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionF
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 
 export type PersonalNumerologyMode = 'core' | 'daily' | 'weekly' | 'monthly';
 export type PersonalNumerologyPeriod = Exclude<PersonalNumerologyMode, 'core'>;
@@ -818,6 +819,7 @@ function buildGeminiPayload(params: {
           count: 3,
         });
   const systemText = [
+    ...(enOutputLanguageSystemDirective() ? [enOutputLanguageSystemDirective()] : []),
     'Seçili persona kişiye özel numerolojide yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Use only the provided on-device numerology JSON. Do not mention general divination numerology cards.',
     'Markdown biçimlendirmesi, yıldızlı vurgu, madde imi, numaralı liste, emoji, ikon veya dekoratif sembol üretme.',
@@ -923,6 +925,7 @@ function buildGeminiPayload(params: {
               `Numerology JSON calculated on-device:\n${JSON.stringify(numerologyJson)}`,
               'Hitap modunu metin boyunca değiştirme; üçüncü tekil şahısla başladıysan "sen" diline geçme, "sen" diliyle başladıysan profil adıyla dışarıdan anlatmaya dönme. Aynı şefkat hitabını bir yanıtta en fazla bir kez kullan; "canım canım", "tatlım tatlım", "güzelim güzelim" gibi ikilemeler yapma.',
               taskPrompt,
+              ...(enOutputLanguageUserTurnReminder() ? [enOutputLanguageUserTurnReminder()] : []),
             ].join('\n\n'),
           },
         ],
@@ -1071,6 +1074,7 @@ export async function createPersonalNumerologyFollowUp(params: {
     .map((message) => `${message.role === 'user' ? 'Kullanıcı' : 'Yorumcu'}: ${message.text.trim()}`)
     .join('\n');
   const systemText = [
+    ...(enOutputLanguageSystemDirective() ? [enOutputLanguageSystemDirective()] : []),
     'Seçili persona yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Türkçe, sıcak, net ve kişiye özel konuş.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',
@@ -1099,6 +1103,7 @@ export async function createPersonalNumerologyFollowUp(params: {
     previousFollowUpText ? `Bu oturumdaki önceki soru-cevap akışı:\n${previousFollowUpText}` : '',
     `Kullanıcının sorusu:\n${params.question}`,
     `Yanıtı 2-3 kısa paragraf olarak ver: ilk paragrafta net cevap, sonra numeroloji bağlamından 1-2 gerekçe ve uygulanabilir kısa tavsiye olsun. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`,
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const payload = await generateGeminiTextDirect({
     system_instruction: { parts: [{ text: systemText }] },

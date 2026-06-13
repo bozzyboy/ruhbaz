@@ -26,6 +26,7 @@ import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionF
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -256,6 +257,7 @@ function buildBaseSystem(params: {
   const identity = getReadingPersonaData()[id];
   const isAnimalTarot = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
+    enOutputLanguageSystemDirective(),
     identity.systemBody,
     [
       '## Tarot Direktifleri',
@@ -293,7 +295,7 @@ function buildBaseSystem(params: {
       '- Türkçe karakterleri daima doğru UTF-8 yaz: ç, ğ, ı, İ, ö, ş, ü.',
     ].filter(Boolean).join('\n'),
     memoryContext(params.profileName, params.memorySnippet, isAnimalTarot),
-  ].join('\n\n');
+  ].filter(Boolean).join('\n\n');
 }
 
 export async function createPersonalTarotReading(params: {
@@ -344,7 +346,8 @@ export async function createPersonalTarotReading(params: {
       ? 'Yorumu önce hayvanın genel enerjisi ve güven/oyun ritmiyle başlat; sonra kart ilişkilerini ev içi davranış, duyular, diğer hayvanlarla minik sosyal dinamikler ve sahibiyle bağı üzerinden işle. Son bölümde sahibine uygulanabilir, yumuşak bir gözlem önerisi ver.'
       : 'Yorumu önce açılımın genel enerjisiyle başlat, sonra önemli kart ilişkilerini pozisyon bağlamında işle, son bölümde uygulanabilir bir yön ve yumuşak toparlama ver.',
     PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
-  ].join('\n\n');
+    enOutputLanguageUserTurnReminder(),
+  ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect(
     {
       system_instruction: { parts: [{ text: systemText }] },
@@ -433,6 +436,7 @@ export async function createPersonalTarotFollowUp(params: {
     params.memorySnippet?.relationshipPrimary === 'evcil_hayvan'
       ? `Sadece son soruya cevap ver; ama aynı kartlar, aynı spread ve evcil hayvan bağlamı korunmalı. İnsan hayatı şablonuna kayma. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`
       : `Sadece son soruya cevap ver; ama aynı kartlar, aynı spread ve önceki bağlam korunmalı. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`,
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect(
     {

@@ -24,6 +24,7 @@ import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionF
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 
 export type AstroPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -1131,6 +1132,7 @@ function buildRelationshipPrompt(params: {
   const subjectNames = params.subjects.map((subject) => subject.profile.displayName);
   const hasPet = params.subjects.some((subject) => subject.profile.relationshipPrimary === 'evcil_hayvan');
   const systemText = [
+    enOutputLanguageSystemDirective(),
     'Seçili persona Türkçe, sıcak ve kişisel astrolog sesini belirler.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma. Doğrudan yoruma başla.',
     'Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan.',
@@ -1176,6 +1178,7 @@ function buildRelationshipPrompt(params: {
           'Eksik doğum saatlerini yalnızca hassasiyet sınırı olarak dikkate al; şehir/ilçe adı veya varsayılan konum söyleme.',
           PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
         ].join(' '),
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   return {
     system_instruction: { parts: [{ text: systemText }] },
@@ -1246,7 +1249,9 @@ function buildBirthChartInterpretationPayload(params: {
     notes: params.chart.transitNotes,
   };
   const relevantMemory = formatRelevantMemory(params.memorySnippet, null, 'doğum haritası yorumu');
+  const enDir = enOutputLanguageSystemDirective();
   const systemText =
+    (enDir ? enDir + '\n\n' : '') +
     'Türkçe konuşan kişisel astrolog sesiyle yaz. Kendini tanıtma; yorumcu/persona adı, public label veya rol tanıtımı yazma, doğrudan yoruma gir. Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan. Sağlık ve finans alanlarında spesifik tavsiye verme; insan sağlığı endişesinde doktora/uzmana, hayvan sağlığı endişesinde veterinere yönlendir. Yalnızca verilen doğum haritası verilerini kullan. Teknik bilgiyi boğmadan, her konumu kişinin hayatı, ilişki biçimi, karar alma tarzı, dönemleri ve iç dünyasıyla anlamlandır. Kesin karakter hükmü verme; insanın dinamik olduğunu hissettir.';
   const userText = [
     `Profil: ${params.profile.displayName}`,
@@ -1270,9 +1275,13 @@ function buildBirthChartInterpretationPayload(params: {
       'Başlık kullanabilirsin ama kısa tut. Yaklaşık 3000 token civarında ana yorumu toparlamaya başla; kalan alanı sonuç, genel değerlendirme ve nazik kapanış için kullan. En geç 4092 token içinde tamamla.',
     ].join(' '),
   ].join('\n\n');
+  const userTextWithReminder = (() => {
+    const reminder = enOutputLanguageUserTurnReminder();
+    return reminder ? userText + '\n\n' + reminder : userText;
+  })();
   return {
     system_instruction: { parts: [{ text: systemText }] },
-    contents: [{ role: 'user', parts: [{ text: userText }] }],
+    contents: [{ role: 'user', parts: [{ text: userTextWithReminder }] }],
     generationConfig: {
       temperature: 0.62,
       maxOutputTokens: BIRTH_CHART_MAIN_MAX_OUTPUT_TOKENS,
@@ -1306,7 +1315,9 @@ function buildBirthChartContinuationPayload(params: {
     })),
     aspects: params.chart.aspects,
   };
+  const enDir = enOutputLanguageSystemDirective();
   const systemText =
+    (enDir ? enDir + '\n\n' : '') +
     'Türkçe konuşan kişisel astrolog sesiyle yaz. Kendini tanıtma; yorumcu/persona adı, public label veya rol tanıtımı yazma. Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan. Sağlık ve finans alanlarında spesifik tavsiye verme; insan sağlığı endişesinde doktora/uzmana, hayvan sağlığı endişesinde veterinere yönlendir. Önceki doğum haritası yorumu token sınırı yüzünden yarım kalmış olabilir; metni tekrar etmeden doğal biçimde tamamla.';
   const userText = [
     `Profil: ${params.profile.displayName}`,
@@ -1320,9 +1331,13 @@ function buildBirthChartContinuationPayload(params: {
       'Yeni baştan kapsamlı yorum üretme; yalnızca devam ve kapanış ver. Yaklaşık 700-1000 token içinde bitir.',
     ].join(' '),
   ].join('\n\n');
+  const userTextWithReminder = (() => {
+    const reminder = enOutputLanguageUserTurnReminder();
+    return reminder ? userText + '\n\n' + reminder : userText;
+  })();
   return {
     system_instruction: { parts: [{ text: systemText }] },
-    contents: [{ role: 'user', parts: [{ text: userText }] }],
+    contents: [{ role: 'user', parts: [{ text: userTextWithReminder }] }],
     generationConfig: {
       temperature: 0.54,
       maxOutputTokens: BIRTH_CHART_CONTINUATION_MAX_OUTPUT_TOKENS,
@@ -1428,7 +1443,8 @@ export async function createBirthChartFollowUp(params: {
     })),
     aspects: params.chart.aspects,
   };
-  const systemText = [
+  const enDir = enOutputLanguageSystemDirective();
+  const systemText = (enDir ? enDir + '\n\n' : '') + [
     'Seçili persona sıcak, modern ve kişisel astrolog sesini belirler.',
     'Cevabı mevcut doğum haritası yorumu ve soru-cevap akışı üzerinden ver.',
     FOLLOW_UP_CHAT_CONTRACT,
@@ -1451,6 +1467,7 @@ export async function createBirthChartFollowUp(params: {
     previousFollowUpText ? `Bu harita yorumundaki önceki soru-cevap akışı:\n${previousFollowUpText}` : '',
     `Kullanıcının sorusu:\n${params.question}`,
     'Yanıtı 2 kısa paragraf olarak ver: ilk paragrafta net cevap, ikinci paragrafta harita bağlamından 1-2 gerekçe ve uygulanabilir kısa tavsiye olsun. Yaklaşık 120-170 token içinde tamamla.',
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect(
     {
@@ -1624,7 +1641,8 @@ function buildPersonalAstroGeminiPayload(params: {
       ? 'Yılın evcil hayvan ana ritimleri, güven, rutin, oyun, duyu dünyası, evdeki ilişkiler ve sahibine öneri.'
       : 'Yılın büyük temaları, ilişki, kariyer/para, kişisel gelişim, kritik dönemler ve öneri.',
   }[params.period];
-  const systemText = [
+  const enDir = enOutputLanguageSystemDirective();
+  const systemText = (enDir ? enDir + '\n\n' : '') + [
     'Seçili persona kişiye özel astrolojide yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Use only the provided on-device astronomy JSON. Do not invent houses, ascendant, exact Moon degree or birth-time-sensitive claims when timeKnown is false.',
     'A personal reading must compare natal placements/aspects with the selected period transits, transit-to-natal aspects and transit movement through natal houses when available; do not collapse it into a generic sky report.',
@@ -1670,6 +1688,7 @@ function buildPersonalAstroGeminiPayload(params: {
       PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
       'Son cümleyi yarım bırakma; token sınırına yaklaşmadan doğal ve tamamlanmış bir kapanış yap.',
     ].join(' '),
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   return {
     system_instruction: { parts: [{ text: systemText }] },
@@ -1841,7 +1860,8 @@ export async function createPersonalAstroFollowUp(params: {
       'Hitap modunu önceki kişisel astroloji yorumuyla tutarlı sürdür; aynı cevap içinde üçüncü tekil şahıs ve sen dili arasında geçiş yapma.';
   const personaContext = assistantPersonaContext(params.assistantId);
   const isAnimalAstro = Boolean(params.profile?.relationshipPrimary === 'evcil_hayvan' || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
-  const systemText = [
+  const enDir = enOutputLanguageSystemDirective();
+  const systemText = (enDir ? enDir + '\n\n' : '') + [
     'Seçili persona yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Türkçe, sıcak, net ve kişiye özel konuş.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',
@@ -1880,6 +1900,7 @@ export async function createPersonalAstroFollowUp(params: {
     isAnimalAstro
       ? `Yanıtı 2-3 kısa paragraf olarak ver: ilk paragrafta net cevap, sonra natal-transit karşılaştırmasından hayvanın dünyasına uygun 1-2 gerekçe ve sahibine uygulanabilir kısa tavsiye olsun. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`
       : `Yanıtı 2-3 kısa paragraf olarak ver: ilk paragrafta net cevap, sonra natal-transit karşılaştırmasından 1-2 gerekçe ve uygulanabilir kısa tavsiye olsun. Doğum haritasına doğrudan atıf gerekiyorsa teknik ve doğal biçimde kullan. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`,
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const followUpPayload = {
     system_instruction: { parts: [{ text: systemText }] },
@@ -2007,7 +2028,8 @@ export async function createAstroRelationshipFollowUp(params: {
             aspects: buildSynastryAspects(left.chart, right.chart).slice(0, 5),
           })),
         );
-  const systemText = [
+  const enDir = enOutputLanguageSystemDirective();
+  const systemText = (enDir ? enDir + '\n\n' : '') + [
     'Seçili persona Türkçe, sıcak ve kişisel astrolog sesini belirler.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',
     'Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan.',
@@ -2032,6 +2054,7 @@ export async function createAstroRelationshipFollowUp(params: {
     previousFollowUpText ? `Bu oturumdaki önceki soru-cevap akışı:\n${previousFollowUpText}` : '',
     `Kullanıcının sorusu:\n${params.question}`,
     `Yanıtı 2-3 kısa paragraf olarak ver: ilk paragrafta net cevap, sonra doğum verisi/sinastri bağından 1-2 gerekçe ve uygulanabilir kısa öneri olsun. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`,
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect({
     system_instruction: { parts: [{ text: systemText }] },

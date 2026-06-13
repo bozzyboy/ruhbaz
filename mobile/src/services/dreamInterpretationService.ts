@@ -22,6 +22,7 @@ import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionF
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
+import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -238,6 +239,7 @@ function buildBaseSystem(params: {
   const identity = getReadingPersonaData()[id];
   const isAnimalDream = Boolean(params.isAnimalProfile || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   return [
+    enOutputLanguageSystemDirective(),
     identity.systemBody,
     [
       '## Rüya Yorumu Direktifleri',
@@ -266,7 +268,7 @@ function buildBaseSystem(params: {
       '- Türkçe karakterleri daima doğru UTF-8 yaz: ç, ğ, ı, İ, ö, ş, ü. Bozuk karakter dizileri kullanma.',
     ].filter(Boolean).join('\n'),
     buildDreamMemoryContext(params.profileName, params.memorySnippet),
-  ].join('\n\n');
+  ].filter(Boolean).join('\n\n');
 }
 
 export function createDreamOpening(params: {
@@ -319,7 +321,8 @@ export async function createDreamInterpretation(params: {
       ? 'Pati, kanat, kuyruk, kulak, beden hareketi, pencere merakı, diğer hayvanlarla oyun/kıskançlık/barışma, insanların duymadığı ses ve kokular, sevdiği insanların kalbindeki yeri gibi evcil hayvan dünyasına ait malzemeleri kullan; kapanış cümlesi üretme.'
       : 'Son paragrafta uygulanabilir, sakin ve persona uyumlu bir öneri ver; kapanış cümlesi üretme.',
     PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
-  ].join('\n\n');
+    enOutputLanguageUserTurnReminder(),
+  ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect(
     {
       system_instruction: { parts: [{ text: systemText }] },
@@ -414,6 +417,7 @@ export async function createDreamFollowUp(params: {
     isAnimalDream
       ? `Sadece son soruya cevap ver; ama evcil hayvanın uyku hali, sembolik ilk yorum ve önceki soru cevap bağlamını bozma. İnsan rüyası/psikolojisi şablonuna kayma. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`
       : `Sadece son soruya cevap ver; ama rüya metni, ilk yorum ve önceki soru cevap bağlamını bozma. ${PERSONAL_FOLLOW_UP_TOKEN_INSTRUCTION}`,
+    enOutputLanguageUserTurnReminder(),
   ].filter(Boolean).join('\n\n');
   const data = await generateGeminiTextDirect(
     {
