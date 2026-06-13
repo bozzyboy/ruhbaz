@@ -12,6 +12,8 @@ Bu dosya oturumlar arası devirde TEK giriş kapısıdır: "şu an neredeyiz + s
 
 **⭐ SONRAKİ CLAUDE SESSION İLK İŞ:** [handoffs/faz4-test-sonrasi_2026-06-12.md](handoffs/faz4-test-sonrasi_2026-06-12.md) OKU → `20_...md` bulguları → **Faz 4.5 planını (Batch A→E) özerk yürüt.** Batch A (güvenlik) önce. K-1..K-5 + Ozan-bloklu işler EN SONA.
 
+**🔄 FAZ 4.5 İLERLEME (canlı, 2026-06-13):** ✅ **Batch A (güvenlik) BİTTİ** — A2 kriz yanıtı K-1 (`56fc9d4`), A1a astro/tarot moderasyon (`9cf63c3`), A1b profil-giriş moderasyon (`6e72f4d`), öz-review düzeltmeleri (memory guard + persona madde-14 K-1, `c37a5da`). Ozan kararları geldi: K-1✅ K-2 (her dönem "sen")✅ K-3 (tek yedek atomik)✅ K-4 (E1 en sona)✅ K-5 (taslak). · ⏳ Sırada: **Batch B** (okuma kalitesi: B1 kozmetik-onarım kaldır, B2 telaş ses-taslak, B3 hafıza ağırlık, B4 astro hitap) → C (EN lokalizasyon) → D (küçük) → E1 (Ozan veri-kaynağı kararı). LOW not: `legalTexts.ts:60` 112 ibaresi (yasal=Ozan).
+
 **Son güncelleme:** 2026-06-12 (Ozan Faz 1-4 cihaz testini bitirdi; bulgular işlendi) · **Durum:** ✅ FAZ 1/2/3 cihaz-testi ~OK · 🔶 **FAZ 4 KISMEN** — UI+deterministik+persona-EN-sesi+moderasyon-EN ✅ ama **LLM okuma ÇIKTILARI EN'de hâlâ TÜRKÇE** + Tarot/Doğum-Haritası/Salon UI parçaları TR + cache dile göre ayrılmıyor + 🔴 kriz girdisi bazı alanlarda yakalanmıyor. → **FAZ 4.5 (EN tamamlama + test düzeltmeleri) gerekiyor; plan hazır (Batch A-E).** **Ozan'a:** `20_...md` + handoff §4'teki TAM liste (kararlar+onaylar+dış işler+test). **Avukat ERTELENDİ (Ozan).** ⏸️ FAZ 5 → Faz 4.5 bitmeden başlamaz.
 
 **✅ OZAN KARARLARI D1-D5 (2026-06-11, "hepsi öneri gibi"):**
