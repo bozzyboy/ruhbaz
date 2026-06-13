@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 
 import type { DevSettings } from '../types';
 import { getReadingPersonaData } from '../services/personaDataI18n';
+import { getAppLanguage } from '../i18n';
 
 export const APP_NAME = 'Ruhbaz';
 
@@ -170,6 +171,30 @@ export function getAssistantLabel(assistantId: string): string {
   // Kaynak generated persona verisi; preset label TR yedeği olarak kalır.
   const persona = getReadingPersonaData()[normalizeAssistantId(assistantId)];
   return persona?.displayName || getAssistantPreset(assistantId).label;
+}
+
+// Faz 4.5 / I-8: Reader-seç ekranı uzmanlık + tagline EN sürümleri (TASLAK — Ozan persona
+// ses beğeni turunda tonu onaylar). EN modda gösterilir; TR sürümleri AVAILABLE_ASSISTANTS'ta.
+const ASSISTANT_DESCRIPTIONS_EN: Record<string, { specialty: string; tagline: string }> = {
+  suzan: { specialty: 'Coffee Reading', tagline: 'Nurturing, frank and protective; she spins stories from the grounds.' },
+  teoman: { specialty: 'Palm Reading', tagline: 'Fatherly and philosophical, with genuine psychological depth.' },
+  selin: { specialty: 'Astrology Reading', tagline: 'A modern astrologer with a refined, awareness-rich energy.' },
+  berk: { specialty: 'Modern Hybrid Reading', tagline: 'Analytical yet warm; talks like a friend and wraps up without tiring you.' },
+  arin: { specialty: 'Tarot', tagline: 'A melancholic, artistic, intuitive and gentle tarot energy.' },
+  ayse: { specialty: 'Nature & Compassion Wisdom', tagline: 'Speaks the language of earth, patience, abundance and compassion.' },
+  deniz: { specialty: 'Social Dynamics Reading', tagline: 'Reads the social subtext with a bubbly, intuitive, best-friend energy.' },
+};
+
+export function getAssistantSpecialty(assistantId: string): string {
+  const id = normalizeAssistantId(assistantId);
+  if (getAppLanguage() === 'en') return ASSISTANT_DESCRIPTIONS_EN[id]?.specialty || getAssistantPreset(id).specialty;
+  return getAssistantPreset(id).specialty;
+}
+
+export function getAssistantTagline(assistantId: string): string {
+  const id = normalizeAssistantId(assistantId);
+  if (getAppLanguage() === 'en') return ASSISTANT_DESCRIPTIONS_EN[id]?.tagline || getAssistantPreset(id).tagline;
+  return getAssistantPreset(id).tagline;
 }
 
 export function applyAssistantPreset(

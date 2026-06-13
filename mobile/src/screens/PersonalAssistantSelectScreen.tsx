@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
-import { AVAILABLE_ASSISTANTS, applyAssistantPreset } from '../config/constants';
+import { AVAILABLE_ASSISTANTS, applyAssistantPreset, getAssistantLabel, getAssistantSpecialty, getAssistantTagline } from '../config/constants';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 
@@ -58,9 +58,9 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
                   style={[styles.assistantCard, selected && styles.assistantCardSelected]}
                   onPress={() => setSelectedAssistantId(assistant.id)}
                 >
-                  <Text style={styles.assistantName}>{assistant.label}</Text>
-                  <Text style={styles.assistantMeta}>{t('readings.assistantSpecialty', { specialty: assistant.specialty })}</Text>
-                  <Text style={styles.assistantTagline}>{assistant.tagline}</Text>
+                  <Text style={styles.assistantName}>{getAssistantLabel(assistant.id)}</Text>
+                  <Text style={styles.assistantMeta}>{t('readings.assistantSpecialty', { specialty: getAssistantSpecialty(assistant.id) })}</Text>
+                  <Text style={styles.assistantTagline}>{getAssistantTagline(assistant.id)}</Text>
                 </TouchableOpacity>
               );
             })}
