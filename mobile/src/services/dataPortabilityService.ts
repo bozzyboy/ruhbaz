@@ -81,8 +81,17 @@ export async function collectBackupBundle(): Promise<BackupBundle> {
   return { marker: BACKUP_MARKER, schemaVersion: BACKUP_SCHEMA_VERSION, createdAt: new Date().toISOString(), files };
 }
 
-function backupFileName(createdAt: string) {
-  return `ruhbaz-yedek-${createdAt.slice(0, 19).replace(/[:T]/g, '-')}.json`;
+// K-3 (Ozan): TEK yedek dosyası, üzerine yazılır (zaman damgalı birikme yok). Sabit ad.
+const BACKUP_FILE_NAME = 'ruhbaz-yedek.json';
+const BACKUP_TMP_NAME = 'ruhbaz-yedek.tmp.json';
+
+function safName(uri: string): string {
+  return decodeURIComponent(uri.split('%2F').pop() || uri.split('/').pop() || uri);
+}
+
+async function findSafFileUri(directoryUri: string, name: string): Promise<string | null> {
+  const uris = await FileSystem.StorageAccessFramework.readDirectoryAsync(directoryUri);
+  return uris.find((uri) => safName(uri) === name) || null;
 }
 
 export type ExportResult = { ok: true; fileName: string; fileCount: number } | { ok: false; reason: 'cancelled' | 'error'; message?: string };
@@ -98,15 +107,23 @@ export async function exportBackupToUserFolder(): Promise<ExportResult> {
       return { ok: false, reason: 'cancelled' };
     }
     const bundle = await collectBackupBundle();
-    const fileName = backupFileName(bundle.createdAt);
-    const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-      permission.directoryUri,
-      fileName,
-      'application/json',
-    );
-    await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(bundle));
+    const json = JSON.stringify(bundle);
+    // K-3: tek yedek, üzerine yaz. SAF rename desteklemez; atomikliği yaklaşık sağlarız:
+    // önce tam içerik geçici dosyaya yazılır (yarıda kalırsa mevcut yedek el değmemiş kalır),
+    // sonra nihai dosya YERİNDE üzerine yazılır (numaralı kopya oluşmaz), en son geçici silinir.
+    const tmpExisting = await findSafFileUri(permission.directoryUri, BACKUP_TMP_NAME);
+    const tmpUri =
+      tmpExisting ||
+      (await FileSystem.StorageAccessFramework.createFileAsync(permission.directoryUri, BACKUP_TMP_NAME, 'application/json'));
+    await FileSystem.writeAsStringAsync(tmpUri, json);
+    const finalExisting = await findSafFileUri(permission.directoryUri, BACKUP_FILE_NAME);
+    const finalUri =
+      finalExisting ||
+      (await FileSystem.StorageAccessFramework.createFileAsync(permission.directoryUri, BACKUP_FILE_NAME, 'application/json'));
+    await FileSystem.writeAsStringAsync(finalUri, json);
+    await FileSystem.StorageAccessFramework.deleteAsync(tmpUri).catch(() => {});
     trackEvent({ name: 'backup_exported' });
-    return { ok: true, fileName, fileCount: bundle.files.length };
+    return { ok: true, fileName: BACKUP_FILE_NAME, fileCount: bundle.files.length };
   } catch (err: any) {
     return { ok: false, reason: 'error', message: String(err?.message || err) };
   }
@@ -126,7 +143,7 @@ export async function listBackupsInUserFolder(): Promise<
     const uris = await FileSystem.StorageAccessFramework.readDirectoryAsync(permission.directoryUri);
     const backups = uris
       .map((uri) => ({ uri, name: decodeURIComponent(uri.split('%2F').pop() || uri.split('/').pop() || uri) }))
-      .filter((item) => /ruhbaz-yedek-.*\.json$/i.test(item.name))
+      .filter((item) => /ruhbaz-yedek.*\.json$/i.test(item.name) && !/\.tmp\.json$/i.test(item.name))
       .sort((a, b) => b.name.localeCompare(a.name));
     return { ok: true, backups };
   } catch (err: any) {

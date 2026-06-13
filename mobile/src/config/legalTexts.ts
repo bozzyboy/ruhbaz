@@ -18,7 +18,7 @@ export const LEGAL_FRAME_SENTENCE =
   'Gelecek hakkında bilgi, öngörü veya vaat içermez; tıbbi, hukuki veya finansal danışmanlık yerine geçmez.';
 
 /** Okuma ekranlarında görünen kalıcı kısa ibare. */
-export const READING_DISCLAIMER_SHORT = 'Eğlence amaçlı sembolik yorumdur.';
+export const READING_DISCLAIMER_SHORT = 'Yapay zeka tarafından üretilen eğlence amaçlı sembolik bir yorumdur.';
 
 /** Onboarding onay ekranı başlığı. */
 export const ONBOARDING_TITLE = 'Konağa Hoş Geldin';
@@ -85,7 +85,7 @@ export const LEGAL_FRAME_SENTENCE_EN =
   'All content in Ruhbaz Manor is AI-generated symbolic interpretation, created for entertainment and personal discovery. ' +
   'It does not contain information, foresight or promises about the future, and it is not a substitute for medical, legal or financial advice.';
 
-export const READING_DISCLAIMER_SHORT_EN = 'Symbolic interpretation, for entertainment.';
+export const READING_DISCLAIMER_SHORT_EN = 'An AI-generated symbolic interpretation, for entertainment.';
 
 export const ONBOARDING_TITLE_EN = 'Welcome to the Manor';
 
