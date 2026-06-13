@@ -5,9 +5,10 @@
 // saat dilimi ile); daha ince yer serbest metin, harita hesabı en yakın büyük şehirden.
 // Türkiye il/ilçe verisi ayrı kalır (data/turkeyLocations.ts) — burada YOKTUR.
 //
-// `code`  = ISO 3166-1 alpha-2 (küçük harf) — kanonik ülke anahtarı (UI value + birth.location.country).
-// `key`   = şehir adının ascii-normalize hali (astroLocationService.normalizeLocationText ile birebir);
-//           koordinat aramada kullanılır. nameTr/nameEn yalnız görünen ad.
+// `code`  = ISO 3166-1 alpha-2 (küçük harf) — kanonik ülke anahtarı (UI value + countryKey hedefi).
+// `key`   = şehrin ascii-normalize EN/yerel adı (en iyi çaba). resolveAstroLocation şehri key VEYA
+//           normalize(nameTr) VEYA normalize(nameEn) ile eşler; UI lokalize adı sakladığından
+//           çözüm pratikte nameTr/nameEn dalından geçer (key zorunlu eşleşme değildir).
 
 export type WorldCountry = {
   code: string;

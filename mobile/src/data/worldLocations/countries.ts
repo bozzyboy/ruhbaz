@@ -152,6 +152,7 @@ export const WORLD_COUNTRIES: WorldCountry[] = [
   { code: 'ph', nameTr: 'Filipinler', nameEn: 'Philippines', lat: 12.8797, lon: 121.774, timezone: 'Asia/Manila' },
   { code: 'pl', nameTr: 'Polonya', nameEn: 'Poland', lat: 51.9194, lon: 19.1451, timezone: 'Europe/Warsaw' },
   { code: 'pt', nameTr: 'Portekiz', nameEn: 'Portugal', lat: 39.3999, lon: -8.2245, timezone: 'Europe/Lisbon' },
+  { code: 'pr', nameTr: 'Porto Riko', nameEn: 'Puerto Rico', lat: 18.2208, lon: -66.5901, timezone: 'America/Puerto_Rico' },
   { code: 'qa', nameTr: 'Katar', nameEn: 'Qatar', lat: 25.3548, lon: 51.1839, timezone: 'Asia/Qatar' },
   { code: 'ro', nameTr: 'Romanya', nameEn: 'Romania', lat: 45.9432, lon: 24.9668, timezone: 'Europe/Bucharest' },
   { code: 'ru', nameTr: 'Rusya', nameEn: 'Russia', lat: 61.524, lon: 105.3188, timezone: 'Europe/Moscow' },
