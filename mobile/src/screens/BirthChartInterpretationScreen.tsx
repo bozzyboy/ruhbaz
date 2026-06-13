@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME } from '../config/constants';
@@ -70,6 +71,13 @@ function estimateBirthChartContextTokens(session: BirthChartInterpretationSessio
   });
   const followUpText = session.followUps.map((message) => `${message.role}: ${message.text}`).join('\n');
   return estimateTokens([chartText, session.interpretationText, followUpText, draftQuestion].filter(Boolean).join('\n\n'));
+}
+
+// DISPLAY-ONLY: kanonik Türkçe burç adını ekranda dile çevirir; motor/persist
+// değeri (session.chart.*) DEĞİŞMEZ, yalnız gösterim çevrilir.
+function displaySign(sign: string | null | undefined, t: TFunction): string {
+  if (!sign) return '';
+  return t(`birthChart.signs.${sign}`, { defaultValue: sign });
 }
 
 function makeMessage(role: 'user' | 'assistant', text: string): BirthChartFollowUpMessage {
@@ -375,9 +383,9 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
             <View style={styles.metaRow}>
               <Text style={[styles.meta, styles.metaText]}>
                   {t('flows.chartMetaLine', {
-                    sun: session.chart.sign,
-                    moon: session.chart.moonSign || t('flows.moonUnavailable'),
-                    rising: session.chart.ascendant || t('flows.birthTimeRequired'),
+                    sun: displaySign(session.chart.sign, t),
+                    moon: session.chart.moonSign ? displaySign(session.chart.moonSign, t) : t('flows.moonUnavailable'),
+                    rising: session.chart.ascendant ? displaySign(session.chart.ascendant, t) : t('flows.birthTimeRequired'),
                     timezone: formatTimezoneForDisplay(session.chart.timezoneUsed),
                   })}
                 </Text>

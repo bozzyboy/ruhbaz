@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, G, Line, Text as SvgText } from 'react-native-svg';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { createBirthChartSnapshot, formatTimezoneForDisplay, hasRequiredAstroBirthInputs, type BirthChartSnapshot } from '../services/astroEngine';
@@ -12,6 +13,19 @@ import { BrandedScrollView } from '../components/BrandedScrollView';
 import { birthChartProfileFingerprint, loadBirthChartInterpretationSession } from '../services/birthChartInterpretationStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PersonalBirthChart'>;
+
+// DISPLAY-ONLY mapper: çevirir AMA motor/persist değerini ASLA değiştirmez.
+// Anahtar = astroEngine'in ürettiği kanonik Türkçe değer; bilinmeyen değer
+// (ör. burada listelenmeyen bir nokta adı) olduğu gibi gösterilir.
+function displaySign(sign: string, t: TFunction): string {
+  return sign ? t(`birthChart.signs.${sign}`, { defaultValue: sign }) : sign;
+}
+function displayPlanet(name: string, t: TFunction): string {
+  return name ? t(`birthChart.planets.${name}`, { defaultValue: name }) : name;
+}
+function displayAspectType(type: string, t: TFunction): string {
+  return type ? t(`birthChart.aspects.${type}`, { defaultValue: type }) : type;
+}
 
 export function PersonalBirthChartScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
@@ -88,7 +102,10 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
 
         const chart = await createBirthChartSnapshot(profile);
         const interpretation = await loadBirthChartInterpretationSession(profileId, birthChartProfileFingerprint(profile));
-        const lines = [
+
+        // PERSIST için KANONİK Türkçe satırlar — byte-identical (memory/transcript
+        // dilden bağımsız sabit kalır; motor değerlerine dokunulmaz).
+        const persistLines = [
           `Güneş Burcu: ${chart.sign}`,
           `Yükselen: ${chart.ascendant || 'Doğum saati gerekli'}`,
           chart.dominantHouse ? `Baskın Ev: ${chart.dominantHouse}. ev` : 'Baskın Ev: Doğum saati gerekli',
@@ -118,21 +135,75 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
           'Transit ve Gökyüzü Notları:',
           ...chart.transitNotes.map((note) => `- ${note}`),
         ];
+
+        // DISPLAY satırları — yalnızca ekrana çizilir; dile göre etiketler ve
+        // burç/gezegen adları çevrilir (motor değeri değişmeden). TR modunda
+        // birth Chart anahtarları kanonik metni tuttuğundan persistLines ile aynıdır.
+        const houseText = (house: number | null) =>
+          house ? t('birthChart.houseSuffix', { house }) : t('birthChart.houseNeedsBirthTime');
+        const lines = [
+          t('birthChart.sunSignLabel', { sign: displaySign(chart.sign, t) }),
+          t('birthChart.ascendantLabel', { value: chart.ascendant ? displaySign(chart.ascendant, t) : t('birthChart.birthTimeNeeded') }),
+          chart.dominantHouse
+            ? t('birthChart.dominantHouseLabel', { house: chart.dominantHouse })
+            : t('birthChart.dominantHouseNeeded'),
+          t('birthChart.timezoneLabel', { timezone: formatTimezoneForDisplay(chart.timezoneUsed) }),
+          '',
+          t('birthChart.planetPositionsHeading'),
+          ...chart.planets.map((p) =>
+            t('birthChart.planetLine', {
+              name: displayPlanet(p.name, t),
+              sign: displaySign(p.sign, t),
+              degree: p.degree.toFixed(1),
+              house: houseText(p.house),
+              retro: p.retrograde ? ' (R)' : '',
+            }),
+          ),
+          ...(chart.points?.length
+            ? [
+                '',
+                t('birthChart.extraPointsHeading'),
+                ...chart.points.map((p) =>
+                  t('birthChart.pointLine', {
+                    name: displayPlanet(p.name, t),
+                    sign: displaySign(p.sign, t),
+                    degree: p.degree.toFixed(1),
+                    house: houseText(p.house),
+                  }),
+                ),
+              ]
+            : []),
+          '',
+          t('birthChart.mainAspectsHeading'),
+          ...(chart.aspects.length
+            ? chart.aspects.map((a) =>
+                t('birthChart.aspectLine', {
+                  planetA: displayPlanet(a.planetA, t),
+                  planetB: displayPlanet(a.planetB, t),
+                  type: displayAspectType(a.type, t),
+                  orb: a.orb.toFixed(1),
+                }),
+              )
+            : [t('birthChart.noMainAspects')]),
+          '',
+          t('birthChart.transitNotesHeading'),
+          ...chart.transitNotes.map((note) => t('birthChart.transitNoteLine', { note })),
+        ];
         if (!chart.cached) {
           const nextState = await appendReadingSummary({
             profileId,
             assistantId: 'selin',
             readingType: 'birth-chart',
             surfacesRead: [],
-            summary: lines.filter(Boolean).slice(0, 14).join('\n'),
-            transcript: [{ role: 'assistant', text: lines.filter(Boolean).join('\n'), timestamp: Date.now() }],
+            summary: persistLines.filter(Boolean).slice(0, 14).join('\n'),
+            transcript: [{ role: 'assistant', text: persistLines.filter(Boolean).join('\n'), timestamp: Date.now() }],
           });
           await appendSelfKnowledgeProfileInsight({
             profileId,
             readingId: nextState.readings[0]?.readingId || `birth-chart-${profileId}`,
             source: 'birth-chart',
             title: `Doğum haritası: ${chart.sign}${chart.ascendant ? `, yükselen ${chart.ascendant}` : ''}`,
-            summary: lines.filter(Boolean).slice(0, 14).join('\n'),
+            summary: persistLines.filter(Boolean).slice(0, 14).join('\n'),
             detailGroup: 'doğum haritası',
             confidence: 0.56,
           });
@@ -168,7 +239,7 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
       <BrandedScrollView contentContainerStyle={[styles.content, { paddingBottom: 24 + insets.bottom }]} showScrollToTop>
         <View style={styles.panel}>
           <Text style={styles.title}>{state.title || t('nav.personalBirthChart')}</Text>
-          <BirthChartWheel chart={state.chart} housesHint={t('flows.housesNeedBirthTime')} />
+          <BirthChartWheel chart={state.chart} housesHint={t('flows.housesNeedBirthTime')} t={t} />
           <TouchableOpacity
             style={[styles.interpretButton, state.loading && styles.interpretButtonDisabled]}
             onPress={() => void openInterpretation()}
@@ -206,6 +277,8 @@ export function PersonalBirthChartScreen({ route, navigation }: Props) {
   );
 }
 
+// KANONİK sıralı burç adları (motor değerleriyle aynı). Tekerlek üzerinde
+// gösterilirken displaySign ile dile çevrilir; bu dizi DEĞİŞMEZ.
 const SIGN_LABELS = ['Koç', 'Boğa', 'İkizler', 'Yengeç', 'Aslan', 'Başak', 'Terazi', 'Akrep', 'Yay', 'Oğlak', 'Kova', 'Balık'];
 const PLANET_SYMBOLS: Record<string, string> = {
   Güneş: '☉',
@@ -228,7 +301,7 @@ function point(cx: number, cy: number, radius: number, longitude: number) {
   return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
 }
 
-function BirthChartWheel({ chart, housesHint }: { chart: BirthChartSnapshot | null; housesHint: string }) {
+function BirthChartWheel({ chart, housesHint, t }: { chart: BirthChartSnapshot | null; housesHint: string; t: TFunction }) {
   const size = 280;
   const cx = size / 2;
   const cy = size / 2;
@@ -249,7 +322,7 @@ function BirthChartWheel({ chart, housesHint }: { chart: BirthChartSnapshot | nu
             <G key={label}>
               <Line x1={cx} y1={cy} x2={line.x} y2={line.y} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
               <SvgText x={text.x} y={text.y} fill="#E8C49A" fontSize="9" fontWeight="700" textAnchor="middle">
-                {label}
+                {displaySign(label, t)}
               </SvgText>
             </G>
           );
@@ -258,7 +331,7 @@ function BirthChartWheel({ chart, housesHint }: { chart: BirthChartSnapshot | nu
           const offset = (index % 3) * 8;
           const pos = point(cx, cy, planetRadius - offset, planet.longitude);
           const lineStart = point(cx, cy, 60, planet.longitude);
-          const symbol = PLANET_SYMBOLS[planet.name] || planet.name.slice(0, 2);
+          const symbol = PLANET_SYMBOLS[planet.name] || displayPlanet(planet.name, t).slice(0, 2);
           return (
             <G key={`${planet.name}-${index}`}>
               <Line x1={lineStart.x} y1={lineStart.y} x2={pos.x} y2={pos.y} stroke="rgba(246,195,139,0.34)" strokeWidth={1} />
@@ -275,7 +348,7 @@ function BirthChartWheel({ chart, housesHint }: { chart: BirthChartSnapshot | nu
           </SvgText>
         ) : (
           <SvgText x={cx} y={cy + 4} fill="#F6C38B" fontSize="11" fontWeight="700" textAnchor="middle">
-            ASC {chart.ascendant}
+            {t('birthChart.ascShort', { sign: displaySign(chart.ascendant, t) })}
           </SvgText>
         )}
       </Svg>
