@@ -329,7 +329,7 @@ export const en: TranslationResource = {
     finalConfirmTitle: 'Final Confirmation',
     finalConfirmMessage: 'Are you sure? This is the last step: all your data will be permanently deleted.',
     yesDeleteAll: 'Yes, Delete Everything',
-    backupNotFoundMessage: 'No "ruhbaz-yedek-...json" file was found in the folder you selected.',
+    backupNotFoundMessage: 'No "ruhbaz-yedek.json" file was found in the folder you selected.',
     backupDoneMessage: 'Backup saved: {{file}} ({{count}} files). The file is in the folder you selected.',
     backupFailedMessage: 'Backup failed: {{error}}',
     backupListFailedMessage: 'Could not read backups: {{error}}',

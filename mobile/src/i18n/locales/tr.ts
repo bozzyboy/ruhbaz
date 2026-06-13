@@ -327,7 +327,7 @@ export const tr = {
     finalConfirmTitle: 'Son Onay',
     finalConfirmMessage: 'Emin misin? Bu, son adım: tüm verin kalıcı olarak silinecek.',
     yesDeleteAll: 'Evet, Hepsini Sil',
-    backupNotFoundMessage: 'Seçtiğin klasörde "ruhbaz-yedek-...json" dosyası bulunamadı.',
+    backupNotFoundMessage: 'Seçtiğin klasörde "ruhbaz-yedek.json" dosyası bulunamadı.',
     backupDoneMessage: 'Yedek alındı: {{file}} ({{count}} dosya). Dosya, seçtiğin klasörde.',
     backupFailedMessage: 'Yedek alınamadı: {{error}}',
     backupListFailedMessage: 'Yedekler okunamadı: {{error}}',

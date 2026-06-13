@@ -143,7 +143,9 @@ export async function listBackupsInUserFolder(): Promise<
     const uris = await FileSystem.StorageAccessFramework.readDirectoryAsync(permission.directoryUri);
     const backups = uris
       .map((uri) => ({ uri, name: decodeURIComponent(uri.split('%2F').pop() || uri.split('/').pop() || uri) }))
-      .filter((item) => /ruhbaz-yedek.*\.json$/i.test(item.name) && !/\.tmp\.json$/i.test(item.name))
+      // ruhbaz-yedek.json (yeni tek dosya) + eski zaman-damgali + .tmp.json (K-3: nihai
+      // yazim yarida kalirsa saglam kopya .tmp'de kalir; listeye dahil ki geri-yuklenebilsin).
+      .filter((item) => /ruhbaz-yedek.*\.json$/i.test(item.name))
       .sort((a, b) => b.name.localeCompare(a.name));
     return { ok: true, backups };
   } catch (err: any) {
