@@ -1,6 +1,6 @@
 # FAZ 4.5 BİTTİ — EN TAMAMLAMA + TEST DÜZELTMELERİ (2026-06-13)
 
-> Özerk oturum. Faz 4.5 planı (`handoffs/faz4-test-sonrasi_2026-06-12.md`) Batch A→E sırasıyla yürütüldü. **Batch A-D + öz-review'ler bitti; E1 Ozan'ın K-4 kararını bekliyor (aşağıda 3 seçenek).** Cihaz testi: `21_FAZ4-5_CIHAZ_TESTLERI_2026-06-13.md`. Güncel durum her zaman `00_HANDOFF.md`.
+> Özerk oturum. Faz 4.5 planı (`handoffs/faz4-test-sonrasi_2026-06-12.md`) Batch A→E sırasıyla yürütüldü. **Batch A-E1 TAMAMI + bağımsız öz-review'ler bitti** (Ozan K-4=B verdi → E1 aynı oturumda uygulandı). Cihaz testi: `21_FAZ4-5_CIHAZ_TESTLERI_2026-06-13.md`. Güncel durum her zaman `00_HANDOFF.md`. **Faz 4.5 KOD olarak tam; cihaz onayı + tat onayları (B2/EN ses) kaldı.**
 
 ---
 
@@ -31,6 +31,12 @@ Her batch: ayrı commit'ler + tsc/utf8/C0/image-contract bekçileri + **bağıms
 - D1 okuma ibaresi metni (TR+EN); D2 tek-yedek atomik (K-3); D3 EN onay doğrulandı (kod değişikliği yok).
 - Öz-review düzeltmeleri: yedek .tmp kurtarma kopyası listeye dahil; backupNotFoundMessage metni.
 
+**E1 — Dünya geneli doğum yeri (🔵, K-4=B uygulandı):**
+- Veri: `data/worldLocations/` (199 ülke kod/TR-EN ad/centroid/tz + ~617 büyük şehir koordinat/tz, 5 paralel ajan, spot-check). Türkiye il/ilçe ayrı korundu.
+- Servis: `astroLocationService` ISO-kod kanonik (countryKey registry'den + eski etiket alias → geriye uyumlu); çözüm: TR yüksek-hassasiyet → TR 81 il → dünya büyük şehri (ad/key eşleme) → ülke merkezi → son çare.
+- UI: ProfileSettings lokalize ülke dropdown (cihaz ülkesi başa) + ülkeye göre büyük şehir dropdown + "listede yok→elle yaz" + serbest ilçe. Eski profiller koda map'lenir.
+- Öz-review TEMİZ (geriye-uyum, kod↔ad round-trip, çözüm, TR regresyon, veri bütünlüğü); 2 LOW düzeltildi (Porto Riko ülke listesine; key-yorumu).
+
 ---
 
 ## 2. REGRESYON / KORUMA (bozulmadı)
@@ -44,8 +50,7 @@ Her batch: ayrı commit'ler + tsc/utf8/C0/image-contract bekçileri + **bağıms
 
 ## 3. ⛔ OZAN — KARAR / ONAY BEKLEYEN (TEK TEK)
 
-**Acil (E1'i açar):**
-1. **K-4 — Doğum yeri veri kaynağı (E1):** aşağıdaki §4'teki 3 seçenekten birini seç → uygularım.
+**Acil:** ~~K-4 (E1 veri kaynağı)~~ ✅ B seçtin, UYGULANDI (§4 tarihçe). Kalan acil karar yok.
 
 **Tat/ses onayları (cihaz turunda):**
 2. **K-5:** B2 "telaş" ses tonu yeterince kısıldı mı, daha mı kısılsın? (21/madde 13)
@@ -64,7 +69,7 @@ Her batch: ayrı commit'ler + tsc/utf8/C0/image-contract bekçileri + **bağıms
 
 ---
 
-## 4. E1 — DOĞUM YERİ VERİ KAYNAĞI: 3 SEÇENEK (K-4 — SEN SEÇ)
+## 4. E1 — DOĞUM YERİ VERİ KAYNAĞI: 3 SEÇENEK (K-4) — ✅ SEÇİLEN: B (uygulandı, tarihçe)
 
 **Sorun (I-12):** EN profil oluştururken ülke listesi TR + yalnız Türkiye'de il/ilçe dropdown var. Hedef: tüm dünya için il/ilçe seçimi + kullanıcının ülkesi (cihaz locale'inden) en başta + ülke adları lokalize. Şu an `turkeyLocations.ts` (1551 satır) yalnız Türkiye; `COUNTRY_OPTIONS` küçük TR liste.
 
@@ -95,5 +100,6 @@ Her batch: ayrı commit'ler + tsc/utf8/C0/image-contract bekçileri + **bağıms
 ---
 
 ## 5. SONRAKİ
-1. **E1** (K-4 kararından sonra) → Faz 4.5 tam kapanır, EN yayınlanabilir eşiği.
-2. **Faz 5** (Konak Akışı + bildirimler) — Faz 4.5 (E1 dahil) bitmeden başlamaz. Brifing: `handoffs/faz4-bitti_ingilizce-i18n_2026-06-11.md` §4.
+1. ✅ **E1 bitti** (B uygulandı) → Faz 4.5 KOD olarak tam.
+2. **Ozan cihaz turu** (`21_...md`) + tat onayları (K-5/B2 + EN persona ses + C5/C6 EN metin) → EN yayınlanabilir eşiği.
+3. **Faz 5** (Konak Akışı + bildirimler) — Ozan onayı + cihaz turundan sonra. Brifing: `handoffs/faz4-bitti_ingilizce-i18n_2026-06-11.md` §4.

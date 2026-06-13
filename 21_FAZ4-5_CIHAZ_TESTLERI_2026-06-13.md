@@ -109,13 +109,23 @@
 
 ---
 
+## 🔵 GRUP E — DÜNYA GENELİ DOĞUM YERİ (E1, K-4=B uygulandı)
+
+> Profil oluştur/düzenle → Doğum yeri bölümü. (Sen B'yi seçtin: büyük şehir gömülü + serbest ilçe.)
+38. **Ülke dropdown'u artık tüm dünya** (199 ülke), aktif dilde ad: TR'de "Almanya/Fransa/Yunanistan…", EN'de "Germany/France/Greece…". **Cihaz ülken (telefon bölgen) en başta** geliyor mu?
+39. **Regresyon:** Türkiye seç → mevcut **il + ilçe** dropdown'ları (değişmedi) çalışıyor mu? İstanbul → Kadıköy gibi ilçe seçilebiliyor mu?
+40. Almanya (veya başka büyük ülke) seç → **büyük şehir dropdown'u** (Berlin/Münih/Hamburg…, aktif dilde) çıkıyor mu? Şehir seç → kaydet.
+41. Şehir listede yoksa → **"Şehir listede yok (elle yaz)"** seç → serbest metin şehir + serbest metin ilçe gir → kaydet.
+42. Şehir verisi olmayan küçük ülke → şehir serbest metin (dropdown yok).
+43. Bu profille **astroloji / doğum haritası** okuması üret → yorum mantıklı (büyük şehir seçiliyse koordinat/saat-dilimi hassas; serbest metinse ülke merkezi + "yaklaşık" notu).
+44. **Regresyon (önemli):** Faz 4.5 ÖNCESİ oluşturduğun bir profili (eski "Türkiye"/"ABD" etiketi saklı) DÜZENLE → ülke dropdown doğru ülkeyi **seçili** gösteriyor + okuma hâlâ çalışıyor (geriye uyum).
+
 ## 📌 SENİN KARAR/ONAY BEKLEYEN MADDELERİN (test sırasında)
 - **K-5:** B2 "telaş" ses tonu yeterli mi (madde 13)?
 - **EN persona sesleri** + **C5 tagline** + **C6 etiket** EN metinleri TASLAK — beğeni/ton onayın.
-- **K-4 (E1 — doğum yeri):** 3 seçenek handoff'ta (`handoffs/faz4-5-bitti_en-tamamlama_2026-06-13.md` §E1 + `00_HANDOFF.md`). Birini seç → uygularım.
+- **K-4 (E1):** ✅ B seçtin, **uygulandı** — GRUP E'de cihazda doğrula.
 
 ## ⏳ KALAN / ATLANANLAR
-- **E1 (dünya geneli doğum-yeri dropdown):** senin K-4 seçimini bekliyor — Faz 4.5'te UYGULANMADI.
 - Release öncesi TOPLU yeni cihaz testi (ayrı tur) hâlâ planlı.
 - `12_FAZ0` kalan testleri (release öncesi turda).
 
@@ -138,3 +148,5 @@
 | Disclaimer metni (legalTexts) | D-1 (34) |
 | Tek yedek atomik (dataPortabilityService) | D-2 (35-36) |
 | EN onay (doğrulama) | D-3 (37) |
+| Dünya konum verisi + ISO çözüm (worldLocations + astroLocationService) | E (38, 40-44) |
+| ProfileSettings dünya doğum-yeri UI (lokalize ülke + şehir dropdown) | E (38-44) |
