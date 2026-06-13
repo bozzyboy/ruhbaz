@@ -60,6 +60,9 @@ export const en: TranslationResource = {
     dailyGuidanceLabel: 'GUIDANCE OF THE DAY',
     runeMessageLabel: 'MESSAGE OF THE STONE:',
     scrollHint: 'scroll down',
+    sphereSignsLabel: 'SIGNS OF THE SPHERE',
+    fortuneTripletLabel: "TODAY'S LUCKY TRIPLET",
+    fortuneCookieLabel: 'FORTUNE COOKIE',
   },
   home: {
     subtitle: 'This is your entrance hall. Step into readings, insight and creative flows from here.',

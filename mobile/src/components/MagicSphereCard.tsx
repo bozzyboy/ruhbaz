@@ -1,11 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { View, StyleSheet, Dimensions, Platform, Text, ImageBackground } from 'react-native';
-import Svg, { 
-  Defs, 
-  LinearGradient, 
-  Stop, 
-  Rect, 
-  Path, 
+import Svg, {
+  Defs,
+  LinearGradient,
+  Stop,
+  Rect,
+  Path,
   Circle,
   RadialGradient,
   G
@@ -19,10 +20,11 @@ interface MagicSphereCardProps {
 
 const MagicSphereCard: React.FC<MagicSphereCardProps> = ({ 
   data, 
-  width = Dimensions.get('window').width * 0.75 
+  width = Dimensions.get('window').width * 0.75
 }) => {
+  const { t } = useTranslation();
   const height = (width * 650) / 400;
-  
+
   return (
     <View style={[styles.container, { width, height }]}>
       <ImageBackground 
@@ -96,7 +98,7 @@ const MagicSphereCard: React.FC<MagicSphereCardProps> = ({
           <Text style={styles.mainText}>{formatReadableText(data.text)}</Text>
 
           <View style={styles.signBox}>
-            <Text style={styles.signTitle}>KÜRENİN İŞARETLERİ</Text>
+            <Text style={styles.signTitle}>{t('cards.sphereSignsLabel')}</Text>
             <Text style={styles.signText}>{formatReadableText(data.sign)}</Text>
           </View>
         </View>

@@ -16,6 +16,7 @@ import Svg, {
   Polygon
 } from 'react-native-svg';
 import { AngelCard } from '../data/divinationData';
+import { getAppLanguage } from '../i18n';
 
 const AnimatedG = Animated.createAnimatedComponent(G) as any;
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -84,7 +85,7 @@ const AngelCardSymbol: React.FC<AngelCardSymbolProps> = ({
           
           {/* 1. Başlık */}
           <Text style={styles.title} adjustsFontSizeToFit numberOfLines={1}>
-            {card.name.toLocaleUpperCase('tr-TR')}
+            {card.name.toLocaleUpperCase(getAppLanguage() === 'en' ? 'en-US' : 'tr-TR')}
           </Text>
 
           {/* 2. Ruhsal Mesaj (İtalik) */}

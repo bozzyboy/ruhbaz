@@ -1,11 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { View, StyleSheet, Dimensions, Platform, Text, ImageBackground } from 'react-native';
-import Svg, { 
-  Defs, 
-  LinearGradient, 
-  Stop, 
-  Rect, 
-  Path, 
+import Svg, {
+  Defs,
+  LinearGradient,
+  Stop,
+  Rect,
+  Path,
   Circle,
   Ellipse,
   G,
@@ -20,10 +21,11 @@ interface FortuneCookieCardProps {
 
 const FortuneCookieCard: React.FC<FortuneCookieCardProps> = ({ 
   data, 
-  width = Dimensions.get('window').width * 0.75 
+  width = Dimensions.get('window').width * 0.75
 }) => {
+  const { t } = useTranslation();
   const height = (width * 650) / 400;
-  
+
   return (
     <View style={[styles.container, { width, height }]}>
       <ImageBackground 
@@ -90,16 +92,16 @@ const FortuneCookieCard: React.FC<FortuneCookieCardProps> = ({
                 
                 {/* Kağıt Üzerindeki Yazı (ŞANS KURABİYESİ) */}
                 <G transform="rotate(-10, 88, 48)">
-                   <SvgText 
-                     x="88" 
-                     y="52" 
-                     fill="#e63946" 
-                     fontSize="7" 
-                     fontWeight="bold" 
+                   <SvgText
+                     x="88"
+                     y="52"
+                     fill="#e63946"
+                     fontSize="7"
+                     fontWeight="bold"
                      textAnchor="middle"
                      fontFamily="monospace"
                    >
-                     ŞANS KURABİYESİ
+                     {t('cards.fortuneCookieLabel')}
                    </SvgText>
                 </G>
 
@@ -113,7 +115,7 @@ const FortuneCookieCard: React.FC<FortuneCookieCardProps> = ({
           <Text style={styles.mainText}>{formatReadableText(data.text)}</Text>
 
           <View style={styles.signBox}>
-            <Text style={styles.signTitle}>GÜNÜN UĞURLU ÜÇLEMESİ</Text>
+            <Text style={styles.signTitle}>{t('cards.fortuneTripletLabel')}</Text>
             <Text style={styles.signText}>{formatReadableText(data.sign)}</Text>
           </View>
         </View>

@@ -58,6 +58,9 @@ export const tr = {
     dailyGuidanceLabel: 'GÜNÜN REHBERLİĞİ',
     runeMessageLabel: 'TAŞIN MESAJI:',
     scrollHint: 'aşağı kaydır',
+    sphereSignsLabel: 'KÜRENİN İŞARETLERİ',
+    fortuneTripletLabel: 'GÜNÜN UĞURLU ÜÇLEMESİ',
+    fortuneCookieLabel: 'ŞANS KURABİYESİ',
   },
   home: {
     subtitle: 'Burası giriş lobin. Okuma, içgörü ve yaratım akışlarına buradan geçebilirsin.',
