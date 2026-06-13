@@ -1,4 +1,5 @@
 import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
+import { getAppLanguage } from '../i18n';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Astronomy from 'astronomy-engine';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
@@ -437,6 +438,7 @@ export async function getCachedPersonalAstroReading(params: {
     params.period,
     currentPeriodKey,
     fingerprint,
+    getAppLanguage(),
   ]);
   return loadFreshPersonalAstroFromCache({ cacheKeyValue, periodKeyValue: currentPeriodKey, fingerprint });
 }
@@ -1747,7 +1749,7 @@ export async function createPersonalAstroReading(params: {
   const fingerprint = profileFingerprint(params.profile);
   const focusQuestion = params.focusQuestion?.replace(/\s+/g, ' ').trim() || '';
   // 'gemini' segmenti getCachedPersonalAstroReading'deki anahtarla birebir aynı kalmalı.
-  const cacheKeyValue = cacheKey([String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION), 'gemini', params.assistantId, params.profile.profileId, params.period, currentPeriodKey, fingerprint]);
+  const cacheKeyValue = cacheKey([String(PERSONAL_ASTRO_PERSONA_PROMPT_VERSION), 'gemini', params.assistantId, params.profile.profileId, params.period, currentPeriodKey, fingerprint, getAppLanguage()]);
   if (!focusQuestion) {
     const cached = await loadFreshPersonalAstroFromCache({ cacheKeyValue, periodKeyValue: currentPeriodKey, fingerprint });
     if (cached) return cached;

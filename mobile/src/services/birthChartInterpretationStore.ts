@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import type { BirthChartSnapshot } from './astroEngine';
 import type { SubjectProfile } from '../types/memory';
+import { getAppLanguage } from '../i18n';
 
 export type BirthChartFollowUpMessage = {
   id: string;
@@ -65,6 +66,7 @@ export function birthChartProfileFingerprint(profile: SubjectProfile) {
   return JSON.stringify({
     birth: profile.birth,
     chartPrecision: profile.chartPrecision,
+    lang: getAppLanguage(),
   });
 }
 

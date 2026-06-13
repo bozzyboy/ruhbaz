@@ -1,4 +1,5 @@
 import { filterModeratedFollowUps, moderateUserInput } from './inputModerationService';
+import { getAppLanguage } from '../i18n';
 import * as FileSystem from 'expo-file-system/legacy';
 import type { ProfileMemorySnippet, SubjectProfile } from '../types/memory';
 import {
@@ -241,6 +242,7 @@ function coreReadingFingerprint(profile: SubjectProfile) {
   return JSON.stringify({
     profile: profileFingerprint(profile),
     reading: 'personal-numerology-core-lifelong',
+    lang: getAppLanguage(),
   });
 }
 
@@ -249,6 +251,7 @@ function periodReadingFingerprint(profile: SubjectProfile, assistantId: string) 
     profile: profileFingerprint(profile),
     assistantId,
     personaPromptVersion: PERSONAL_NUMEROLOGY_PERSONA_PROMPT_VERSION,
+    lang: getAppLanguage(),
   });
 }
 

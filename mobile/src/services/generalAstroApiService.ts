@@ -130,7 +130,7 @@ function generalAstroCacheKey(params: {
   period: Exclude<AstroPeriod, 'yearly'>;
   periodKey: string;
 }) {
-  return `${params.profileId}:${params.sign}:${params.period}:${params.periodKey}`;
+  return `${params.profileId}:${params.sign}:${params.period}:${params.periodKey}:${getAppLanguage()}`;
 }
 
 async function loadGeneralAstroFromCache(params: {
