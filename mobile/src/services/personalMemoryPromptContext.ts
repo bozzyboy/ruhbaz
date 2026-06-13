@@ -89,6 +89,10 @@ export function formatStandardPersonalMemoryContext(params: {
 
   lines.push('- Avoid repeat yasak konu değildir: kullanıcı özellikle gündeme getirirse bu tema cevaplanmalı, hatta direkt soruluyorsa ana eksen olabilir.');
   lines.push('- Kullanıcı özellikle gündeme getirmediyse eski life event, pet life event, önceki okuma teması veya aynı ilişki dinamiği tekrar ana konu yapılmamalı.');
+  // I-4k: okuma-öncesi konu/odak = takip mesajı eşit üst sinyal.
+  lines.push('- Okuma öncesi girilen konu/odak metni ile sohbet sırasındaki takip mesajı eşit ağırlıkta birincil kullanıcı sinyalidir; biri diğerinden daha az önemli değildir, ikisi de aynı dikkatle ele alınır.');
+  // I-3k: çapraz-profil/son-okuma sızması varsayılan hafif dokunuş (≤2-3 cümle).
+  lines.push('- Hafif dokunuş sınırı: başka bir profile ait kişi/evcil hayvan adı (öne çıkan ilişkilerdekiler dahil) veya önceki/son okuma teması, kullanıcı bu okumanın aktif girdisinde (konu/soru/niyet/takip) açıkça anmadıysa en fazla 2-3 cümlelik hafif ve dolaylı bir dokunuşla geçilir; asla bir paragraf, okumanın açılışı ya da ana eksen yapılmaz. Kullanıcı aktif girdide açıkça anarsa o tema derinleşebilir ve merkeze gelebilir.');
   lines.push('- Kendini Tanı çıktıları profil essence olarak düşük-orta ağırlıktadır; MBTI, kişilik testi, temel numeroloji veya doğum haritası sonucunu kaynak adıyla söyleme, yalnızca kişinin mizacını ve hassasiyetini anlamak için kullan.');
   lines.push('- Aynı kapanış cümlesi, aynı örnek olay, aynı sembol veya aynı tavsiye yakın okumalarda tekrar edilmemeli; gerekiyorsa yeni açıyla ve kısa bir dokunuşla geçilmeli.');
   lines.push('- Hafıza kaynağını açık etme; "hafızanda", "önceki okumanda", "profilinde gördüğüm" gibi ifadeler kullanma.');
