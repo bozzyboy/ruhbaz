@@ -329,7 +329,7 @@ function buildGeneralAstroPayload(params: {
         : '3-4 ana konuya değin: duygu hali, ilişkiler, iş/para ve küçük bir öneri.',
       animalProfile
         ? 'Metin hayvanı üçüncü tekil şahısla anlatsın; hesap sahibine yalnızca sahibi/refakatçisi olarak yumuşak öneri ver.'
-        : '',
+        : 'Kullanıcıya her dönemde tutarlı biçimde "sen" diliyle doğrudan hitap et (örn. "bugün senin için", "bu hafta seni bekleyen"); "Koç burcu için" gibi üçüncü-şahıs burç anlatımına kayma. Burç yalnızca bağlamdır, hitap kişiyedir. Günlük, haftalık ve aylık metinlerin hepsinde aynı "sen" hitabı kalsın. (K-2)',
       params.period === 'daily'
         ? 'Metni 110-150 kelime arasında tut. Bugünün gün adını yazarsan sadece verilen zaman kuralındaki gün adını kullan.'
         : params.period === 'weekly'
@@ -434,13 +434,14 @@ function buildLocalGeneralAstroFallback(params: {
   const avoidRepeat = params.repeatMemory
     ? ' Önceki genel yorumlarla aynı cümle kalıbına düşmemek için bu kez odağı daha pratik ve farklı bir açıdan tutmak iyi olur.'
     : '';
+  // K-2: yerel fallback de "sen" hitabıyla (birincil yolla tutarlı). Burç bağlam olarak kalır.
   if (params.period === 'daily') {
-    return `${signLabel} için bugün genel hava daha sade ve toparlayıcı ilerliyor. Duygusal tarafta acele tepki vermek yerine önce gözlem yapmak, ilişkilerde gereksiz yanlış anlamaları azaltabilir. İş ve para tarafında küçük ama net bir düzenleme günü rahatlatır; büyük kararları ise kanıt ve zamanla tartmak daha iyi olur. Günün önerisi, enerjini tek bir önceliğe toplamak ve akşam saatlerinde zihnini dağıtan küçük işleri kapatmak.${avoidRepeat}`;
+    return `${signLabel} ritminde bugün senin için genel hava daha sade ve toparlayıcı ilerliyor. Duygusal tarafta acele tepki vermek yerine önce gözlem yapman, ilişkilerde gereksiz yanlış anlamaları azaltabilir. İş ve para tarafında küçük ama net bir düzenleme seni rahatlatır; büyük kararları ise kanıt ve zamanla tartman daha iyi olur. Bugünün önerisi, enerjini tek bir önceliğe toplaman ve akşam saatlerinde zihnini dağıtan küçük işleri kapatman.${avoidRepeat}`;
   }
   if (params.period === 'weekly') {
-    return `${signLabel} için ${params.label} haftasının genel ritmi parça parça netleşme üzerine kurulu. Haftanın başında iletişim ve planlama öne çıkarken, orta bölümde ilişkilerde denge ve karşılıklı beklentiler daha görünür olabilir. İş ve para tarafında hızlı büyütmek yerine mevcut düzeni sağlamlaştırmak destekleyici duruyor. Hafta sonuna doğru dinlenme, sadeleşme ve bir konuyu kapatma isteği artabilir.${avoidRepeat}`;
+    return `${signLabel} ritminde ${params.label} haftasının genel akışı senin için parça parça netleşme üzerine kurulu. Haftanın başında iletişim ve planlama öne çıkarken, orta bölümde ilişkilerinde denge ve karşılıklı beklentiler daha görünür olabilir. İş ve para tarafında hızlı büyütmek yerine mevcut düzeni sağlamlaştırman destekleyici duruyor. Hafta sonuna doğru dinlenme, sadeleşme ve bir konuyu kapatma isteğin artabilir.${avoidRepeat}`;
   }
-  return `${signLabel} için ${params.label} genel olarak yön belirleme ve yük azaltma teması taşıyor. Ayın ilk kısmında gündelik düzen, iş akışı ve kişisel sorumluluklar öne çıkabilir. Orta bölümde ilişkilerde açıklık, aile veya yakın çevreyle uyum arayışı belirginleşir. Ay sonuna doğru daha sade hedefler seçmek, enerjiyi dağıtmadan ilerlemeyi kolaylaştırır. Bu yorum genel Güneş burcu ritmidir; kişisel doğum haritası yerine kolektif eğilimi anlatır.${avoidRepeat}`;
+  return `${signLabel} ritminde ${params.label} senin için genel olarak yön belirleme ve yük azaltma teması taşıyor. Ayın ilk kısmında gündelik düzenin, iş akışın ve kişisel sorumlulukların öne çıkabilir. Orta bölümde ilişkilerinde açıklık, aile veya yakın çevreyle uyum arayışı belirginleşir. Ay sonuna doğru daha sade hedefler seçmen, enerjini dağıtmadan ilerlemeni kolaylaştırır. Bu yorum genel Güneş burcu ritmidir; kişisel doğum haritası yerine kolektif eğilimi anlatır.${avoidRepeat}`;
 }
 
 async function rememberGeneralAstroReading(params: {
