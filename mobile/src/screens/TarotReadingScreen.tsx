@@ -24,6 +24,7 @@ import {
   loadProfileMemorySnippet,
 } from '../services/profileMemoryService';
 import { analyzeMemoryTranscript } from '../services/memoryAnalysisService';
+import { moderateUserInput } from '../services/inputModerationService';
 import {
   createPersonalTarotFollowUp,
   createPersonalTarotReading,
@@ -192,6 +193,15 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     const initialIntent = question?.replace(/\s+/g, ' ').trim() || '';
     setIsLoading(true);
     try {
+      if (initialIntent) {
+        // K42: kullanıcı sorusu modele/hafızaya gitmeden denetlenir; engellenirse nazik red.
+        const moderation = moderateUserInput(initialIntent, 'question');
+        if (moderation.verdict !== 'allow') {
+          setReadingText(moderation.replyText);
+          setMessages([makeMessage('assistant', moderation.replyText)]);
+          return;
+        }
+      }
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
       if (!profile) throw new Error(t('session.profileNotFound'));

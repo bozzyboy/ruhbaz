@@ -307,6 +307,17 @@ export async function createPersonalTarotReading(params: {
   memorySnippet?: ProfileMemorySnippet | null;
   usedClosings?: string[];
 }) {
+  // K42: kullanıcının ana sorusu/niyeti modele gitmeden denetlenir.
+  // Engellenirse nazik red erken döner — kapanış/sağlık post-işlemine uğramaz.
+  const moderation = moderateUserInput(params.question, 'question');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      closingSentence: '',
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const systemText = buildBaseSystem({
     assistantId: params.assistantId,
     assistantLabel: params.assistantLabel,

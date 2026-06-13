@@ -14,6 +14,7 @@ import { TokenUsage } from '../components/TokenUsage';
 import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import { applyMemoryAnalysisResult, appendReadingDerivedTheme, appendReadingSummary, appendUserConversationMemory, appendUserReadingIntentMemory, loadAccountState, loadProfileMemorySnippet } from '../services/profileMemoryService';
 import { getRetryLaterMessage, isRetryableLlmError } from '../services/llmRetryMessages';
+import { moderateUserInput } from '../services/inputModerationService';
 import { analyzeMemoryTranscript } from '../services/memoryAnalysisService';
 import {
   createPersonalAstroReading,
@@ -222,6 +223,19 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
       return;
     }
     const focusQuestion = selection === 'topic' ? normalizedTopicText : '';
+    if (focusQuestion) {
+      // K42: konu metni modele/hafızaya/arşive gitmeden denetlenir; engellenirse nazik red.
+      const moderation = moderateUserInput(focusQuestion, 'question');
+      if (moderation.verdict !== 'allow') {
+        setTopicText('');
+        setMeta(null);
+        setReadingTheme(null);
+        setFollowUps([]);
+        setText(moderation.replyText);
+        setSelectionCollapsed(true);
+        return;
+      }
+    }
     setSelectionCollapsed(true);
     setIsLoading(true);
     setTimeout(() => {

@@ -1689,6 +1689,20 @@ export async function createPersonalAstroReading(params: {
   focusQuestion?: string | null;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<AstroReadingResult> {
+  // K42: konu/odak sorusu (kullanıcı serbest metni) modele gitmeden denetlenir.
+  // Engellenirse nazik red erken döner — hiçbir kapanış/sağlık post-işleminden geçmez.
+  const moderation = moderateUserInput(params.focusQuestion || '', 'question');
+  if (moderation.verdict !== 'allow') {
+    return {
+      text: moderation.replyText,
+      sign: '',
+      timezoneUsed: '',
+      periodKey: periodKey(params.period),
+      cached: false,
+      modelName: 'local-input-moderation',
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    };
+  }
   const location = resolveAstroLocation(params.profile.birth.location);
   if (!params.profile.birth.date || !location) {
     throw new Error('Kişiye özel astro için doğum tarihi, ülke ve şehir gerekli.');
