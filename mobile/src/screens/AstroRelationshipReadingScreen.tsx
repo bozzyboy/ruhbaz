@@ -20,6 +20,7 @@ import {
   type AstroRelationshipSubject,
 } from '../services/astroEngine';
 import { analyzeMemoryTranscript } from '../services/memoryAnalysisService';
+import { moderateUserInput } from '../services/inputModerationService';
 import {
   applyMemoryAnalysisResult,
   appendReadingDerivedTheme,
@@ -315,6 +316,14 @@ export function AstroRelationshipReadingScreen({ route, navigation }: Props) {
     let nextState = accountState;
     const subjects: AstroRelationshipSubject[] = [];
     for (const draft of drafts) {
+      // K42: ad + ilişki açıklaması (kullanıcı serbest metni) profile/okumaya geçmeden denetlenir.
+      for (const candidate of [draft.displayName.trim(), relationshipFreeformForDraft(draft) || '']) {
+        const moderation = moderateUserInput(candidate, 'chat');
+        if (moderation.verdict !== 'allow') {
+          setInfoModal({ visible: true, title: APP_NAME, message: moderation.replyText });
+          return null;
+        }
+      }
       let profile = draft.profileId ? nextState.profiles.find((item) => item.profileId === draft.profileId) || null : null;
       if (!profile && draft.saveProfile) {
         nextState = await createProfile({

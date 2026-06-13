@@ -19,6 +19,7 @@ import { BrandedPicker } from '../components/BrandedPicker';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { TURKEY_CITY_OPTIONS, TURKEY_DISTRICTS_BY_CITY } from '../data/turkeyLocations';
+import { moderateUserInput } from '../services/inputModerationService';
 import {
   exportBackupToUserFolder,
   importBackupFromUri,
@@ -508,6 +509,17 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     if (needsRelationshipFreeform(profileDraft) && !profileDraft.relationshipFreeform.trim()) {
       setValidationModal({ visible: true, message: t('profile.relationshipFreeformRequired') });
       return;
+    }
+
+    // K42: profil adı + ilişki açıklaması (kullanıcı serbest metni) kaydedilmeden denetlenir.
+    // Doğum haritası/numeroloji/ilişki okumaları bu profil verisinden beslenir; zararlı
+    // metin giriş noktasında durur, okuma servislerine taşınmaz.
+    for (const candidate of [trimmedName, profileDraft.relationshipFreeform.trim()]) {
+      const moderation = moderateUserInput(candidate, 'chat');
+      if (moderation.verdict !== 'allow') {
+        setValidationModal({ visible: true, message: moderation.replyText });
+        return;
+      }
     }
 
     const relationshipPrimary = editingIsPrimary ? 'kendi' : profileDraft.relationshipPrimary;
