@@ -229,7 +229,6 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
       if (!profile) throw new Error(t('session.profileNotFound'));
-      const memorySnippet = await loadProfileMemorySnippet(state, profileId, text ? { semanticQuery: text } : undefined).catch(() => null);
       const readingName = kind === 'iching' ? 'I-Ching Okuması' : 'Rün Okuması';
       if (!hasInterpretation) {
         // Okuma öncesi konu/niyet girildiyse güçlü userStated 'okuma öncesi konu' olarak yazılır (astro/tarot ile aynı yol);
@@ -241,6 +240,9 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
             readingType: kind === 'iching' ? 'personal-iching' : 'personal-rune',
           }).catch(() => {});
         }
+        // Niyet YAZILDIKTAN sonra snippet yükle (tarot paritesi): bu okumanın hafıza bağlamı yeni konuyu da içersin.
+        const memoryState = text ? await loadAccountState().catch(() => state) : state;
+        const memorySnippet = await loadProfileMemorySnippet(memoryState, profileId, text ? { semanticQuery: text } : undefined).catch(() => null);
         const result = await createPersonalDivinationReading({
           profile,
           assistantId,
@@ -260,6 +262,8 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         await addUsage(readingName, result);
       } else {
         await appendUserConversationMemory(profileId, text).catch(() => {});
+        const memoryState = await loadAccountState().catch(() => state);
+        const memorySnippet = await loadProfileMemorySnippet(memoryState, profileId, { semanticQuery: text }).catch(() => null);
         const previousFollowUps: DivinationFollowUpMessage[] = messages
           .filter((message) => message.text !== interpretationText)
           .map(({ role, text: messageText }) => ({ role, text: messageText }));

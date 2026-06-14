@@ -292,6 +292,7 @@ export async function createPersonalDivinationReading(params: {
       closingSentence: '',
       modelName: 'local-input-moderation',
       usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+      specificityUsage: { events: [], cues: [] },
     };
   }
   const isAnimal = params.profile.relationshipPrimary === 'evcil_hayvan';
@@ -305,8 +306,14 @@ export async function createPersonalDivinationReading(params: {
   const domainName = params.kind === 'iching' ? 'I-Ching' : 'Rün';
   // Anlamsal + tekrar-önlemeli 2 micro life event; kişiye özel dokuyu güçlendirir,
   // usage döner ki ekran appendReadingSpecificityUsage ile kaydedip tekrarı önlesin.
+  // Cast imzasını seed'e kat: aynı soru/genel okumada bile her çekiliş farklı sıralama üretsin
+  // (snippet yüklenemese bile tekrar-çeşitlilik bozulmaz).
+  const castSeed =
+    params.cast.kind === 'iching'
+      ? `${params.cast.iching?.present.name || ''}:${params.cast.iching?.changingLineNumbers.join(',') || ''}`
+      : params.cast.rune?.runes.map((rune) => rune.rune).join('') || '';
   const specificity = buildDivinationSpecificityContext({
-    seed: `${params.profile.profileId}:${params.kind}:${params.question?.slice(0, 80) || 'genel'}`,
+    seed: `${params.profile.profileId}:${params.kind}:${params.question?.slice(0, 80) || 'genel'}:${castSeed}`,
     memorySnippet: params.memorySnippet,
     focusQuestion: params.question,
     messages: [],
