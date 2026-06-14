@@ -26,6 +26,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
+import { getReadingSafetyCore } from './readingCommonPrompt';
 
 export type PersonalNumerologyMode = 'core' | 'daily' | 'weekly' | 'monthly';
 export type PersonalNumerologyPeriod = Exclude<PersonalNumerologyMode, 'core'>;
@@ -833,6 +834,7 @@ function buildGeminiPayload(params: {
         });
   const systemText = [
     ...(enOutputLanguageSystemDirective() ? [enOutputLanguageSystemDirective()] : []),
+    getReadingSafetyCore(),
     'Seçili persona kişiye özel numerolojide yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Use only the provided on-device numerology JSON. Do not mention general divination numerology cards.',
     'Markdown biçimlendirmesi, yıldızlı vurgu, madde imi, numaralı liste, emoji, ikon veya dekoratif sembol üretme.',
@@ -1088,6 +1090,7 @@ export async function createPersonalNumerologyFollowUp(params: {
     .join('\n');
   const systemText = [
     ...(enOutputLanguageSystemDirective() ? [enOutputLanguageSystemDirective()] : []),
+    getReadingSafetyCore(),
     'Seçili persona yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Türkçe, sıcak, net ve kişiye özel konuş.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',

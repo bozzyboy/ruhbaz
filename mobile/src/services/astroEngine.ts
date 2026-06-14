@@ -26,6 +26,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
+import { getReadingSafetyCore } from './readingCommonPrompt';
 
 export type AstroPeriod = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -1135,6 +1136,7 @@ function buildRelationshipPrompt(params: {
   const hasPet = params.subjects.some((subject) => subject.profile.relationshipPrimary === 'evcil_hayvan');
   const systemText = [
     enOutputLanguageSystemDirective(),
+    getReadingSafetyCore(),
     'Seçili persona Türkçe, sıcak ve kişisel astrolog sesini belirler.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma. Doğrudan yoruma başla.',
     'Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan.',
@@ -1254,6 +1256,7 @@ function buildBirthChartInterpretationPayload(params: {
   const enDir = enOutputLanguageSystemDirective();
   const systemText =
     (enDir ? enDir + '\n\n' : '') +
+    getReadingSafetyCore() + '\n\n' +
     'Türkçe konuşan kişisel astrolog sesiyle yaz. Kendini tanıtma; yorumcu/persona adı, public label veya rol tanıtımı yazma, doğrudan yoruma gir. Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan. Sağlık ve finans alanlarında spesifik tavsiye verme; insan sağlığı endişesinde doktora/uzmana, hayvan sağlığı endişesinde veterinere yönlendir. Yalnızca verilen doğum haritası verilerini kullan. Teknik bilgiyi boğmadan, her konumu kişinin hayatı, ilişki biçimi, karar alma tarzı, dönemleri ve iç dünyasıyla anlamlandır. Kesin karakter hükmü verme; insanın dinamik olduğunu hissettir.';
   const userText = [
     `Profil: ${params.profile.displayName}`,
@@ -1320,6 +1323,7 @@ function buildBirthChartContinuationPayload(params: {
   const enDir = enOutputLanguageSystemDirective();
   const systemText =
     (enDir ? enDir + '\n\n' : '') +
+    getReadingSafetyCore() + '\n\n' +
     'Türkçe konuşan kişisel astrolog sesiyle yaz. Kendini tanıtma; yorumcu/persona adı, public label veya rol tanıtımı yazma. Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan. Sağlık ve finans alanlarında spesifik tavsiye verme; insan sağlığı endişesinde doktora/uzmana, hayvan sağlığı endişesinde veterinere yönlendir. Önceki doğum haritası yorumu token sınırı yüzünden yarım kalmış olabilir; metni tekrar etmeden doğal biçimde tamamla.';
   const userText = [
     `Profil: ${params.profile.displayName}`,
@@ -1446,7 +1450,7 @@ export async function createBirthChartFollowUp(params: {
     aspects: params.chart.aspects,
   };
   const enDir = enOutputLanguageSystemDirective();
-  const systemText = (enDir ? enDir + '\n\n' : '') + [
+  const systemText = (enDir ? enDir + '\n\n' : '') + getReadingSafetyCore() + '\n\n' + [
     'Seçili persona sıcak, modern ve kişisel astrolog sesini belirler.',
     'Cevabı mevcut doğum haritası yorumu ve soru-cevap akışı üzerinden ver.',
     FOLLOW_UP_CHAT_CONTRACT,

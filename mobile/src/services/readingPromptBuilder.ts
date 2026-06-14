@@ -11,6 +11,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 import { ensureLoreGraphIndexed, selectLoreCrumbs } from './loreGraphService';
+import { getReadingSafetyCore } from './readingCommonPrompt';
 
 export type ReadingMessage = { role: 'user' | 'assistant'; text: string };
 export type CoffeeImageSlot = 'cup' | 'cup2' | 'saucer';
@@ -403,7 +404,7 @@ export function buildReadingPrompt(params: {
     '- Türkçe karakterleri daima UTF-8 doğru yaz: ç, ğ, ı, İ, ö, ş, ü.',
     '- Bozuk karakter dizileri kullanma.',
   ].filter(Boolean).join('\n');
-  const parts = [enOutputLanguageSystemDirective(), sanitizeRestrictedReadingTerms(identity.systemBody), runtimeRules, buildAddressPolicy(id, params.memorySnippet), buildSafetyPolicy()];
+  const parts = [enOutputLanguageSystemDirective(), sanitizeRestrictedReadingTerms(identity.systemBody), getReadingSafetyCore(), runtimeRules, buildAddressPolicy(id, params.memorySnippet), buildSafetyPolicy()];
   if (focusQuestion) {
     parts.push(
       [

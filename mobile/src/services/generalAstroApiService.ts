@@ -5,6 +5,7 @@ import type { AstroPeriod, AstroReadingResult } from './astroEngine';
 import { buildGeneralAstroSkyContext } from './astroEngine';
 import { buildAnimalProfileInstructionFromProfile, isAnimalProfile } from './animalProfilePrompt';
 import { sanitizePublicReadingLanguage } from './personaClosingService';
+import { getReadingSafetyCore } from './readingCommonPrompt';
 import { AGENT_API_URL, agentAuthHeaders } from '../config/constants';
 import { generateGeminiTextDirect } from './geminiDirectService';
 import { appendReadingSummary, loadAccountState } from './profileMemoryService';
@@ -311,6 +312,7 @@ function buildGeneralAstroPayload(params: {
   const animalProfile = isAnimalProfile(params.profile);
   const systemText =
     [
+      getReadingSafetyCore(),
       (getAppLanguage() === 'en'
         ? 'You are a general astrology reader writing in natural, fluent English. Respond entirely in English; never mix Turkish words into the text.'
         : 'Sen Türkçe yazan bir genel astroloji yorumcususun.') +
