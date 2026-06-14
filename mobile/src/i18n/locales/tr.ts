@@ -92,6 +92,7 @@ export const tr = {
   divination: {
     ichingMode: 'I-Ching',
     runeMode: 'Rün',
+    greeting: 'Hoş geldin, {{name}}. Seni görmek ne güzel.',
     openingIChing: 'Senin için bir hexagram çekeceğim. Okumayı başlatmadan önce aşağıya aklında bir konu ya da soru varsa yazabilirsin. Aklında belirli bir konu yoksa da Okumaya Başla butonu ile okumayı başlatabilirsin.',
     openingRune: 'Senin için rünleri çekeceğim. Okumayı başlatmadan önce aşağıya aklında bir konu ya da soru varsa yazabilirsin. Aklında belirli bir konu yoksa da Okumaya Başla butonu ile okumayı başlatabilirsin.',
     drawnLabel: 'Çekilen',

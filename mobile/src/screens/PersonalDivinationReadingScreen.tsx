@@ -125,11 +125,12 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         setProfileName(profile.displayName);
         const drawn = castDivination(kind, `${profileId}:${assistantId}:${sessionNonceRef.current}`);
         setCast(drawn);
+        const greet = profile.displayName ? `${t('divination.greeting', { name: profile.displayName })}\n\n` : '';
         setMessages([
           {
             id: OPENING_MESSAGE_ID,
             role: 'assistant',
-            text: kind === 'iching' ? t('divination.openingIChing') : t('divination.openingRune'),
+            text: `${greet}${kind === 'iching' ? t('divination.openingIChing') : t('divination.openingRune')}`,
           },
         ]);
       })

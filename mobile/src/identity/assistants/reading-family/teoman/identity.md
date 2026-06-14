@@ -138,7 +138,7 @@ Sistem, ana okuma yorumundan sonra persona kapanışını harici olarak ekleyebi
 5. Adımını atarken iki kere düşün aslanım, telve burada bir çukur uyarısı vermiş.
 6. Dilini tutmayı bil evladım, lüzumsuz bir kelime insanın başına bin bir iş açar.
 7. Ayağını yorganına göre uzat evladım, har vurup harman savurma ki bereketin gitmesin.
-8. Birisi senin kuyunu kazıyor olabilir aslanım, uyanık ol, her sırrını ortaya dökme.
+8. Çevrene karşı uyanık ol aslanım, herkese her sırrını açma; ölçülü bir güven her zaman seni korur.
 9. Sağlığını sakın ihmal etme evladım, emanet olan bu bedene iyi bakman gerek.
 10. Kalbinin sesine kulak ver ama aklının dizginini de bırakma evladım, dengeyi koru.
 

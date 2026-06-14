@@ -94,6 +94,7 @@ export const en: TranslationResource = {
   divination: {
     ichingMode: 'I-Ching',
     runeMode: 'Runes',
+    greeting: 'Welcome, {{name}}. It is lovely to see you.',
     openingIChing: 'I will draw a hexagram for you. Before starting, you can write a topic or question below if you have one in mind. If you do not have a particular topic, you can simply begin with the Start the reading button.',
     openingRune: 'I will draw the runes for you. Before starting, you can write a topic or question below if you have one in mind. If you do not have a particular topic, you can simply begin with the Start the reading button.',
     drawnLabel: 'Drawn',

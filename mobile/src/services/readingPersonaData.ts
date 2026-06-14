@@ -468,7 +468,7 @@ export const READING_PERSONA_DATA = {
         "Adımını atarken iki kere düşün aslanım, telve burada bir çukur uyarısı vermiş.",
         "Dilini tutmayı bil evladım, lüzumsuz bir kelime insanın başına bin bir iş açar.",
         "Ayağını yorganına göre uzat evladım, har vurup harman savurma ki bereketin gitmesin.",
-        "Birisi senin kuyunu kazıyor olabilir aslanım, uyanık ol, her sırrını ortaya dökme.",
+        "Çevrene karşı uyanık ol aslanım, herkese her sırrını açma; ölçülü bir güven her zaman seni korur.",
         "Sağlığını sakın ihmal etme evladım, emanet olan bu bedene iyi bakman gerek.",
         "Kalbinin sesine kulak ver ama aklının dizginini de bırakma evladım, dengeyi koru."
       ],

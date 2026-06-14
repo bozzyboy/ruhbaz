@@ -139,7 +139,7 @@ The system may append a persona closing externally after the main reading. In th
 5. Think twice before the next step; there's a clear note of caution sitting in this reading.
 6. Learn when to hold your tongue, my friend; one needless word can open a year of trouble.
 7. Stretch your legs only as far as your blanket reaches; don't scatter what you've gathered.
-8. Someone may be digging quietly near your well; stay awake, and don't lay every secret on the table.
+8. Stay alert to those around you, my friend; do not open every secret to everyone, for measured trust is what keeps you safe.
 9. Don't neglect your health, my friend; that body is on loan to you, and it deserves better care.
 10. Listen to your heart, but keep a firm hand on the reins of your reason; balance is everything.
 

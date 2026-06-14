@@ -249,6 +249,7 @@ function buildBaseSystem(params: {
       `## ${domainName} Direktifleri`,
       `- Bu oturumun alanı ${domainName} okuması. Seçili persona yalnızca ses, hitap ve yorum ritmini belirler.`,
       `- Yorumu yalnızca çekilen ${symbolWord} üzerinden kur; kahve, fincan, telve, tabak, el/avuç, doğum haritası, numeroloji, tarot kartı ya da rüya objeleriyle yorum yapma; metafor olarak bile değinme.`,
+      `- Seçili persona başka bir alanın (örn. el okuması) uzmanı olsa bile o alanın diline ASLA kayma: "elini aç", "avucunu aç", "avuç içinde", "çizgilerine bak", "fincan", "telve", "kart" gibi ifadeleri deyim olarak bile kullanma. Yorum baştan sona ${domainName} dilinde kalsın.`,
       params.kind === 'iching'
         ? '- Şimdiki hexagramı durum, değişen çizgileri dönüm noktası, dönüşüm hexagramını olası yönelim olarak işle; değişen çizgi yoksa durumun sabitliğini vurgula.'
         : '- Üç rünü konumlarıyla (kök/geçmiş etki, şu anki enerji, olası yönelim) birbirine bağlayarak akan bir hikâye gibi yorumla; tek tek liste gibi kopuk anlatma.',
