@@ -13,6 +13,7 @@ import { SessionScreen } from './src/screens/SessionScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { MemoryDebugScreen } from './src/screens/MemoryDebugScreen';
 import { ReadingDetailScreen } from './src/screens/ReadingDetailScreen';
+import { ManorFeedScreen } from './src/screens/ManorFeedScreen';
 import { GeneralReadingsScreen } from './src/screens/GeneralReadingsScreen';
 import { GeneralReadingResultScreen } from './src/screens/GeneralReadingResultScreen';
 import { PersonalReadingsScreen } from './src/screens/PersonalReadingsScreen';
@@ -51,6 +52,7 @@ export type RootStackParamList = {
   Home: { freshStartToken?: number } | undefined;
   ProfileSettings: { profileId?: string } | undefined;
   LegalInfo: undefined;
+  ManorFeed: undefined;
   GeneralReadings: undefined;
   SelfKnowledge: { devSettings: DevSettings } | undefined;
   SimyaLab: { devSettings: DevSettings } | undefined;
@@ -242,6 +244,7 @@ export default function App() {
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('nav.home') }} />
           <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ title: t('nav.profileSettings') }} />
           <Stack.Screen name="LegalInfo" component={LegalInfoScreen} options={{ title: t('nav.legalInfo') }} />
+          <Stack.Screen name="ManorFeed" component={ManorFeedScreen} options={{ title: t('nav.manorFeed') }} />
           <Stack.Screen name="GeneralReadings" component={GeneralReadingsScreen} options={{ title: t('nav.generalReadings') }} />
           <Stack.Screen name="GeneralReadingResult" component={GeneralReadingResultScreen} options={{ title: t('nav.generalReadingResult') }} />
           <Stack.Screen name="SunCompatibility" component={SunCompatibilityScreen} options={{ title: t('nav.sunCompatibility') }} />

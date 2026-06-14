@@ -174,6 +174,18 @@ export function HomeScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity
+          style={styles.feedCard}
+          activeOpacity={0.86}
+          onPress={() => navigation.navigate('ManorFeed')}
+        >
+          <Text style={styles.feedIcon}>✦</Text>
+          <View style={styles.feedTextWrap}>
+            <Text style={styles.feedTitle}>{t('home.manorFeedTitle')}</Text>
+            <Text style={styles.feedDesc}>{t('home.manorFeedDesc')}</Text>
+          </View>
+        </TouchableOpacity>
+
         {ENABLE_DEVELOPER_DEBUG_UI ? (
         <View style={styles.panel}>
           <TouchableOpacity
@@ -457,6 +469,21 @@ const styles = StyleSheet.create({
   lobbyIcon: { color: '#D4A574', fontSize: 25, fontWeight: '900', lineHeight: 30 },
   lobbyTitle: { color: '#FFF5E8', fontSize: 16, fontWeight: '900', lineHeight: 20, marginTop: 10 },
   lobbyText: { color: 'rgba(212,165,116,0.76)', fontSize: 12, lineHeight: 18, marginTop: 8 },
+  feedCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 16,
+    backgroundColor: 'rgba(212,165,116,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(212,165,116,0.3)',
+  },
+  feedIcon: { color: '#E8C49A', fontSize: 24, fontWeight: '900' },
+  feedTextWrap: { flex: 1 },
+  feedTitle: { color: '#FFF5E8', fontSize: 16, fontWeight: '900', marginBottom: 4 },
+  feedDesc: { color: 'rgba(212,165,116,0.82)', fontSize: 12, lineHeight: 18 },
   tokenHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   tokenActionRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 12, marginBottom: 10 },
   expandButtonText: { color: '#F6C38B', fontSize: 12, fontWeight: '900' },
