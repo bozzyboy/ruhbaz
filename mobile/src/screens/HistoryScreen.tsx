@@ -7,7 +7,7 @@ import type { RootStackParamList } from '../../App';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { getAssistantLabel } from '../config/constants';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
-import { deleteAllReadingsForProfile, deleteReading, getAllReadingsForProfile, getReadingTypeLabel, loadAccountState } from '../services/profileMemoryService';
+import { deleteAllReadingsForProfile, deleteReading, getAllReadingsForProfile, getReadingTypeLabel, loadAccountState, setReadingFavorite } from '../services/profileMemoryService';
 import type { ReadingSummary } from '../types/memory';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'History'>;
@@ -18,12 +18,25 @@ export function HistoryScreen({ route, navigation }: Props) {
   const [readings, setReadings] = useState<ReadingSummary[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<ReadingSummary | null>(null);
   const [deleteAllVisible, setDeleteAllVisible] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const refresh = useCallback(() => {
     loadAccountState().then((state) => {
       setReadings(getAllReadingsForProfile(state, profileId));
     });
   }, [profileId]);
+
+  const toggleFavorite = useCallback(
+    (reading: ReadingSummary) => {
+      const next = !reading.favorite;
+      // İyimser yerel güncelleme; kalıcılaştırma arka planda, hata olursa yeniden yükle.
+      setReadings((prev) => prev.map((item) => (item.readingId === reading.readingId ? { ...item, favorite: next } : item)));
+      void setReadingFavorite(reading.readingId, next).catch(() => refresh());
+    },
+    [refresh],
+  );
+
+  const visibleReadings = showFavoritesOnly ? readings.filter((reading) => reading.favorite) : readings;
 
   useEffect(() => {
     navigation.setOptions({ title: t('history.navTitle', { name: profileName }) });
@@ -39,12 +52,35 @@ export function HistoryScreen({ route, navigation }: Props) {
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         {readings.length ? (
+          <View style={styles.filterRow}>
+            <TouchableOpacity
+              style={[styles.filterPill, !showFavoritesOnly && styles.filterPillActive]}
+              activeOpacity={0.82}
+              onPress={() => setShowFavoritesOnly(false)}
+            >
+              <Text style={[styles.filterPillText, !showFavoritesOnly && styles.filterPillTextActive]}>{t('history.favoritesAll')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.filterPill, showFavoritesOnly && styles.filterPillActive]}
+              activeOpacity={0.82}
+              onPress={() => setShowFavoritesOnly(true)}
+            >
+              <Text style={[styles.filterPillText, showFavoritesOnly && styles.filterPillTextActive]}>♥ {t('history.favoritesFilter')}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+        {readings.length ? (
           <TouchableOpacity style={styles.deleteAllButton} activeOpacity={0.82} onPress={() => setDeleteAllVisible(true)}>
             <Text style={styles.deleteAllButtonText}>{t('history.deleteAllButton')}</Text>
           </TouchableOpacity>
         ) : null}
-        {readings.length ? (
-          readings.map((reading) => (
+        {!readings.length ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('history.emptyText')}</Text>
+          </View>
+        ) : visibleReadings.length ? (
+          visibleReadings.map((reading) => (
             <View key={reading.readingId} style={styles.card}>
               <TouchableOpacity
                 style={styles.cardMain}
@@ -66,6 +102,14 @@ export function HistoryScreen({ route, navigation }: Props) {
                 <Text style={styles.date}>{new Date(reading.createdAt).toLocaleString('tr-TR')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                style={[styles.favPill, reading.favorite && styles.favPillActive]}
+                onPress={() => toggleFavorite(reading)}
+                accessibilityRole="button"
+                accessibilityLabel={reading.favorite ? t('history.favoriteAdded') : t('history.favoriteAdd')}
+              >
+                <Text style={[styles.favPillIcon, reading.favorite && styles.favPillIconActive]}>{reading.favorite ? '♥' : '♡'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
                 style={styles.deletePill}
                 onPress={() => setDeleteTarget(reading)}
               >
@@ -75,8 +119,8 @@ export function HistoryScreen({ route, navigation }: Props) {
           ))
         ) : (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
-            <Text style={styles.emptyText}>{t('history.emptyText')}</Text>
+            <Text style={styles.emptyTitle}>{t('history.favoritesEmptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('history.favoritesEmptyText')}</Text>
           </View>
         )}
       </BrandedScrollView>
@@ -127,6 +171,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   deleteAllButtonText: { color: '#FFB3B3', fontSize: 13, fontWeight: '900' },
+  filterRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  filterPill: {
+    flex: 1,
+    minHeight: 40,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(212,165,116,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterPillActive: { borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.18)' },
+  filterPillText: { color: 'rgba(232,196,154,0.75)', fontSize: 13, fontWeight: '800' },
+  filterPillTextActive: { color: '#E8C49A' },
   card: {
     borderRadius: 16,
     padding: 14,
@@ -152,6 +210,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   deletePillText: { color: '#FF8F8F', fontSize: 12, fontWeight: '700' },
+  favPill: {
+    marginLeft: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(212,165,116,0.4)',
+    backgroundColor: 'rgba(212,165,116,0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  favPillActive: { borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.2)' },
+  favPillIcon: { color: 'rgba(232,196,154,0.7)', fontSize: 16, lineHeight: 18 },
+  favPillIconActive: { color: '#E8C49A' },
   emptyCard: {
     borderRadius: 16,
     padding: 18,

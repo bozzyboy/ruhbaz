@@ -363,6 +363,12 @@ export const tr = {
     deleteAllMessage: 'Bu profilin cihazdaki tüm son okuma kayıtlarını silmek istediğine emin misin? Bu işlem şimdilik yalnız cihazdaki kayıtları temizler; Google Drive yedekleme daha sonra eklenecek.',
     yesDeleteAll: 'Evet, Hepsini Sil',
     noCancel: 'Hayır, Vazgeç',
+    favoriteAdd: 'Kalbime ekle',
+    favoriteAdded: 'Kalplimde',
+    favoritesFilter: 'Kalplilerim',
+    favoritesAll: 'Tümü',
+    favoritesEmptyTitle: 'Henüz kalpli okuma yok',
+    favoritesEmptyText: 'Bir okumayı kalple işaretle; burada toplansın.',
     // ReadingDetailScreen
     testSummaryTitle: 'Test Özeti',
     readingSummaryTitle: 'Okuma Özeti',

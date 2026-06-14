@@ -8,7 +8,7 @@ import { BrandedScrollView } from '../components/BrandedScrollView';
 import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { getAssistantLabel } from '../config/constants';
-import { deleteReading, getReadingTypeLabel } from '../services/profileMemoryService';
+import { deleteReading, getReadingTypeLabel, setReadingFavorite } from '../services/profileMemoryService';
 import { SymbolicDisclaimer } from '../components/SymbolicDisclaimer';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReadingDetail'>;
@@ -17,6 +17,13 @@ export function ReadingDetailScreen({ route, navigation }: Props) {
   const { t } = useTranslation();
   const { reading, profileName } = route.params;
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [favorite, setFavorite] = useState(Boolean(reading.favorite));
+
+  const toggleFavorite = () => {
+    const next = !favorite;
+    setFavorite(next);
+    void setReadingFavorite(reading.readingId, next).catch(() => setFavorite(!next));
+  };
   const mainText = (() => {
     const firstAssistantText = reading.transcript?.find((item) => item.role === 'assistant')?.text?.trim() || '';
     return firstAssistantText.length > reading.summary.length ? firstAssistantText : reading.summary;
@@ -45,9 +52,21 @@ export function ReadingDetailScreen({ route, navigation }: Props) {
       <SymbolicDisclaimer />
       <BrandedScrollView contentContainerStyle={styles.content} showScrollToTop>
         <View style={styles.metaCard}>
-          <Text style={styles.assistant}>
-            {reading.readingType === 'personality-test' ? t('history.testsLabel') : getAssistantLabel(reading.assistantId)}
-          </Text>
+          <View style={styles.metaHeaderRow}>
+            <Text style={[styles.assistant, styles.metaHeaderName]}>
+              {reading.readingType === 'personality-test' ? t('history.testsLabel') : getAssistantLabel(reading.assistantId)}
+            </Text>
+            <TouchableOpacity
+              style={[styles.favButton, favorite && styles.favButtonActive]}
+              onPress={toggleFavorite}
+              activeOpacity={0.82}
+              accessibilityRole="button"
+              accessibilityLabel={favorite ? t('history.favoriteAdded') : t('history.favoriteAdd')}
+            >
+              <Text style={[styles.favIcon, favorite && styles.favIconActive]}>{favorite ? '♥' : '♡'}</Text>
+              <Text style={styles.favText}>{favorite ? t('history.favoriteAdded') : t('history.favoriteAdd')}</Text>
+            </TouchableOpacity>
+          </View>
           <Text style={styles.meta}>{getReadingTypeLabel(reading)}</Text>
           <Text style={styles.meta}>{profileName}</Text>
           <Text style={styles.date}>{new Date(reading.createdAt).toLocaleString('tr-TR')}</Text>
@@ -107,6 +126,23 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   assistant: { color: '#FFF5E8', fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  metaHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 },
+  metaHeaderName: { flex: 1 },
+  favButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(212,165,116,0.4)',
+    backgroundColor: 'rgba(212,165,116,0.1)',
+  },
+  favButtonActive: { borderColor: '#D4A574', backgroundColor: 'rgba(212,165,116,0.2)' },
+  favIcon: { color: 'rgba(232,196,154,0.7)', fontSize: 16, lineHeight: 18 },
+  favIconActive: { color: '#E8C49A' },
+  favText: { color: '#E8C49A', fontSize: 12, fontWeight: '700' },
   meta: { color: '#D4A574', fontSize: 13, marginBottom: 4 },
   date: { color: 'rgba(255,255,255,0.58)', fontSize: 12 },
   readingCard: {

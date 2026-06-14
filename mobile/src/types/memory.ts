@@ -562,6 +562,8 @@ export interface ReadingSummary {
   };
   createdAt: string;
   summary: string;
+  /** K29: kullanıcının kalple işaretlediği okuma (favori). */
+  favorite?: boolean;
   transcript?: Array<{
     role: 'user' | 'assistant';
     text: string;

@@ -1139,6 +1139,7 @@ export async function loadAccountState(): Promise<AccountState> {
     astroRelationship: reading.astroRelationship,
     createdAt: reading.createdAt || nowIso(),
     summary: reading.summary || reading.previewText || '',
+    favorite: reading.favorite === true,
     transcript: Array.isArray(reading.transcript)
       ? reading.transcript
           .filter((item) => item && (item.role === 'user' || item.role === 'assistant') && typeof item.text === 'string')
@@ -2829,6 +2830,21 @@ export function getRecentReadingsForProfile(
 
 export function getAllReadingsForProfile(state: AccountState, profileId: string): ReadingSummary[] {
   return state.readings.filter((reading) => reading.profileId === profileId);
+}
+
+/** K29: bir okumanın favori (kalp) durumunu değiştirir ve cihazda kalıcılaştırır. */
+export async function setReadingFavorite(readingId: string, favorite: boolean): Promise<AccountState> {
+  const state = await loadAccountState();
+  let changed = false;
+  const readings = state.readings.map((reading) => {
+    if (reading.readingId !== readingId || reading.favorite === favorite) return reading;
+    changed = true;
+    return { ...reading, favorite };
+  });
+  if (!changed) return state;
+  const nextState: AccountState = { ...state, readings };
+  await saveState(nextState);
+  return nextState;
 }
 
 export async function appendReadingSummary(

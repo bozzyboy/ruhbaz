@@ -365,6 +365,12 @@ export const en: TranslationResource = {
     deleteAllMessage: 'Are you sure you want to delete all of this profile’s recent reading records on this device? For now this only clears the records on the device; Google Drive backup will come later.',
     yesDeleteAll: 'Yes, Delete Everything',
     noCancel: 'No, Cancel',
+    favoriteAdd: 'Add to favorites',
+    favoriteAdded: 'In favorites',
+    favoritesFilter: 'My Favorites',
+    favoritesAll: 'All',
+    favoritesEmptyTitle: 'No favorite readings yet',
+    favoritesEmptyText: 'Mark a reading with a heart to collect it here.',
     // ReadingDetailScreen
     testSummaryTitle: 'Test Summary',
     readingSummaryTitle: 'Reading Summary',
