@@ -36,7 +36,7 @@
 
 ## ▶ DURAK NOKTASI — özerk inşa burada (sağlıklı) durdu
 Faz 5'in **özerk yapılabilir TÜM dilimleri (5.1 + 5.2 + 5.3 + 5.4) BİTTİ ve öz-review'den geçti.** (5.4 durak sonrası, Ozan'ın "B" kararıyla eklendi — `c7b9bb3`.) Kalan 2 dilim (5.5/5.6) Ozan tarafından ERTELENDİ:
-- **5.4** → ✅ Ozan **B (konuşmalı)** seçti → UYGULANDI (`0ef8524`/`4762123`/`c7b9bb3`; default Teoman/Arın; öz-review koşuyor).
+- **5.4** → ✅ Ozan **B (konuşmalı)** seçti → UYGULANDI (`0ef8524`/`4762123`/`c7b9bb3`; default Teoman/Arın; **öz-review TEMİZ 8/8** — kapanış havuzu yeterli, cast 64/64, wiring regresyonsuz).
 - **5.5 Aura** → ürün-his/taste kararı (app-geneli tema = regresyon riski; kapsamlı = renk/atmosfer tat). Mandat "emin olmadığın üründe-his kararı yapma" → Ozan.
 - **5.6 bildirimler** → native (YENİ APK; Ozan derleyip kurar) + bildirim taksonomisi Ozan onayı (`24_`).
 
