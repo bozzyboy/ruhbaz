@@ -24,7 +24,7 @@ import {
 import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionFromProfile, isAnimalProfile, isAnimalMemorySnippet } from './animalProfilePrompt';
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
-import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 import { getReadingSafetyCore } from './readingCommonPrompt';
 
@@ -1072,6 +1072,10 @@ export async function createPersonalNumerologyFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const simpleReply = getSimpleFollowUpReply(params.question);
+  if (simpleReply) {
+    return { text: simpleReply, modelName: 'local-follow-up-reply', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } };
+  }
   const moderation = moderateUserInput(params.question, 'question');
   if (moderation.verdict !== 'allow') {
     return {

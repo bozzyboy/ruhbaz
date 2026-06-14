@@ -1,3 +1,5 @@
+import { getAppLanguage } from '../i18n';
+
 export const FOLLOW_UP_CHAT_CONTRACT = [
   '- Bu tur yeni bir okuma açılışı değildir; önceki okuma metnini yeniden yazma, özetleme veya kopyalama.',
   '- Yalnızca kullanıcının son mesajındaki soruya doğrudan cevap ver.',
@@ -25,10 +27,61 @@ export function cleanFollowUpReply(text: string) {
   return cleaned;
 }
 
-export function getSimpleFollowUpReply(userText: string) {
-  const normalized = (userText || '').trim().toLocaleLowerCase('tr-TR');
-  if (/^(teşekkür|tesekkur|sağ ol|sag ol|tamam|ok|peki|anladım|anladim)[.! ]*$/i.test(normalized)) {
-    return 'Rica ederim, burada kalalım; başka bir yerini açmak istersen son soruna göre devam ederim.';
+// Sosyal-kapanış mesajları (teşekkür / sağ ol / thanks) — bunlara koca yorum yerine
+// kısa "rica ederim" denir. Yaklaşım: mesajdan sosyal-kapanış + dolgu token'larını
+// ÇIKAR, geriye anlamlı kelime kalırsa (gerçek soru) ASLA yakalama. Bu, "teşekkürler
+// peki ya işim?" gibi karışık mesajların yanlışlıkla yakalanmasını önler.
+const SOCIAL_CLOSING_TOKENS = [
+  // TR — teşekkür
+  'çok teşekkür ederim', 'çok teşekkür ederiz', 'çok teşekkürler', 'teşekkür ederim',
+  'teşekkür ederiz', 'teşekkür ettim', 'teşekkürler', 'teşekkür', 'tesekkur ederim',
+  'tesekkur ederiz', 'tesekkurler', 'tesekkur', 'teşekürler', 'teşekur',
+  // TR — sağ ol
+  'çok sağ ol', 'sağ olasın', 'sağ ol', 'sağolasın', 'sağol', 'sağ olun', 'sağolun',
+  'sag olasin', 'sag ol', 'sagolasin', 'sagol', 'sag olun', 'sagolun',
+  // TR — diğer şükran / onay
+  'eyvallah', 'eyvalla', 'minnettarım', 'minnettarim', 'minnettar',
+  'ellerine sağlık', 'eline sağlık', 'ellerinize sağlık', 'elinize sağlık',
+  'ellerine saglik', 'eline saglik', 'allah razı olsun', 'allah razi olsun',
+  'tamamdır', 'tamamdir', 'tamam', 'tmm', 'peki', 'anladım', 'anladim', 'olur', 'oldu',
+  // EN
+  'thank you so much', 'thank you very much', 'thanks so much', 'thanks a lot',
+  'thank you', 'thank u', 'thanks', 'thx', 'tysm', 'ty', 'appreciate it',
+  'much appreciated', 'appreciated', 'cheers', 'got it', 'understood',
+  'okay', 'alright', 'ok',
+];
+// Token'ların arasını dolduran ama tek başına anlam taşımayan kelimeler.
+const SOCIAL_FILLER_TOKENS = [
+  'çok', 'cok', 'ya', 'be', 'valla', 'vallahi', 'vallaha', 'ee', 'eh',
+  'sana', 'size', 'canım', 'canim', 'dostum', 'kardeşim', 'kardesim', 'hocam',
+  'really', 'so', 'very', 'much', 'then', 'well', 'again', 'and', 'for', 'that',
+];
+
+function isSocialClosingOnly(userText: string): boolean {
+  const raw = (userText || '').trim();
+  if (!raw || raw.length > 80) return false;
+  // Soru işareti içeren mesajlar neredeyse her zaman gerçek sorudur.
+  if (raw.includes('?')) return false;
+  // Harf ve boşluk dışındaki her şeyi (noktalama, emoji, rakam) boşluğa çevir.
+  let cleaned = raw.toLocaleLowerCase('tr-TR').replace(/[^\p{L}\s]+/gu, ' ').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return false;
+  const tokens = [...SOCIAL_CLOSING_TOKENS, ...SOCIAL_FILLER_TOKENS].sort((a, b) => b.length - a.length);
+  let buf = ' ' + cleaned + ' ';
+  let prev = '';
+  while (buf !== prev) {
+    prev = buf;
+    for (const tok of tokens) {
+      buf = buf.split(' ' + tok + ' ').join(' ');
+    }
+    buf = ' ' + buf.replace(/\s+/g, ' ').trim() + ' ';
   }
-  return '';
+  return buf.trim() === '';
+}
+
+export function getSimpleFollowUpReply(userText: string) {
+  if (!isSocialClosingOnly(userText)) return '';
+  if (getAppLanguage() === 'en') {
+    return 'You are welcome — we can stay here; if you want to open another part, just tell me and I will continue.';
+  }
+  return 'Rica ederim, burada kalalım; başka bir yerini açmak istersen son soruna göre devam ederim.';
 }

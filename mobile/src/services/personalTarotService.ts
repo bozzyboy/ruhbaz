@@ -25,7 +25,7 @@ import {
 import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionFromProfile } from './animalProfilePrompt';
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
-import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 import { getReadingSafetyCore } from './readingCommonPrompt';
 
@@ -402,6 +402,10 @@ export async function createPersonalTarotFollowUp(params: {
   memorySnippet?: ProfileMemorySnippet | null;
   usedClosings?: string[];
 }) {
+  const simpleReply = getSimpleFollowUpReply(params.question);
+  if (simpleReply) {
+    return { text: simpleReply, closingSentence: '', modelName: 'local-follow-up-reply', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } };
+  }
   const moderation = moderateUserInput(params.question, 'question');
   if (moderation.verdict !== 'allow') {
     return {

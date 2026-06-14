@@ -24,7 +24,7 @@ import {
 import { buildAnimalProfileInstructionFromMemory, buildAnimalProfileInstructionFromProfile, isAnimalProfile } from './animalProfilePrompt';
 import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
-import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT } from './followUpResponseService';
+import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 import { getReadingSafetyCore } from './readingCommonPrompt';
 
@@ -1416,6 +1416,10 @@ export async function createBirthChartFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const birthChartSimpleReply = getSimpleFollowUpReply(params.question);
+  if (birthChartSimpleReply) {
+    return { text: birthChartSimpleReply, modelName: 'local-follow-up-reply', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } };
+  }
   const birthChartFollowUpModeration = moderateUserInput(params.question, 'question');
   if (birthChartFollowUpModeration.verdict !== 'allow') {
     return {
@@ -1832,6 +1836,10 @@ export async function createPersonalAstroFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const astroSimpleReply = getSimpleFollowUpReply(params.question);
+  if (astroSimpleReply) {
+    return { text: astroSimpleReply, modelName: 'local-follow-up-reply', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } };
+  }
   const astroFollowUpModeration = moderateUserInput(params.question, 'question');
   if (astroFollowUpModeration.verdict !== 'allow') {
     return {
@@ -2019,6 +2027,10 @@ export async function createAstroRelationshipFollowUp(params: {
   previousFollowUps?: Array<{ role: 'user' | 'assistant'; text: string }>;
   memorySnippet?: ProfileMemorySnippet | null;
 }): Promise<{ text: string; modelName?: string; usage: { inputTokens: number; outputTokens: number; totalTokens: number } }> {
+  const relationshipSimpleReply = getSimpleFollowUpReply(params.question);
+  if (relationshipSimpleReply) {
+    return { text: relationshipSimpleReply, modelName: 'local-follow-up-reply', usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } };
+  }
   const relationshipFollowUpModeration = moderateUserInput(params.question, 'question');
   if (relationshipFollowUpModeration.verdict !== 'allow') {
     return {
