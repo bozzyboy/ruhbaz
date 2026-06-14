@@ -11,11 +11,13 @@
 
 ### 5.2 — Konak Akışı (feed) ✅ [fazın adını taşıyan]
 - `fdfeb6a`: `data/manorFeedSeed.ts` (9 öğe bilingual TASLAK içerik, 677-uyumlu sembolik/eğlence, persona adı metinde geçmez) + `services/manorFeedService.ts` (getManorFeed dil-cache + uzak fetch hook `EXPO_PUBLIC_MANOR_FEED_URL` + bundle fallback + pickFeedHighlights) + `screens/ManorFeedScreen.tsx` (branded liste + disclaimer) + App nav kaydı + HomeScreen tam-genişlik giriş kartı + i18n (nav.manorFeed, home.manorFeed*, manorFeed namespace).
-- Öz-review: **arka planda çalışıyor** (bu snapshot yazılırken). Sonuç gelince bulgular işlenecek (bu dosyaya not düşülecek).
+- Öz-review: **TEMİZ** (8/8 boyut; cache/dil/uzak-fetch/677/nav/i18n hepsi temiz; tek not: `pickFeedHighlights` 5.3 için rezerveydi).
 - **Ozan bloğu (5.2):** feed içerik onayı/genişletme + uzak yayın (statik JSON → GitHub Pages/Actions cron) + production'da `EXPO_PUBLIC_MANOR_FEED_URL` set. Tüketici + tohum tam çalışıyor; yalnız yayın blokta.
 
+### 5.3 — Bekleme sahnesi (K33/F7) ✅
+- `9f19d35`: `components/WaitingScene.tsx` — okuma hazırlanırken (ilk yorum gelene kadar) Konak Akışı havuzundan bir atmosfer kartı; "davet" türü elenir; akış boşsa null. SessionScreen'de loader ALTINA **eklemeli** render (Bug 3 mantığı değişmedi). i18n `manorFeed.whileYouWait`. **Şimdilik yalnız SessionScreen** (kahve/el — en uzun bekleme); diğer reading ekranları + kart rotasyonu/animasyon ileride. Öz-review **TEMİZ** (Bug 3 loader korundu — WaitingScene koşulu loader koşulunun alt-kümesi, eklemeli render; yaşam döngüsü/dil-cache/i18n hepsi temiz). Öz-review notu üzerine kullanılmayan `pickFeedHighlights` export kaldırıldı (`acdef7c`).
+
 ## 🔜 KALAN FAZ 5 DİLİMLERİ (özerk sıra)
-- **5.3 Bekleme sahnesi (K33/F7):** okuma beklerken feed havuzundan kart göster (atmosfer). `manorFeedService.pickFeedHighlights` zaten hazır. SessionScreen loader alanına dokunur (Bug 3 bölgesi — dikkat). JS/TS.
 - **5.4 I-Ching + Rün kişisel okuma türleri:** ⚠️ **MİMARİ NOT:** kişisel-okuma giriş noktaları PARÇALI — `PersonalReadingTypeSelectScreen`'de tarot-personal bile `currentlyAvailable:false`, dream burada listede YOK (başka yoldan giriliyor). I-Ching/Rün'ü temiz eklemek bu menü mimarisini çözmeyi gerektirir (sandığımdan büyük). Genel divinationData'da I-Ching(64)+Rün(24) zaten var. Önce understand-workflow ile akışı haritalamak iyi olur.
 - **5.5 Aura günlük tema (K39):** ⚠️ **TASARIM KARARI:** app-geneli dinamik tema = HER ekrana dokunur (yüksek regresyon riski; regresyon-önleme ihlali). Öneri: **kapsamlı tema yerine Home'da günlük "Aura" kartı/şeridi** (astroEngine günlük gökyüzünden renk+atmosfer satırı, erişilebilirlik + sabitleme). Tam tema = Ozan taste/mimari kararı.
 - **5.6 Bildirimler + taksonomi:** ⚠️ **NATIVE → YENİ APK GEREKİR** (`expo-notifications` paket yok, eklenince native). Yerel günlük astro + etkileşimli + re-engagement + doğum günü + rating. **Bildirim taksonomisi tasarım dokümanı** (her tür: tetikleyici/frekans tavanı/kapatma/677-dil) Ozan onayına hazırlanmalı (briefing'in gerektirdiği tasarım turu). Metin onayları = Ozan bloğu.
@@ -33,4 +35,4 @@
 - **Bekçi tuzağı (yeni hafıza):** kod yorumlarında/string'lerde ASCII apostrof (`save'ler`) utf8 bekçisinin tırnak paritesini bozar → yeniden ifade et veya curly `'`. Commit mesajında da apostrof/`||`/boşluklu-`/` PowerShell here-string'i bozar. Bkz. memory [[ps-commit-heredoc-apostrof]].
 
 ## 📌 DURUM
-✅ Faz 4.5 (kod tam + cihaz-testi-1 3 bug + öz-review). 🔄 Faz 5: 5.1 + 5.2 BİTTİ; 5.3–5.6 kaldı. 🔶 Hiçbiri cihazda doğrulanmadı (reload yeter; 5.6 hariç YENİ APK). Ozan cihaz turları (21_/22_/23_) + tat onayları + bloklar bekliyor.
+✅ Faz 4.5 (kod tam + cihaz-testi-1 3 bug + öz-review). 🔄 Faz 5: **5.1 + 5.2 + 5.3 BİTTİ** (favoriler, Konak Akışı feed, bekleme sahnesi); 5.4–5.6 kaldı + 5.6 taksonomi taslağı (`24_`) hazır. 🔶 Hiçbiri cihazda doğrulanmadı (reload yeter; 5.6 hariç YENİ APK). Ozan cihaz turları (21_/22_/23_) + tat onayları + bloklar bekliyor.
