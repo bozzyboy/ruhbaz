@@ -490,8 +490,8 @@ function appendGeneralAstroFooter(params: {
   const displayName = params.profile.displayName;
   const footer =
     getAppLanguage() === 'en'
-      ? `\n\nDear ${displayName}, that was a general reading for your ${SIGN_EN[params.sign]} sign. Remember, whenever you like you can visit the Parlour → Astrology section for an interpretation made entirely for you and your exact moment of birth — one that also takes your rising sign, your Moon and the full sky chart at your birth into account.`
-      : `\n\nSevgili ${displayName}, bu senin ${SIGN_TR[params.sign]} burcun için genel bir yorumdu. Unutma, dilediğin zaman yükselen burcun, Ay'ın ve doğduğun andaki gökyüzü haritasının da göz önünde bulundurulduğu, tamamen sana ve doğum anına özel astroloji yorumun için Salon → Astroloji bölümünü ziyaret edebilirsin.`;
+      ? `\n\nDear ${displayName}, that was a general reading for your ${SIGN_EN[params.sign]} sign. Remember, whenever you like you can visit the Parlour → Astrology section for an interpretation made entirely for you and your exact moment of birth — one that also takes your rising sign, your moon sign and your full birth chart into account.`
+      : `\n\nSevgili ${displayName}, bu senin ${SIGN_TR[params.sign]} burcun için genel bir yorumdu. Unutma, dilediğin zaman yükselen burcunu, ay burcunu ve doğduğun andaki gökyüzü haritasını da göz önünde bulunduran, tamamen sana ve doğum anına özel astroloji yorumun için Salon → Astroloji bölümünü ziyaret edebilirsin.`;
   // İdempotent: metin zaten bu dipnotla bitiyorsa tekrar ekleme.
   if (text.endsWith(footer.trimEnd())) return text;
   return text + footer;

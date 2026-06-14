@@ -241,6 +241,7 @@ export function buildMemoryContext(profileName: string, memorySnippet: ProfileMe
   if (coffeeMode === 'ai-brew') {
     lines.push('- Bu modda gerçek bir fotoğraf yok; ama kullanıcının yerine sen bir Türk kahvesi yapıp içmişsin ve şimdi onun fincanına ve tabağına bakıyormuşsun gibi rol yap.');
     lines.push('- Fincanın içinde, kenarında ve kahve tabağında telve şekilleri, semboller ve bunların konumları varmış gibi canlı canlı betimle; gerçek bir fincan okuması gibi şekillerden, sembollerden ve nerede durduklarından bahset.');
+    lines.push('- Kullanıcının kahveyi kendisinin içtiğini ya da "içerken aklından neler geçtiğini" VARSAYMA; kahveyi onun niyetine/yerine SEN içtin. Yorumu kullanıcının içme deneyimi/düşünceleri üzerinden değil, önündeymiş gibi baktığın fincan ve tabaktaki şekiller üzerinden kur.');
     lines.push('- Bu okuma görsel yüklenmiş bir kahve yorumuyla AYNI uzunlukta ve doluluk(ta) olmalı; kısa kesme, asıl ağırlığı betimlenen fincan/tabak sembollerine ver.');
     lines.push('- "Fotoğraf yok", "görsel gelmedi", "elimde görüntü yok" gibi ifadeler kullanma; hayali fincan ve tabak gerçekten önündeymiş gibi akıcı şekilde oku.');
     lines.push('- Hafızada tekrar eden temalar varsa bunları ana konu yapmak zorunda değilsin; sadece seçici, düşük sesli ve doğal bir tanışıklık hissi olarak kullan.');
