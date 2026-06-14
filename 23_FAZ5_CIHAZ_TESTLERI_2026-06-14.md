@@ -160,6 +160,47 @@
 
 ---
 
+## 🎛️ UI/UX KALANLARI — APP-GENELİ (Faz 5.4 UI turu, 2026-06-15) — KURULUM: yalnız JS/TS → `npx expo start -c` + uygulamayı kapat-aç (yeni APK GEREKMEZ)
+> **Ne değişti?** Ozan'ın cihazda 5.4 (I-Ching/Rün) sonrası verdiği app-geneli geri bildirimler: (1) sosyal followup'a kısa yanıt, (2a) persona kendi adına hitabı anlıyor, (2b) divination cast görseli konumu, (2c) okuma gelince başa scroll, (2d) followup balonu yeşilimsi, (2e) edit/yeniden-gönder kaldırıldı. Çoğu paylaşılan servis/ekran olduğundan **tüm okuma türlerinde** test edilmeli (regresyon).
+
+### 1) Sosyal followup kısa-yanıt (her okuma türü)
+59. **Teşekkür → kısa yanıt:** Herhangi bir okumayı tamamla (I-Ching, Rün, tarot, rüya, kahve, el, kişisel astro, doğum haritası, astro ilişki, numeroloji — sırayla farklı türlerde dene) → takip kutusuna **"teşekkür ederim"** yaz, gönder → **Beklenen:** koca yeni yorum DEĞİL, kısa "Rica ederim, burada kalalım; başka bir yerini açmak istersen son soruna göre devam ederim." gelir.
+60. **Varyantlar:** "teşekkürler", "sağ ol", "sağolasın", "eyvallah", "minnettarım", "ellerine sağlık", "çok teşekkürler" → hepsi kısa "rica ederim" yanıtı. "tamam" / "ok" / "peki" de kısa kapanış.
+61. **Gerçek soru YAKALANMAMALI (regresyon):** "teşekkürler peki ya aşk hayatım?" veya "sağ ol ama işim ne olacak" yaz → **Beklenen:** kısa kapanış DEĞİL; normal, gerçek takip yorumu gelir (içinde gerçek soru var → tam cevap).
+62. **EN paritesi:** dili EN yap → "thanks" / "thank you so much" / "ty" → kısa "You are welcome — we can stay here..."; "thanks but what about my job?" → tam cevap.
+
+### 2a) Persona kendi adına hitap (her okuma türü)
+63. **"Teoman Baba, ..." testi:** El okuması (Teoman) veya herhangi bir okumada, okuma öncesi/sonrası **"Teoman Baba, bu konuda ne diyorsun?"** gibi personanın ADIYLA hitap et → **Beklenen:** LLM bunu KENDİSİNE yönelik sayar; "babandan haber", "baban", "üçüncü bir kişi" gibi yorum YOK. Yine de kendini adıyla tanıtmaz ("Ben Teoman" demez).
+64. **Diğer personalar:** Suzan (kahve), Arın (tarot), Selin (astro), Ayşe (rüya), vb. için de adlarıyla hitap et → aynı: hitap kendilerine, akraba sanma yok. (Regresyon: persona yine de görünür metinde kendi adını yazmamalı.)
+
+### 2b) Divination cast görseli konumu (I-Ching/Rün)
+65. **Sıra kontrolü:** I-Ching veya Rün okuması yap (konu/soru gir) → okuma gelince ekranda sıra: **[senin konu/soru balonun] → [hexagram/rün görseli] → [okuma metni]**. Görsel artık sorunun ÜSTÜNDE değil, sorunun ALTINDA + okumanın ÜSTÜNDE.
+66. **Konu girmeden (genel okuma):** konu boş bırak → görsel okumanın üstünde görünür (üstte kullanıcı balonu yok). Rün için de aynı.
+
+### 2c) Okuma gelince başa scroll (her okuma türü)
+67. **İlk okuma:** Herhangi bir okumayı başlat → okuma gelince ekran en ALTA kaymasın; **okumanın/görselin BAŞI** görünsün (I-Ching/Rün'de önce hexagram + okuma başı; diğerlerinde okuma başı). Aşağı kaydırmadan başı okuyabilmelisin.
+68. **Takip cevabı:** bir takip sorusu sor → cevap gelince yine **cevabın BAŞINA** scroll olur (en altına değil). 7 ekranın hepsinde dene: I-Ching/Rün, kahve/el (Session), tarot, rüya, kişisel astro, doğum haritası, numeroloji.
+
+### 2d) Followup balonu yeşilimsi (her okuma türü)
+69. **Balon rengi:** Her okumada senin yazdığın takip mesajı balonu **yeşilimsi** (divination'daki gibi); özellikle kahve/el (Session) ekranında eskiden amber/kahverengiydi → artık yeşilimsi. Diğer ekranlar zaten yeşilimsi (regresyon: bozulmadı).
+
+### 2e) "Düzenle / Yeniden Gönder" kaldırıldı (kahve/el)
+70. **Aksiyon satırı yok:** Kahve/El okuması (Session) ekranında, senin mesaj balonunun altında eskiden **"Sorunu Düzenle / Yeniden Gönder"** satırı vardı → artık YOK. (Diğer ekranlarda zaten yoktu; "Soruyu Düzenle" modal başlığı editör kutusunda kalabilir — o ayrı, normal.)
+
+**Dosya → test eşlemesi (UI turu):**
+| Değişen dosya | Test |
+|---|---|
+| `services/followUpResponseService.ts` (geniş TR+EN matcher, dil-duyarlı) | 59–62 |
+| `services/personalTarot/astroEngine/personalNumerology` (simpleReply çağrısı eklendi) | 59–62 |
+| `services/readingCommonPrompt.ts` (`getPersonaSelfNameDirective`) + 9 okuma promptu (enjekte) | 63–64 |
+| `screens/PersonalDivinationReadingScreen.tsx` (cast konumu + scroll + onLayout) | 65–68 |
+| `screens/SessionScreen.tsx` (balon yeşil + edit/resend kaldır + scroll-to-start) | 67–70 |
+| `screens/Tarot/Dream/PersonalAstro/Numerology/BirthChart...Screen.tsx` (scroll-to-start) | 67–68 |
+
+> **Regresyon notu (Ozan bilerek baksın):** Bu tur paylaşılan servis (followUpResponseService) + 9 okuma promptu (self-name) + 7 ekran (scroll/balon) dokundu. Her okuma türünü en az bir kez aç → açılış + ilk okuma + 1 takip + 1 "teşekkür" → 5 maddeyi (kısa yanıt, self-name, scroll-başa, balon yeşil, edit/resend yok) birlikte doğrula. I-Ching/Rün'de ek olarak cast konumu (65–66).
+
+---
+
 ## ⏳ KALAN (Faz 5)
 - **5.5 Aura:** ⏸️ Ozan kararı: **UI kararı sonraya** (full UI değişiminde yeniden sorulacak). Ertelendi.
 - **5.6 Bildirimler:** ⏸️ Ozan kararı: **şimdilik kapalı; taksonomi (`24_`) şimdilik böyle**; metin tonu (persona vs konak) sonraya; B2/B7 push yerel-türlerden sonraya (onaylı). NATIVE → YENİ APK gerektirir; ileride hem genişlet hem değiştir.
