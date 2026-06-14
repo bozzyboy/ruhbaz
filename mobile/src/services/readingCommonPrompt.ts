@@ -36,7 +36,7 @@ export function getCommonReadingGuardrailBody(): string {
  * yasağı, kriz, kumar, din, siyaset, cinsel, ayrımcılık/nefret, 3. kişi iddiası, insan-iddiası.
  * Dil-duyarlı (EN'de common.en.md, item 24 İngilizce-dili dahil).
  * YENİ BİR FAL/OKUMA TÜRÜ EKLERSEN: o servisin sistem prompt'una bunu MUTLAKA kat
- * (scripts/check-reading-safety-core.js bekçisi eksik olanı build'de yakalar).
+ * (scripts/check-safety-core.js bekçisi eksik olanı build'de yakalar).
  */
 export function getReadingSafetyCore(): string {
   return extractSection(getCommonReadingIdentityBody(), 'Safety And Boundaries');

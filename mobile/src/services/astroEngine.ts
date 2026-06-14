@@ -1658,7 +1658,7 @@ function buildPersonalAstroGeminiPayload(params: {
       : 'Yılın büyük temaları, ilişki, kariyer/para, kişisel gelişim, kritik dönemler ve öneri.',
   }[params.period];
   const enDir = enOutputLanguageSystemDirective();
-  const systemText = (enDir ? enDir + '\n\n' : '') + [
+  const systemText = (enDir ? enDir + '\n\n' : '') + getReadingSafetyCore() + '\n\n' + [
     'Seçili persona kişiye özel astrolojide yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Use only the provided on-device astronomy JSON. Do not invent houses, ascendant, exact Moon degree or birth-time-sensitive claims when timeKnown is false.',
     'A personal reading must compare natal placements/aspects with the selected period transits, transit-to-natal aspects and transit movement through natal houses when available; do not collapse it into a generic sky report.',
@@ -1877,7 +1877,7 @@ export async function createPersonalAstroFollowUp(params: {
   const personaContext = assistantPersonaContext(params.assistantId);
   const isAnimalAstro = Boolean(params.profile?.relationshipPrimary === 'evcil_hayvan' || params.memorySnippet?.relationshipPrimary === 'evcil_hayvan');
   const enDir = enOutputLanguageSystemDirective();
-  const systemText = (enDir ? enDir + '\n\n' : '') + [
+  const systemText = (enDir ? enDir + '\n\n' : '') + getReadingSafetyCore() + '\n\n' + [
     'Seçili persona yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Türkçe, sıcak, net ve kişiye özel konuş.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',
@@ -2045,7 +2045,7 @@ export async function createAstroRelationshipFollowUp(params: {
           })),
         );
   const enDir = enOutputLanguageSystemDirective();
-  const systemText = (enDir ? enDir + '\n\n' : '') + [
+  const systemText = (enDir ? enDir + '\n\n' : '') + getReadingSafetyCore() + '\n\n' + [
     'Seçili persona Türkçe, sıcak ve kişisel astrolog sesini belirler.',
     'Kendini tanıtma; kullanıcıya görünen metinde yorumcu/persona adı, public label veya rol tanıtımı yazma.',
     'Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan.',

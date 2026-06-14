@@ -18,6 +18,9 @@ const failures = [];
 function must(condition, message) {
   if (!condition) failures.push(message);
 }
+function countMatches(src, re) {
+  return (src.match(re) || []).length;
+}
 
 // 1) getReadingSafetyCore tanimi yerinde mi?
 const commonPromptPath = path.join(servicesDir, 'readingCommonPrompt.ts');
@@ -46,9 +49,17 @@ for (const file of REQUIRED) {
   const filePath = path.join(servicesDir, file);
   const src = fs.existsSync(filePath) ? fs.readFileSync(filePath, 'utf8') : '';
   must(Boolean(src), `Okuma servisi bulunamadi: ${file} (tasindiysa bekciyi guncelle).`);
+  if (!src) continue;
+  // Builder-basina sayim: paylasilan buildBaseSystem tek core cagrisiyla coklu system_instruction'u
+  // kapsar; inline systemText kuran dosyada (astro gibi) HER system_instruction kendi core cagrisini
+  // ister. Yalniz boolean "iceriyor mu" yetmez (astroEngine'de 4 cagri varken 3 prompt cekirdeksiz kalmisti).
+  const siCount = countMatches(src, /system_instruction\s*:/g);
+  const coreCount = countMatches(src, /getReadingSafetyCore\(/g);
+  const baseCount = countMatches(src, /buildBaseSystem\(/g);
+  must(coreCount >= 1, `${file}: getReadingSafetyCore() hic cagrilmiyor. Okuma sistem promptuna guvenlik cekirdegini ekle.`);
   must(
-    src.includes('getReadingSafetyCore('),
-    `${file}: getReadingSafetyCore() cagrilmiyor. Okuma sistem promptuna guvenlik cekirdegini ekle.`,
+    siCount <= coreCount + baseCount,
+    `${file}: ${siCount} system_instruction kurulurken yalniz ${coreCount} getReadingSafetyCore cagrisi var (+${baseCount} buildBaseSystem). Inline systemText kuran her okuma promptuna getReadingSafetyCore ekle.`,
   );
 }
 
