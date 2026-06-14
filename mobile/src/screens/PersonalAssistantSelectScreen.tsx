@@ -18,6 +18,7 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
     if (readingType === 'astro-personal') return 'selin';
     if (readingType === 'numerology-personal' || readingType === 'numerology-core' || readingType === 'numerology-period') return 'berk';
     if (readingType === 'tarot-personal') return 'arin';
+    if (readingType === 'dream-interpretation') return 'ayse';
     if (readingType === 'palm') return 'teoman';
     return AVAILABLE_ASSISTANTS[0].id;
   }, [readingType]);
