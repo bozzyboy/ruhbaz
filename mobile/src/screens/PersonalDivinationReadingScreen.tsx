@@ -402,13 +402,22 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                 <AssistantLoading label={t('divination.openingLoading')} detail={t('session.pleaseWait')} />
               ) : (
                 <>
-                  {hasInterpretation && cast ? <DivinationCastView cast={cast} /> : null}
-                  {(hasInterpretation ? messages.filter((message) => message.id !== OPENING_MESSAGE_ID) : messages).map((message) => (
-                    <View key={message.id} style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
-                      <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
-                      <SelectableFormattedText text={message.text} style={styles.chatText} />
-                    </View>
-                  ))}
+                  {(() => {
+                    const displayMessages = hasInterpretation
+                      ? messages.filter((message) => message.id !== OPENING_MESSAGE_ID)
+                      : messages;
+                    // Cast görseli (hexagram/rün) kullanıcı konu balonunun ALTINDA, ilk okuma balonunun ÜSTÜNDE render olsun.
+                    const firstReadingIndex = displayMessages.findIndex((message) => message.role === 'assistant');
+                    return displayMessages.map((message, index) => (
+                      <React.Fragment key={message.id}>
+                        {hasInterpretation && cast && index === firstReadingIndex ? <DivinationCastView cast={cast} /> : null}
+                        <View style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
+                          <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
+                          <SelectableFormattedText text={message.text} style={styles.chatText} />
+                        </View>
+                      </React.Fragment>
+                    ));
+                  })()}
                 </>
               )}
               {isSending ? <AssistantLoading compact /> : null}
