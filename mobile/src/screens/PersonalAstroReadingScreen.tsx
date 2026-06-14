@@ -111,6 +111,8 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
   const questionBaseRef = useRef('');
   const pageScrollRef = useRef<ScrollView>(null);
   const readingPanelYRef = useRef(0);
+  const followUpsPanelYRef = useRef(0);
+  const messageYRef = useRef<Record<string, number>>({});
 
   const assistantLabel = useMemo(() => getAssistantLabel(assistantId), [assistantId]);
   const normalizedTopicText = normalizeLimitedInput(topicText, OPTIONAL_READING_TOPIC_MAX_CHARS);
@@ -324,15 +326,24 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
     };
   }, []);
 
+  // Takip cevabı gelince en ALTA değil, yeni balonun BAŞINA scroll (kullanıcı cevabın başını görsün).
+  // Mutlak konum = followup paneli Y'si + balonun panel içi Y'si.
   useEffect(() => {
-    if (!isSendingQuestion) return;
-    const t1 = setTimeout(() => pageScrollRef.current?.scrollToEnd({ animated: true }), 0);
-    const t2 = setTimeout(() => pageScrollRef.current?.scrollToEnd({ animated: true }), 80);
+    if (!followUps.length) return;
+    const last = followUps[followUps.length - 1];
+    const scrollToStart = () => {
+      const y = messageYRef.current[last.id];
+      if (typeof y === 'number') {
+        pageScrollRef.current?.scrollTo({ y: Math.max(0, followUpsPanelYRef.current + y - 8), animated: true });
+      }
+    };
+    const t1 = setTimeout(scrollToStart, 0);
+    const t2 = setTimeout(scrollToStart, 120);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [isSendingQuestion, followUps.length]);
+  }, [followUps]);
 
   const latestReadableText = useMemo(() => {
     const lastAssistant = [...followUps].reverse().find((message) => message.role === 'assistant');
@@ -669,11 +680,19 @@ export function PersonalAstroReadingScreen({ route, navigation }: Props) {
         </View>
 
         {text ? (
-          <View style={styles.panel}>
+          <View
+            style={styles.panel}
+            onLayout={(event) => {
+              followUpsPanelYRef.current = event.nativeEvent.layout.y;
+            }}
+          >
             {followUps.map((message) => (
               <View
                 key={message.id}
                 style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
+                onLayout={(event) => {
+                  messageYRef.current[message.id] = event.nativeEvent.layout.y;
+                }}
               >
                 <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                 <SelectableFormattedText text={message.text} style={styles.chatText} />

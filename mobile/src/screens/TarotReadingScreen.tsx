@@ -120,6 +120,8 @@ export function TarotReadingScreen({ route, navigation }: Props) {
   const questionBaseRef = useRef('');
   const pageScrollRef = useRef<ScrollView>(null);
   const readingScrollRef = useRef<ScrollView>(null);
+  const messageYRef = useRef<Record<string, number>>({});
+  const firstReadingScrolledRef = useRef(false);
 
   const isBusy = isLoading || isSendingQuestion || isProfileLoading;
   const wantsInitialQuestion = true;
@@ -263,14 +265,27 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Okuma/cevap gelince en ALTA değil BAŞINA scroll: ilk okumada en üst, sonra son balonun başı.
   useEffect(() => {
-    const t1 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 0);
-    const t2 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 80);
+    if (isProfileLoading) return;
+    const last = messages[messages.length - 1];
+    if (!last) return;
+    const scrollToStart = () => {
+      if (readingText && !firstReadingScrolledRef.current) {
+        firstReadingScrolledRef.current = true;
+        readingScrollRef.current?.scrollTo({ y: 0, animated: true });
+        return;
+      }
+      const y = messageYRef.current[last.id];
+      if (typeof y === 'number') readingScrollRef.current?.scrollTo({ y: Math.max(0, y - 8), animated: true });
+    };
+    const t1 = setTimeout(scrollToStart, 0);
+    const t2 = setTimeout(scrollToStart, 120);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [messages.length, isSendingQuestion]);
+  }, [messages, readingText, isProfileLoading]);
 
   const latestReadableText = useMemo(() => {
     const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant');
@@ -534,9 +549,6 @@ export function TarotReadingScreen({ route, navigation }: Props) {
               contentContainerStyle={styles.readingScrollContent}
               nestedScrollEnabled
               indicatorMode="box"
-              onContentSizeChange={() => {
-                if (isSendingQuestion) readingScrollRef.current?.scrollToEnd({ animated: true });
-              }}
             >
               {isLoading || isProfileLoading ? (
                 <AssistantLoading label={t('flows.tarotLoading')} detail={t('session.pleaseWaitKeepOpen')} />
@@ -547,6 +559,9 @@ export function TarotReadingScreen({ route, navigation }: Props) {
                   <View
                     key={message.id}
                     style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
+                    onLayout={(event) => {
+                      messageYRef.current[message.id] = event.nativeEvent.layout.y;
+                    }}
                   >
                     <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                     <SelectableFormattedText text={message.text} style={styles.chatText} />

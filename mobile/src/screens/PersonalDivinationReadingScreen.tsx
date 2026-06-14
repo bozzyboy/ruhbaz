@@ -98,6 +98,8 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
   const speechRunRef = useRef(0);
   const questionBaseRef = useRef('');
   const readingScrollRef = useRef<ScrollView>(null);
+  const messageYRef = useRef<Record<string, number>>({});
+  const firstReadingScrolledRef = useRef(false);
   const sessionNonceRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
 
   const hasInterpretation = Boolean(interpretationText);
@@ -147,14 +149,29 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
     };
   }, [assistantId, kind, profileId, t]);
 
+  // Okuma/cevap gelince en ALTA değil, yeni içeriğin BAŞINA scroll: ilk okumada en üst
+  // (kullanıcı sorusu + cast görseli + okuma başı görünsün), sonraki cevaplarda son balonun başı.
   useEffect(() => {
-    const t1 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 0);
-    const t2 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 80);
+    if (isLoadingProfile) return;
+    const display = hasInterpretation ? messages.filter((message) => message.id !== OPENING_MESSAGE_ID) : messages;
+    const last = display[display.length - 1];
+    if (!last) return;
+    const scrollToStart = () => {
+      if (hasInterpretation && !firstReadingScrolledRef.current) {
+        firstReadingScrolledRef.current = true;
+        readingScrollRef.current?.scrollTo({ y: 0, animated: true });
+        return;
+      }
+      const y = messageYRef.current[last.id];
+      if (typeof y === 'number') readingScrollRef.current?.scrollTo({ y: Math.max(0, y - 8), animated: true });
+    };
+    const t1 = setTimeout(scrollToStart, 0);
+    const t2 = setTimeout(scrollToStart, 120);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [messages.length, isSending]);
+  }, [messages, hasInterpretation, isLoadingProfile]);
 
   const latestReadableText = useMemo(() => {
     const lastAssistant = [...messages].reverse().find((message) => message.role === 'assistant');
@@ -396,7 +413,6 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
               contentContainerStyle={styles.readingScrollContent}
               nestedScrollEnabled
               indicatorMode="box"
-              onContentSizeChange={() => readingScrollRef.current?.scrollToEnd({ animated: true })}
             >
               {isLoadingProfile ? (
                 <AssistantLoading label={t('divination.openingLoading')} detail={t('session.pleaseWait')} />
@@ -411,7 +427,12 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                     return displayMessages.map((message, index) => (
                       <React.Fragment key={message.id}>
                         {hasInterpretation && cast && index === firstReadingIndex ? <DivinationCastView cast={cast} /> : null}
-                        <View style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
+                        <View
+                          style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
+                          onLayout={(event) => {
+                            messageYRef.current[message.id] = event.nativeEvent.layout.y;
+                          }}
+                        >
                           <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                           <SelectableFormattedText text={message.text} style={styles.chatText} />
                         </View>

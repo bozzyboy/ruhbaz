@@ -109,6 +109,8 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
   const questionBaseRef = useRef('');
   const readingScrollRef = useRef<ScrollView>(null);
   const contextWarningShownRef = useRef(false);
+  const messageYRef = useRef<Record<string, number>>({});
+  const firstReadingScrolledRef = useRef(false);
 
   const assistantLabel = 'Selin';
   const contextTokens = useMemo(() => estimateBirthChartContextTokens(session, questionText), [questionText, session]);
@@ -196,25 +198,28 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
     };
   }, []);
 
+  // Okuma/cevap gelince en ALTA değil BAŞINA scroll: ilk yorum gelince en üst, takip cevabında son balonun başı.
   useEffect(() => {
-    if (!isSendingQuestion) return;
-    const t1 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 0);
-    const t2 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 80);
+    if (isLoading) return;
+    const followUps = session?.followUps || [];
+    const scrollToStart = () => {
+      if (session?.interpretationText && !firstReadingScrolledRef.current) {
+        firstReadingScrolledRef.current = true;
+        readingScrollRef.current?.scrollTo({ y: 0, animated: true });
+        return;
+      }
+      const last = followUps[followUps.length - 1];
+      if (!last) return;
+      const y = messageYRef.current[last.id];
+      if (typeof y === 'number') readingScrollRef.current?.scrollTo({ y: Math.max(0, y - 8), animated: true });
+    };
+    const t1 = setTimeout(scrollToStart, 0);
+    const t2 = setTimeout(scrollToStart, 120);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [isSendingQuestion, session?.followUps.length]);
-
-  useEffect(() => {
-    if (!session?.followUps.length) return;
-    const t1 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 0);
-    const t2 = setTimeout(() => readingScrollRef.current?.scrollToEnd({ animated: true }), 80);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [session?.followUps.length]);
+  }, [session?.interpretationText, session?.followUps, isLoading]);
 
   useEffect(() => {
     if (!session || !isContextLocked || contextWarningShownRef.current) return;
@@ -436,11 +441,6 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
               contentContainerStyle={styles.readingScrollContent}
               nestedScrollEnabled
               indicatorMode="box"
-              onContentSizeChange={() => {
-                if (isSendingQuestion) {
-                  readingScrollRef.current?.scrollToEnd({ animated: true });
-                }
-              }}
             >
               {isLoading ? (
                 <AssistantLoading
@@ -461,6 +461,9 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
                     <View
                       key={message.id}
                       style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}
+                      onLayout={(event) => {
+                        messageYRef.current[message.id] = event.nativeEvent.layout.y;
+                      }}
                     >
                       <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
                       <SelectableFormattedText text={message.text} style={styles.chatText} />
