@@ -79,7 +79,9 @@ export type RootStackParamList = {
       | 'numerology-period'
       | 'angel-personal'
       | 'manifest-chat'
-      | 'dream-interpretation';
+      | 'dream-interpretation'
+      | 'iching-personal'
+      | 'rune-personal';
   };
   PersonalReadingSetup:
     | {
@@ -108,6 +110,11 @@ export type RootStackParamList = {
   DreamInterpretation: {
     profileId: string;
     assistantId: string;
+  };
+  PersonalDivinationReading: {
+    profileId: string;
+    assistantId: string;
+    kind: 'iching' | 'rune';
   };
   TarotSpreadSelect: {
     profileId: string;

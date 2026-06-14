@@ -1117,6 +1117,8 @@ export async function loadAccountState(): Promise<AccountState> {
       reading.readingType === 'birth-chart' ||
       reading.readingType === 'dream-interpretation' ||
       reading.readingType === 'personal-tarot' ||
+      reading.readingType === 'personal-iching' ||
+      reading.readingType === 'personal-rune' ||
       reading.readingType === 'personality-test' ||
       reading.readingType === 'general-astro' ||
       reading.readingType === 'astro-compatibility' ||
@@ -1138,6 +1140,8 @@ export async function loadAccountState(): Promise<AccountState> {
       reading.readingType === 'birth-chart' ||
       reading.readingType === 'dream-interpretation' ||
       reading.readingType === 'personal-tarot' ||
+      reading.readingType === 'personal-iching' ||
+      reading.readingType === 'personal-rune' ||
       reading.readingType === 'personality-test' ||
       reading.readingType === 'general-astro' ||
       reading.readingType === 'astro-compatibility' ||
@@ -3104,6 +3108,12 @@ export function getReadingTypeLabel(reading: ReadingSummary): string {
   }
   if (reading.readingType === 'personal-tarot') {
     return reading.tarotSpread?.spreadName ? `Tarot - ${reading.tarotSpread.spreadName}` : 'Kişiye Özel Tarot';
+  }
+  if (reading.readingType === 'personal-iching') {
+    return 'Kişiye Özel I-Ching';
+  }
+  if (reading.readingType === 'personal-rune') {
+    return 'Kişiye Özel Rün';
   }
   if (reading.readingType === 'personality-test') {
     return reading.testResult?.testName ? `Test - ${reading.testResult.testName}` : 'Kişilik Testi';

@@ -5,7 +5,7 @@ import { getReadingPersonaData } from './personaDataI18n';
 import { getAppLanguage } from '../i18n';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
-export type PersonalReadingDomain = 'coffee' | 'palm' | 'astro' | 'numerology' | 'tarot' | 'dream';
+export type PersonalReadingDomain = 'coffee' | 'palm' | 'astro' | 'numerology' | 'tarot' | 'dream' | 'iching' | 'rune';
 
 const DOMAIN_FORBIDDEN_TERMS: Record<PersonalReadingDomain, RegExp> = {
   coffee: /avuç|el okuması|el çizg|doğum haritası|natal|transit|burç|numeroloji|rüya yorumu/i,
@@ -15,6 +15,9 @@ const DOMAIN_FORBIDDEN_TERMS: Record<PersonalReadingDomain, RegExp> = {
     /kahve|fincan|telve|tabak|avuç|el okuması|el çizg|görsel|fotoğraf|tarot|kart|melek kart|rune|i ching|hexagram|gökyüzü|yıldız|gezegen|natal|transit|burç|ay döng/i,
   tarot: /kahve|fincan|telve|tabak|avuç|el okuması|el çizg|doğum haritası|numeroloji|rüya yorumu/i,
   dream: /kahve|fincan|telve|tabak|avuç|el okuması|el çizg|doğum haritası|numeroloji|tarot|kart/i,
+  // I-Ching/Rün KENDİ sembollerini (hexagram/rün) kullanır; yalnız DİĞER alanların araçları yasak.
+  iching: /kahve|fincan|telve|tabak|avuç|el okuması|el çizg|doğum haritası|natal|transit|burç|numeroloji|tarot|kart|melek kart|rune|rüya yorumu/i,
+  rune: /kahve|fincan|telve|tabak|avuç|el okuması|el çizg|doğum haritası|natal|transit|burç|numeroloji|tarot|kart|melek kart|i ching|hexagram|rüya yorumu/i,
 };
 
 const FALLBACK_CLOSINGS: Record<'astro' | 'numerology', Record<string, string[]>> = {

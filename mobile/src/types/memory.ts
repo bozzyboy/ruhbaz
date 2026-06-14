@@ -522,6 +522,8 @@ export interface ReadingSummary {
     | 'birth-chart'
     | 'dream-interpretation'
     | 'personal-tarot'
+    | 'personal-iching'
+    | 'personal-rune'
     | 'personality-test'
     | 'general-astro'
     | 'astro-compatibility'
