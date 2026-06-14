@@ -30,7 +30,7 @@ import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } fr
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
 import { buildDivinationSpecificityContext } from './readingSpecificityBank';
-import { getReadingSafetyCore } from './readingCommonPrompt';
+import { getReadingSafetyCore, getPersonaSelfNameDirective } from './readingCommonPrompt';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -245,6 +245,7 @@ function buildBaseSystem(params: {
     enOutputLanguageSystemDirective(),
     identity.systemBody,
     getReadingSafetyCore(),
+    getPersonaSelfNameDirective(params.assistantId),
     [
       `## ${domainName} Direktifleri`,
       `- Bu oturumun alanı ${domainName} okuması. Seçili persona yalnızca ses, hitap ve yorum ritmini belirler.`,

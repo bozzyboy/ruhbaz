@@ -23,7 +23,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
-import { getReadingSafetyCore } from './readingCommonPrompt';
+import { getReadingSafetyCore, getPersonaSelfNameDirective } from './readingCommonPrompt';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -259,6 +259,7 @@ function buildBaseSystem(params: {
     enOutputLanguageSystemDirective(),
     identity.systemBody,
     getReadingSafetyCore(),
+    getPersonaSelfNameDirective(params.assistantId),
     [
       '## Rüya Yorumu Direktifleri',
       `- Bu oturumun alanı rüya yorumu. Yorumcunun ana branşı ${identity.primaryDomainLabel} olsa bile kahve, fincan, telve, el çizgisi, tarot kartı veya doğum haritası objeleriyle yorum yapma.`,

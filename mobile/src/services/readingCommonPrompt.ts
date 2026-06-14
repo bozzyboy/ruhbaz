@@ -1,5 +1,7 @@
 import { COMMON_READING_IDENTITY_BODY } from './readingPersonaData';
 import { getCommonReadingIdentityBody } from './personaDataI18n';
+import { getAssistantLabel } from '../config/constants';
+import { getAppLanguage } from '../i18n';
 
 type ReadingCommonDomain = 'coffee' | 'palm' | 'paw' | 'general';
 
@@ -40,6 +42,29 @@ export function getCommonReadingGuardrailBody(): string {
  */
 export function getReadingSafetyCore(): string {
   return extractSection(getCommonReadingIdentityBody(), 'Safety And Boundaries');
+}
+
+/**
+ * PERSONA KENDİ-ADINA HİTAP DİREKTİFİ (Faz 5.4 UI) — APP-GENELİ.
+ * Sorun: kullanıcı okuma içinde personaya kendi adıyla ("Teoman Baba, ...") seslendiğinde
+ * LLM bu adı kullanıcının BABASI/akrabası sanıp "babandan haber" gibi üçüncü-kişi yorumu
+ * üretiyordu. Çözüm: tüm reading sistem prompt'larına personanın public label'ını + "bu hitap
+ * SANA; üçüncü kişi/akraba değil; yine de kendini tanıtma" direktifini kat (getReadingSafetyCore
+ * ile aynı enjeksiyon noktaları). Dil-duyarlı (TR/EN). assistantId boşsa '' döner (regresyonsuz).
+ */
+export function getPersonaSelfNameDirective(assistantId?: string | null): string {
+  const label = (assistantId ? getAssistantLabel(assistantId) : '').trim();
+  if (!label) return '';
+  if (getAppLanguage() === 'en') {
+    return [
+      `- The user may address you as "${label}", possibly with a warm/respectful suffix (e.g. "dear ${label}"). This address is directed AT YOU — it is NOT a third person, a relative, or "your father/mother/sibling". Never treat this name as a separate human, and never say things like "news about your father".`,
+      '- Even so, do not introduce yourself, do not open with your own name, and do not say "I am ...".',
+    ].join('\n');
+  }
+  return [
+    `- Kullanıcı sana "${label}" diye ya da "${label} Baba/Abi/Abla/Teyze/Hocam" gibi saygı ekleriyle hitap edebilir. Bu hitap DOĞRUDAN SANA yöneliktir — üçüncü bir kişi, akraba ya da "baban/annen/kardeşin" değildir. Bu adı ayrı bir insanmış gibi yorumlama; "babandan/annenden haber var" türü cümleler kurma.`,
+    '- Yine de kendini tanıtma, adınla başlama, "Ben ..." diye açma.',
+  ].join('\n');
 }
 
 function coffeeVisionProtocol() {

@@ -27,7 +27,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
-import { getReadingSafetyCore } from './readingCommonPrompt';
+import { getReadingSafetyCore, getPersonaSelfNameDirective } from './readingCommonPrompt';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -261,6 +261,7 @@ function buildBaseSystem(params: {
     enOutputLanguageSystemDirective(),
     identity.systemBody,
     getReadingSafetyCore(),
+    getPersonaSelfNameDirective(params.assistantId),
     [
       '## Tarot Direktifleri',
       '- Bu oturum tarot açılımıdır. Seçili persona yalnızca ses, hitap ve yorum ritmini belirler.',
