@@ -488,6 +488,55 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
     hasWorldCities &&
     (profileDraft.birthCity === CITY_OTHER_VALUE || (Boolean(profileDraft.birthCity) && !cityIsKnownWorld));
 
+  // Perf: picker seçeneklerini memoize et. Aksi halde her tuş vuruşunda (TextInput'lar
+  // profileDraft'i değiştirir) JSX içindeki inline .map'ler 199 ülke + ~617 şehir dizisini
+  // yeniden kurar; BrandedPicker artık FlatList ile virtualize ediyor ama dizi inşası da
+  // ana iş parçacığını yorardı. t yalnız dil değişiminde değişir → tuşlamada yeniden kurulmaz.
+  const countryPickerOptions = useMemo(
+    () => [{ label: t('profile.countrySelect'), value: 'sec' }, ...countryOptions],
+    [countryOptions, t],
+  );
+  const turkeyCityPickerOptions = useMemo(
+    () => [{ label: t('profile.citySelect'), value: 'sec' }, ...turkeyCities.map((city) => ({ label: city, value: city }))],
+    [turkeyCities, t],
+  );
+  const worldCityPickerOptions = useMemo(
+    () => [
+      { label: t('profile.citySelect'), value: 'sec' },
+      ...worldCityOptions,
+      { label: t('profile.cityOther'), value: CITY_OTHER_VALUE },
+    ],
+    [worldCityOptions, t],
+  );
+  const districtPickerOptions = useMemo(
+    () => [
+      { label: t('profile.districtSelect'), value: 'sec' },
+      ...selectedCityDistricts.map((district) => ({ label: district, value: district })),
+      { label: t('profile.districtOther'), value: DISTRICT_OTHER_VALUE },
+    ],
+    [selectedCityDistricts, t],
+  );
+  const yearPickerOptions = useMemo(
+    () => [{ label: t('profile.yearLabel'), value: 'sec' }, ...YEAR_OPTIONS.map((year) => ({ label: year, value: year }))],
+    [t],
+  );
+  const monthPickerOptions = useMemo(
+    () => [{ label: t('profile.monthLabel'), value: 'sec' }, ...MONTH_OPTIONS.map((month) => ({ label: t(month.labelKey), value: month.value }))],
+    [t],
+  );
+  const dayPickerOptions = useMemo(
+    () => [{ label: t('profile.dayLabel'), value: 'sec' }, ...DAY_OPTIONS.map((day) => ({ label: day, value: day }))],
+    [t],
+  );
+  const hourPickerOptions = useMemo(
+    () => [{ label: t('profile.hourLabel'), value: 'sec' }, ...HOUR_OPTIONS.map((hour) => ({ label: hour, value: hour }))],
+    [t],
+  );
+  const minutePickerOptions = useMemo(
+    () => [{ label: t('profile.minuteLabel'), value: 'sec' }, ...MINUTE_OPTIONS.map((minute) => ({ label: minute, value: minute }))],
+    [t],
+  );
+
   const loadState = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -844,7 +893,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthYear)}
                       onValueChange={(value) => handleDraftChange('birthYear', value === 'sec' ? '' : value)}
-                      options={[{ label: t('profile.yearLabel'), value: 'sec' }, ...YEAR_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={yearPickerOptions}
                       compact
                     />
                   </View>
@@ -853,7 +902,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthMonth)}
                       onValueChange={(value) => handleDraftChange('birthMonth', value === 'sec' ? '' : value)}
-                      options={[{ label: t('profile.monthLabel'), value: 'sec' }, ...MONTH_OPTIONS.map((option) => ({ label: t(option.labelKey), value: option.value }))]}
+                      options={monthPickerOptions}
                       compact
                     />
                   </View>
@@ -862,7 +911,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthDay)}
                       onValueChange={(value) => handleDraftChange('birthDay', value === 'sec' ? '' : value)}
-                      options={[{ label: t('profile.dayLabel'), value: 'sec' }, ...DAY_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={dayPickerOptions}
                       compact
                     />
                   </View>
@@ -875,7 +924,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthHour)}
                       onValueChange={(value) => handleDraftChange('birthHour', value === 'sec' ? '' : value)}
-                      options={[{ label: t('profile.hourLabel'), value: 'sec' }, ...HOUR_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={hourPickerOptions}
                       compact
                     />
                   </View>
@@ -884,7 +933,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     <BrandedPicker
                       selectedValue={pickerValue(profileDraft.birthMinute)}
                       onValueChange={(value) => handleDraftChange('birthMinute', value === 'sec' ? '' : value)}
-                      options={[{ label: t('profile.minuteLabel'), value: 'sec' }, ...MINUTE_OPTIONS.map((option) => ({ label: option, value: option }))]}
+                      options={minutePickerOptions}
                       compact
                     />
                   </View>
@@ -899,7 +948,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                     handleDraftChange('birthCity', '');
                     handleDraftChange('birthDistrict', '');
                   }}
-                  options={[{ label: t('profile.countrySelect'), value: 'sec' }, ...countryOptions.map((option) => ({ label: option.label, value: option.value }))]}
+                  options={countryPickerOptions}
                 />
                 {isTurkeyBirthCountry ? (
                   <BrandedPicker
@@ -913,7 +962,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       handleDraftChange('birthCity', value);
                       handleDraftChange('birthDistrict', '');
                     }}
-                    options={[{ label: t('profile.citySelect'), value: 'sec' }, ...turkeyCities.map((option) => ({ label: option, value: option }))]}
+                    options={turkeyCityPickerOptions}
                   />
                 ) : hasWorldCities ? (
                   <BrandedPicker
@@ -927,11 +976,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       handleDraftChange('birthCity', value);
                       handleDraftChange('birthDistrict', '');
                     }}
-                    options={[
-                      { label: t('profile.citySelect'), value: 'sec' },
-                      ...worldCityOptions.map((option) => ({ label: option.label, value: option.value })),
-                      { label: t('profile.cityOther'), value: CITY_OTHER_VALUE },
-                    ]}
+                    options={worldCityPickerOptions}
                   />
                 ) : (
                   <TextInput
@@ -969,11 +1014,7 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
                       }
                       handleDraftChange('birthDistrict', value);
                     }}
-                    options={[
-                      { label: t('profile.districtSelect'), value: 'sec' },
-                      ...selectedCityDistricts.map((option) => ({ label: option, value: option })),
-                      { label: t('profile.districtOther'), value: DISTRICT_OTHER_VALUE },
-                    ]}
+                    options={districtPickerOptions}
                   />
                 ) : null}
                 {showDistrictFreeform ? (

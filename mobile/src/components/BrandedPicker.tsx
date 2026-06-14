@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 export type BrandedPickerOption<T extends string> = {
   label: string;
@@ -15,7 +16,12 @@ type Props<T extends string> = {
   placeholder?: string;
   disabled?: boolean;
   compact?: boolean;
+  /** Uzun listelerde arama kutusu. Verilmezse eşik (20) aşılınca otomatik açılır. */
+  searchable?: boolean;
 };
+
+// Bu eşiğin üstündeki listelerde arama kutusu otomatik gösterilir (ülke/şehir/yıl gibi).
+const SEARCH_AUTO_THRESHOLD = 20;
 
 export function BrandedPicker<T extends string>({
   label,
@@ -25,19 +31,33 @@ export function BrandedPicker<T extends string>({
   placeholder = 'Seç',
   disabled = false,
   compact = false,
+  searchable,
 }: Props<T>) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
+  const [query, setQuery] = useState('');
   const selected = useMemo(() => options.find((option) => option.value === selectedValue) || null, [options, selectedValue]);
+  const showSearch = searchable ?? options.length > SEARCH_AUTO_THRESHOLD;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLocaleLowerCase('tr-TR');
+    if (!showSearch || !q) return options;
+    return options.filter((option) => option.label.toLocaleLowerCase('tr-TR').includes(q));
+  }, [options, query, showSearch]);
+
+  const open = () => {
+    if (disabled) return;
+    setQuery('');
+    setVisible(true);
+  };
+  const close = () => setVisible(false);
 
   return (
     <>
       <TouchableOpacity
         style={[styles.trigger, compact && styles.triggerCompact, disabled && styles.disabled]}
         activeOpacity={0.88}
-        onPress={() => {
-          if (!disabled) setVisible(true);
-        }}
+        onPress={open}
         disabled={disabled}
       >
         {label ? <Text style={styles.inlineLabel}>{label}</Text> : null}
@@ -46,38 +66,64 @@ export function BrandedPicker<T extends string>({
         </Text>
       </TouchableOpacity>
       {visible ? (
-        <Modal visible transparent animationType="fade" onRequestClose={() => setVisible(false)}>
+        <Modal visible transparent animationType="fade" onRequestClose={close}>
           <View style={[styles.overlay, { paddingBottom: Math.max(insets.bottom, 14) }]}>
             <View style={styles.card}>
               <View style={styles.header}>
                 <Text style={styles.title}>{label || placeholder}</Text>
-                <TouchableOpacity onPress={() => setVisible(false)}>
-                  <Text style={styles.closeText}>Kapat</Text>
+                <TouchableOpacity onPress={close}>
+                  <Text style={styles.closeText}>{t('common.close')}</Text>
                 </TouchableOpacity>
               </View>
-              <ScrollView style={styles.optionScroll} contentContainerStyle={styles.optionContent}>
-                {options.map((option) => {
-                  const active = option.value === selectedValue;
+              {showSearch ? (
+                <TextInput
+                  style={styles.search}
+                  value={query}
+                  onChangeText={setQuery}
+                  placeholder={t('common.search')}
+                  placeholderTextColor="rgba(255,255,255,0.42)"
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  selectionColor="#D4A574"
+                />
+              ) : null}
+              <FlatList
+                data={filtered}
+                style={styles.optionScroll}
+                contentContainerStyle={styles.optionContent}
+                keyboardShouldPersistTaps="handled"
+                keyExtractor={(item) => item.value}
+                initialNumToRender={16}
+                maxToRenderPerBatch={16}
+                windowSize={9}
+                removeClippedSubviews
+                ItemSeparatorComponent={renderSeparator}
+                ListEmptyComponent={showSearch ? <Text style={styles.emptyText}>{t('common.noResults')}</Text> : null}
+                renderItem={({ item }) => {
+                  const active = item.value === selectedValue;
                   return (
                     <TouchableOpacity
-                      key={option.value}
                       style={[styles.optionRow, active && styles.optionRowActive]}
                       onPress={() => {
-                        onValueChange(option.value);
-                        setVisible(false);
+                        onValueChange(item.value);
+                        close();
                       }}
                     >
-                      <Text style={[styles.optionText, active && styles.optionTextActive]}>{option.label}</Text>
+                      <Text style={[styles.optionText, active && styles.optionTextActive]}>{item.label}</Text>
                     </TouchableOpacity>
                   );
-                })}
-              </ScrollView>
+                }}
+              />
             </View>
           </View>
         </Modal>
       ) : null}
     </>
   );
+}
+
+function renderSeparator() {
+  return <View style={styles.separator} />;
 }
 
 const styles = StyleSheet.create({
@@ -117,8 +163,21 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
   title: { color: '#D4A574', fontSize: 16, fontWeight: '800', flex: 1, paddingRight: 10 },
   closeText: { color: '#E8C49A', fontSize: 13, fontWeight: '800' },
+  search: {
+    borderWidth: 1,
+    borderColor: 'rgba(168,130,82,0.3)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#FFF5E8',
+    backgroundColor: 'rgba(0,0,0,0.22)',
+    fontSize: 14,
+    marginBottom: 10,
+  },
   optionScroll: { flexShrink: 1 },
-  optionContent: { gap: 8, paddingBottom: 4 },
+  optionContent: { paddingBottom: 4 },
+  separator: { height: 8 },
+  emptyText: { color: 'rgba(255,255,255,0.5)', fontSize: 13, textAlign: 'center', paddingVertical: 16 },
   optionRow: {
     borderRadius: 12,
     borderWidth: 1,

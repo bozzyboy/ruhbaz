@@ -20,6 +20,8 @@ export const tr = {
     yes: 'Evet',
     no: 'Hayır',
     tryAgain: 'Tekrar Dene',
+    search: 'Ara...',
+    noResults: 'Sonuç bulunamadı',
   },
   nav: {
     home: 'Ruhbaz',

@@ -22,6 +22,8 @@ export const en: TranslationResource = {
     yes: 'Yes',
     no: 'No',
     tryAgain: 'Try Again',
+    search: 'Search...',
+    noResults: 'No results found',
   },
   nav: {
     home: 'Ruhbaz',
