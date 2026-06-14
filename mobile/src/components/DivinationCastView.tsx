@@ -1,19 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { useTranslation } from 'react-i18next';
 import IChingSymbol from './IChingSymbol';
 import type { DivinationCast } from '../services/personalDivinationService';
 
 // Kişisel I-Ching/Rün okumasının çekiliş GÖRSELİ (koyu tema). Genel okumalardaki gibi:
-// I-Ching = şimdiki hexagram (→ dönüşüm hexagramı) + altlarında isimler; Rün = 3 rün glyph'i + altlarında anlam.
+// I-Ching = şimdiki hexagram (→ dönüşüm hexagramı) + altlarında isimler; Rün = 3 glyph + orijinal/TR isim.
 // Sadece sembolleri gösterir; yorum metni ekranda ayrıca akar.
 
-const RUNE_POSITION_KEYS = ['divination.runePosRoot', 'divination.runePosNow', 'divination.runePosPath'];
-
 export function DivinationCastView({ cast }: { cast: DivinationCast }) {
-  const { t } = useTranslation();
-
   if (cast.kind === 'iching' && cast.iching) {
     const ic = cast.iching;
     return (
@@ -45,7 +40,7 @@ export function DivinationCastView({ cast }: { cast: DivinationCast }) {
     return (
       <View style={styles.panel}>
         <View style={styles.runeRow}>
-          {cast.rune.runes.map((rune, index) => (
+          {cast.rune.runes.map((rune) => (
             <View key={rune.positionNo} style={styles.runeItem}>
               <Svg width={46} height={46} viewBox="0 0 100 100">
                 <Path
@@ -58,11 +53,11 @@ export function DivinationCastView({ cast }: { cast: DivinationCast }) {
                   transform="scale(0.7) translate(22, 10)"
                 />
               </Svg>
+              <Text style={styles.runeName} numberOfLines={1}>
+                {rune.rune}
+              </Text>
               <Text style={styles.runeKeyword} numberOfLines={1}>
                 {rune.keyword}
-              </Text>
-              <Text style={styles.runePos} numberOfLines={1}>
-                {t(RUNE_POSITION_KEYS[index] || RUNE_POSITION_KEYS[RUNE_POSITION_KEYS.length - 1])}
               </Text>
             </View>
           ))}
@@ -99,8 +94,8 @@ const styles = StyleSheet.create({
   arrow: { color: 'rgba(232,196,154,0.7)', fontSize: 22, marginTop: 18 },
   runeRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', gap: 16 },
   runeItem: { alignItems: 'center', maxWidth: 100 },
-  runeKeyword: { color: '#FFF5E8', fontSize: 12, fontWeight: '800', textAlign: 'center', marginTop: 6 },
-  runePos: { color: 'rgba(255,255,255,0.55)', fontSize: 10, textAlign: 'center', marginTop: 2 },
+  runeName: { color: '#E8C49A', fontSize: 12, fontWeight: '800', textAlign: 'center', marginTop: 6, letterSpacing: 0.3 },
+  runeKeyword: { color: 'rgba(255,255,255,0.72)', fontSize: 11, textAlign: 'center', marginTop: 2 },
 });
 
 export default DivinationCastView;
