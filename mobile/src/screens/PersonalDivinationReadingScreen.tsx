@@ -17,6 +17,7 @@ import { TokenUsage } from '../components/TokenUsage';
 import {
   applyMemoryAnalysisResult,
   appendReadingDerivedTheme,
+  appendReadingSpecificityUsage,
   appendReadingSummary,
   appendUserConversationMemory,
   appendUserReadingIntentMemory,
@@ -253,6 +254,9 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         setInterpretationText(result.text);
         setMessages((current) => [...current, makeMessage('assistant', result.text)]);
         if (result.closingSentence) setUsedClosings((current) => [...current, result.closingSentence]);
+        if (result.specificityUsage?.events?.length) {
+          await appendReadingSpecificityUsage(profileId, result.specificityUsage).catch(() => {});
+        }
         await addUsage(readingName, result);
       } else {
         await appendUserConversationMemory(profileId, text).catch(() => {});

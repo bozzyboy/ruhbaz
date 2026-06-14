@@ -29,6 +29,7 @@ import { formatPromptMemoryPack } from './memoryPromptPackFormatter';
 import { formatPetMentionMemoryContext, formatStandardPersonalMemoryContext } from './personalMemoryPromptContext';
 import { cleanFollowUpReply, FOLLOW_UP_CHAT_CONTRACT, getSimpleFollowUpReply } from './followUpResponseService';
 import { enOutputLanguageSystemDirective, enOutputLanguageUserTurnReminder } from './promptLanguage';
+import { buildDivinationSpecificityContext } from './readingSpecificityBank';
 
 type PersonaId = keyof typeof READING_PERSONA_DATA;
 
@@ -298,6 +299,14 @@ export async function createPersonalDivinationReading(params: {
     isAnimalProfile: isAnimal,
   });
   const domainName = params.kind === 'iching' ? 'I-Ching' : 'Rün';
+  // Anlamsal + tekrar-önlemeli 2 micro life event; kişiye özel dokuyu güçlendirir,
+  // usage döner ki ekran appendReadingSpecificityUsage ile kaydedip tekrarı önlesin.
+  const specificity = buildDivinationSpecificityContext({
+    seed: `${params.profile.profileId}:${params.kind}:${params.question?.slice(0, 80) || 'genel'}`,
+    memorySnippet: params.memorySnippet,
+    focusQuestion: params.question,
+    messages: [],
+  });
   const userText = [
     `Profil adı: ${params.profile.displayName}`,
     buildAnimalProfileInstructionFromProfile(params.profile),
@@ -314,6 +323,7 @@ export async function createPersonalDivinationReading(params: {
     isAnimal
       ? 'Yorumu önce hayvanın genel enerjisi ve güven/oyun ritmiyle başlat; sonra sembolleri ev içi davranış, duyular ve sahibiyle bağı üzerinden işle. Son bölümde sahibine uygulanabilir yumuşak bir öneri ver.'
       : 'Yorumu önce çekilişin genel enerjisiyle başlat, sonra sembollerin ilişkisini işle, son bölümde uygulanabilir bir yön ve yumuşak toparlama ver.',
+    specificity.text,
     PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION,
     enOutputLanguageUserTurnReminder(),
   ]
@@ -345,6 +355,7 @@ export async function createPersonalDivinationReading(params: {
     closingSentence: completed.closingSentence,
     modelName: data.model,
     usage: data.usage,
+    specificityUsage: specificity.usage,
   };
 }
 
