@@ -261,6 +261,37 @@ export function isHealthClosingSentence(sentence: string) {
   return HEALTH_CLOSING_TERMS.test((sentence || '').toLocaleLowerCase('tr-TR'));
 }
 
+// Kapanış cümleleri sabit blok olarak seçilir; profilin cinsiyet/yaşına uyarlanamaz. Bu yüzden
+// cinsiyet/yaş ima eden hitap kelimelerini (aslanım, güzelim, kızım, evladım...) kapanıştan tamamen
+// çıkarırız (cümle kalır, hitap düşer). Nötr hitaplar (canım, dostum, tatlım) korunur. Çok-kelimeli
+// kalıplar tek kelimelerden önce gelmeli (doğru eşleşme için).
+const CLOSING_ADDRESS_TERMS = [
+  'güzel kızım', 'güzel oğlum', 'güzel evladım', 'güzel yavrum', 'güzel kuzum', 'güzel çocuğum',
+  'aslan oğlum', 'güzel kız', 'güzel oğlan', 'güzel oğul',
+  'aslanım', 'güzelim', 'kızım', 'oğlum', 'evladım', 'yavrucuğum', 'yavrum', 'kuzucuğum', 'kuzum', 'çocuğum',
+  'my son', 'my daughter', 'my girl', 'my boy', 'my child',
+];
+
+function stripClosingAddress(sentence: string): string {
+  if (!sentence) return sentence;
+  let out = sentence;
+  for (const term of CLOSING_ADDRESS_TERMS) {
+    const esc = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // cümle ortası/sonu: " <hitap>" ya da ", <hitap>" -> kaldır (sonraki noktalama korunur)
+    out = out.replace(new RegExp(`[ ]*,?[ ]+${esc}(?=[ ,;.:!?…]|$)`, 'gi'), '');
+    // cümle başı: "<hitap>, " -> kaldır
+    out = out.replace(new RegExp(`(^|[.!?…][ ]+)${esc}[ ]*,?[ ]*`, 'gi'), '$1');
+  }
+  out = out
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\s+([,;.:!?…])/g, '$1')
+    .replace(/([,;])\s*([,;])/g, '$1')
+    .replace(/,\s*\./g, '.')
+    .trim();
+  if (!out) return out;
+  return out.charAt(0).toLocaleUpperCase('tr-TR') + out.slice(1);
+}
+
 function safeClosingOptions(id: PersonaId, domain: PersonalReadingDomain, allowHealthClosing = false) {
   const forbidden = DOMAIN_FORBIDDEN_TERMS[domain];
   const library = getReadingPersonaData()[id].closingLibrary as Record<string, readonly string[]>;
@@ -274,7 +305,7 @@ function safeClosingOptions(id: PersonaId, domain: PersonalReadingDomain, allowH
     );
   const fallbackByDomain = domain === 'astro' || domain === 'numerology' ? FALLBACK_CLOSINGS[domain] : null;
   const fallback = fallbackByDomain ? fallbackByDomain[id] || fallbackByDomain['suzan'] : [];
-  return options.length ? options : fallback;
+  return (options.length ? options : fallback).map(stripClosingAddress).filter(Boolean);
 }
 
 export function selectPersonaClosingSentence(params: {
@@ -300,10 +331,13 @@ export function selectAnimalClosingSentence(params: {
 }) {
   const id = personaId(params.assistantId);
   const used = new Set((params.usedClosings || []).map((item) => item.trim()).filter(Boolean));
-  const animalPool =
+  const animalPool = (
     getAppLanguage() === 'en'
       ? ANIMAL_CLOSINGS_EN
-      : ANIMAL_PERSONA_CLOSINGS[id] || ANIMAL_PERSONA_CLOSINGS['suzan'];
+      : ANIMAL_PERSONA_CLOSINGS[id] || ANIMAL_PERSONA_CLOSINGS['suzan']
+  )
+    .map(stripClosingAddress)
+    .filter(Boolean);
   const options = animalPool.filter((sentence) => !used.has(sentence));
   const pool = options.length ? options : animalPool;
   return pool[hashString(`animal:${id}:${params.seed}:${used.size}`) % pool.length] || '';
