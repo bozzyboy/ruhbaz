@@ -28,6 +28,7 @@ import { PersonalAstroReadingScreen } from './src/screens/PersonalAstroReadingSc
 import { PersonalBirthChartScreen } from './src/screens/PersonalBirthChartScreen';
 import { BirthChartInterpretationScreen } from './src/screens/BirthChartInterpretationScreen';
 import { DreamInterpretationScreen } from './src/screens/DreamInterpretationScreen';
+import { PersonalDivinationReadingScreen } from './src/screens/PersonalDivinationReadingScreen';
 import { PersonalNumerologyReadingScreen } from './src/screens/PersonalNumerologyReadingScreen';
 import { TarotSpreadSelectScreen } from './src/screens/TarotSpreadSelectScreen';
 import { TarotReadingScreen } from './src/screens/TarotReadingScreen';
@@ -303,6 +304,11 @@ export default function App() {
             name="DreamInterpretation"
             component={DreamInterpretationScreen}
             options={{ title: t('nav.dreamInterpretation') }}
+          />
+          <Stack.Screen
+            name="PersonalDivinationReading"
+            component={PersonalDivinationReadingScreen}
+            options={({ route }) => ({ title: route.params.kind === 'iching' ? t('divination.ichingMode') : t('divination.runeMode') })}
           />
           <Stack.Screen
             name="TarotSpreadSelect"

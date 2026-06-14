@@ -565,6 +565,7 @@ export const en: TranslationResource = {
     // DreamInterpretationScreen
     memoryMaintenanceTitle: 'Memory Maintenance',
     dreamFailed: 'The dream reading couldn’t be generated.',
+    readingFailed: 'The reading couldn’t be generated.',
     sleepDreamHeader: 'Sleep/Dream Interpretation',
     sleepOpeningLoading: 'Opening the sleep reading',
     dreamOpeningLoading: 'Opening the dream reading',

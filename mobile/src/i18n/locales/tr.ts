@@ -563,6 +563,7 @@ export const tr = {
     // DreamInterpretationScreen
     memoryMaintenanceTitle: 'Hafıza Bakımı',
     dreamFailed: 'Rüya yorumu üretilemedi.',
+    readingFailed: 'Okuma üretilemedi.',
     sleepDreamHeader: 'Uyku/Rüya Yorumu',
     sleepOpeningLoading: 'Uyku yorumu açılıyor',
     dreamOpeningLoading: 'Rüya yorumu açılıyor',

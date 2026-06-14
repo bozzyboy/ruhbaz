@@ -27,7 +27,9 @@ type ReadingTypeItem = {
     | 'numerology-period'
     | 'angel-personal'
     | 'manifest-chat'
-    | 'dream-interpretation';
+    | 'dream-interpretation'
+    | 'iching-personal'
+    | 'rune-personal';
   title: string;
   shortTitle: string;
   description: string;
@@ -183,6 +185,20 @@ export function PersonalReadingsScreen({ navigation, route }: Props) {
         title: t('readings.typeDream'),
         shortTitle: t('readings.shortDream'),
         description: t('readings.descDreamSalon'),
+        currentlyAvailable: true,
+      },
+      {
+        id: 'iching-personal',
+        title: t('readings.typeIChingPersonal'),
+        shortTitle: t('readings.shortIChing'),
+        description: t('readings.descIChingSalon'),
+        currentlyAvailable: true,
+      },
+      {
+        id: 'rune-personal',
+        title: t('readings.typeRunePersonal'),
+        shortTitle: t('readings.shortRune'),
+        description: t('readings.descRuneSalon'),
         currentlyAvailable: true,
       },
     ],

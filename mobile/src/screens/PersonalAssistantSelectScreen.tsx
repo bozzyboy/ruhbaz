@@ -19,6 +19,8 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
     if (readingType === 'numerology-personal' || readingType === 'numerology-core' || readingType === 'numerology-period') return 'berk';
     if (readingType === 'tarot-personal') return 'arin';
     if (readingType === 'dream-interpretation') return 'ayse';
+    if (readingType === 'iching-personal') return 'teoman';
+    if (readingType === 'rune-personal') return 'arin';
     if (readingType === 'palm') return 'teoman';
     return AVAILABLE_ASSISTANTS[0].id;
   }, [readingType]);
@@ -37,6 +39,8 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
     if (readingType === 'numerology-period') return t('readings.typeNumerologyPeriod');
     if (readingType === 'numerology-personal') return t('readings.typeNumerologyPersonal');
     if (readingType === 'dream-interpretation') return t('readings.typeDream');
+    if (readingType === 'iching-personal') return t('readings.typeIChingPersonal');
+    if (readingType === 'rune-personal') return t('readings.typeRunePersonal');
     if (readingType === 'angel-personal') return t('readings.typeAngelPersonal');
     return t('readings.typeManifestChat');
   }, [readingType, t]);
@@ -90,6 +94,15 @@ export function PersonalAssistantSelectScreen({ navigation, route }: Props) {
                 navigation.navigate('DreamInterpretation', {
                   profileId,
                   assistantId: selectedAssistantId,
+                });
+                return;
+              }
+
+              if (readingType === 'iching-personal' || readingType === 'rune-personal') {
+                navigation.navigate('PersonalDivinationReading', {
+                  profileId,
+                  assistantId: selectedAssistantId,
+                  kind: readingType === 'iching-personal' ? 'iching' : 'rune',
                 });
                 return;
               }
