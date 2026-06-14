@@ -1524,6 +1524,113 @@ function selectCues(seedText: string, recent: string) {
   ).slice(0, CUES_PER_READING);
 }
 
+// Anlamsal sinyal: kullanıcının girdiği konu + userStated/okuma-türevi temalardan
+// 4+ harfli kelimeler. Türkçe ek çeşitliliğini substring eşleşmesi kabaca yakalar
+// (ör. "para" -> "parayı", "Para ve Bütçe" grubu). Embedding gerekmez (kaba anlamsallık).
+function signalTokenSet(parts: Array<string | null | undefined>): Set<string> {
+  return new Set(
+    parts
+      .filter(Boolean)
+      .join(' ')
+      .toLocaleLowerCase('tr-TR')
+      .split(/[^\p{L}]+/u)
+      .filter((token) => token.length >= 4),
+  );
+}
+
+function semanticEventScore(signalTokens: Set<string>, item: SpecificityItem): number {
+  if (!signalTokens.size) return 0;
+  const haystack = `${item.group} ${item.label}`.toLocaleLowerCase('tr-TR');
+  let score = 0;
+  for (const token of signalTokens) {
+    if (haystack.includes(token)) score += 1;
+  }
+  return score;
+}
+
+// I-Ching/Rün kişisel okuması için somut hayat olayı seçimi (count=2 varsayılan):
+// (a) tekrar-önlemeli (recentText -> usedLifeEvents), (b) grup-çeşitli, (c) ANLAMSAL —
+// girilen konu + son dönem userStated/okuma temalarına yakın olaylar öne çıkar,
+// (d) hayvan-duyarlı. selectEvents/buildSpecificityContext'i BOZMADAN paralel yol.
+export function selectDivinationLifeEvents(params: {
+  seed: string;
+  count?: number;
+  memorySnippet?: ProfileMemorySnippet | null;
+  focusQuestion?: string | null;
+  messages?: ReadingMessage[];
+}): SpecificityItem[] {
+  const count = params.count ?? 2;
+  const isAnimalProfile = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
+  const messages = params.messages || [];
+  const recent = recentText(params.memorySnippet, messages);
+  const allowHealthEvents = userAskedHealthConcern(
+    [params.focusQuestion || '', ...messages.filter((message) => message.role === 'user').map((message) => message.text || '')].join(' '),
+  );
+  const healthGroup = isAnimalProfile ? 'Hayvan Sağlık Dikkati' : 'Sağlık Rutini';
+  const bank = isAnimalProfile ? ANIMAL_LIFE_EVENT_BANK : LIFE_EVENT_BANK;
+
+  const signal = signalTokenSet([
+    params.focusQuestion,
+    ...(params.memorySnippet?.userStatedTopics || []),
+    ...(params.memorySnippet?.userTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
+    ...(params.memorySnippet?.readingTopics || []),
+    ...(params.memorySnippet?.readingTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
+  ]);
+
+  const pool = bank.filter(
+    (item) =>
+      !recent.includes(item.label.toLocaleLowerCase('tr-TR')) && (allowHealthEvents || item.group !== healthGroup),
+  );
+  // Önce seeded shuffle (deterministik tie-break), sonra anlamsal skora göre stabil sırala.
+  const ordered = shuffleSeeded(pool, `${params.seed}:divination-events`)
+    .map((item) => ({ item, score: semanticEventScore(signal, item) }))
+    .sort((a, b) => b.score - a.score);
+
+  const selected: SpecificityItem[] = [];
+  for (const { item } of ordered) {
+    if (selected.some((chosen) => chosen.group === item.group)) continue;
+    selected.push(item);
+    if (selected.length >= count) break;
+  }
+  return selected;
+}
+
+// I-Ching/Rün okuması için "Somut Hayat Malzemesi" prompt bloğu (sembol/taş çerçeveli,
+// kahve telve/çizgi dili YOK). Dönen usage servis tarafından appendReadingSpecificityUsage
+// ile kaydedilir; böylece tekrar-önleme (recentText) sonraki okumalarda çalışır.
+export function buildDivinationSpecificityContext(params: {
+  seed: string;
+  memorySnippet?: ProfileMemorySnippet | null;
+  focusQuestion?: string | null;
+  messages?: ReadingMessage[];
+  count?: number;
+}): { text: string; usage: SpecificityUsage } {
+  const events = selectDivinationLifeEvents({
+    seed: params.seed,
+    count: params.count ?? 2,
+    memorySnippet: params.memorySnippet,
+    focusQuestion: params.focusQuestion,
+    messages: params.messages,
+  });
+  if (!events.length) return { text: '', usage: { events: [], cues: [] } };
+  const isAnimalProfile = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
+  return {
+    text: [
+      '## Somut Hayat Malzemesi',
+      isAnimalProfile
+        ? '- Aşağıdaki adaylar yalnızca hayvanın dünyasından seçildi; sembolleri bu küçük gündelik hâllere bağla, insan hayatı (iş, ilişki, para, okul) teması kurma.'
+        : '- Okuma soyut ruh hâli yazısı değil; aşağıdaki gündelik olay adaylarını çekilen sembollerin/taşların anlamına doğal biçimde bağla.',
+      '- Bu adayları yorumun içine yedir ama liste gibi sayma; sembolik dilin parçası olsunlar.',
+      '- Bunlar kesin bilgi değildir; "olacak" diye hüküm verme. "Görünen ihtimal", "bu sembol şunu düşündürüyor", "yakına düşen hâl" gibi olasılık dili kullan.',
+      '- Seçilen olayları bu okumaya özgü tut; aynı olayı tekrarlama.',
+      `- Olay adayları: ${events.map((item) => `${item.group}: ${item.label}`).join('; ')}.`,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+    usage: { events, cues: [] },
+  };
+}
+
 export function buildSpecificityContext(params: {
   sessionId: string;
   profileName: string;
