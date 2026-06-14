@@ -127,10 +127,18 @@ function nearEachOther(reA: RegExp, reB: RegExp, text: string, maxDistance = 80)
 // R2 — kriz: NİYET kalıpları. ("ol" gibi geniş ekler bilinçli YOK — "yoluna girecek" tetiklemez.)
 // EN kriz NİYET kalıpları (Faz 4): EN moddaki kullanıcı da korunur.
 const CRISIS_RE_EN =
-  /(kill myself|end my life|end it all|take my own life|suicid(e|al)|want to die|don'?t want to live|hurt myself|harm myself|self[- ]?harm)/i;
+  /(kill(ing)? (myself|my self)|end (my|it all|my own) life|take my (own )?life|suicid(e|al)|want(ing)? to die|wanna die|don'?t want to (live|be here)|no reason to live|nothing to live for|better off dead|wish i (was|were) dead|hurt myself|harm myself|self[- ]?harm|cut myself|overdose)/i;
 
+// TR kriz — KATI niyet kalıpları; her bağlamda (rüya dahil) çalışır. "rüyamda intihar
+// ettim" gibi kâbus anlatımını TETİKLEMEZ (bilinçli: niyet kalıbı gerekir).
 const CRISIS_RE =
   /(intihar (etmek istiyorum|edece[ğg]im|etmeyi dü[şs]ünüyorum)|kendimi öldür(mek istiyorum|eceğim|ecegim)|kendime zarar ver(mek istiyorum|eceğim|ecegim)|ya[şs]amak istemiyorum)/iu;
+
+// TR kriz — GENİŞ kalıplar: bare "intihar" + yaygın ifadeler. YALNIZ rüya-DIŞI bağlamda
+// (question/chat) uygulanır; rüya anlatımındaki kâbus sembollerini engellemez.
+// (Cihaz testi 2026-06-13: tarot/kahve konu/soru alanlarında bare "intihar" kaçıyordu.)
+const CRISIS_BROAD_RE =
+  /(\bintihar|can[ıi]ma k[ıi]y|kendimi as(?:mak|aca[ğg][ıi]m|ar[ıi]m)?|kendimi öldür|kendimi oldur|kendime zarar ver|hayat[ıi]ma son ver|ya[şs]amak istemiyor|ya[şs]amak iste(?:mem|miyom)|ölmek isti(?:yor|yom|yorum)|olmek isti(?:yor|yom|yorum)|ke[şs]ke öls|ke[şs]ke ols)/iu;
 
 // Cinsellik (R14) — açık terimler.
 const SEXUAL_RE = new RegExp(
@@ -273,6 +281,12 @@ function buildProbe(text: string): string {
   return `${cleaned.toLocaleLowerCase('tr-TR')}${buffer}${cleaned.toLowerCase()}`;
 }
 
+/** Kriz tespiti: KATI niyet kalıpları her bağlamda; GENİŞ kalıplar yalnız rüya-DIŞINDA. */
+function isCrisisText(normalized: string, context: ModerationContext): boolean {
+  if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) return true;
+  return context !== 'dream' && CRISIS_BROAD_RE.test(normalized);
+}
+
 export function moderateUserInput(
   text: string | null | undefined,
   context: ModerationContext = 'chat',
@@ -283,7 +297,7 @@ export function moderateUserInput(
   }
   const normalized = buildProbe(trimmed);
 
-  if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) {
+  if (isCrisisText(normalized, context)) {
     trackEvent({ name: 'moderation_blocked', category: 'crisis' });
     return { verdict: 'crisis', category: 'crisis', replyText: replyFor('crisis') };
   }
@@ -304,7 +318,7 @@ export function isAllowedUserText(text: string | null | undefined, context: Mode
   const trimmed = (text || '').trim();
   if (!trimmed) return true;
   const normalized = buildProbe(trimmed);
-  if (CRISIS_RE.test(normalized) || CRISIS_RE_EN.test(normalized)) return false;
+  if (isCrisisText(normalized, context)) return false;
   const rules = context === 'dream' ? DREAM_RULES : FULL_RULES;
   return !rules.some((rule) => rule.test(normalized));
 }
