@@ -24,6 +24,7 @@ import { ImageUploader } from '../components/ImageUploader';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { AssistantLoading } from '../components/AssistantLoading';
+import { WaitingScene } from '../components/WaitingScene';
 import { SelectableFormattedText } from '../components/SelectableFormattedText';
 import {
   getLatestNativeTranscript,
@@ -651,6 +652,8 @@ export function SessionScreen({ route, navigation }: Props) {
               compact={Boolean(state.messages.length)}
             />
           ) : null}
+          {/* 5.3 bekleme sahnesi: ilk okuma hazirlanirken Konak Akisi atmosfer karti (eklemeli, loader mantigina dokunmaz). */}
+          {state.messages.length === 0 && state.status !== 'ended' ? <WaitingScene /> : null}
         </BrandedScrollView>
 
         <View style={styles.readActionsBar}>

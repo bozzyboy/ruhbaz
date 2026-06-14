@@ -89,6 +89,7 @@ export const en: TranslationResource = {
     byManor: 'The Manor',
     emptyTitle: 'The feed is empty for now',
     emptyText: 'New pieces will appear here as they are prepared.',
+    whileYouWait: 'While you wait, from the manor',
   },
   settings: {
     legalInfoButton: 'Legal Information',

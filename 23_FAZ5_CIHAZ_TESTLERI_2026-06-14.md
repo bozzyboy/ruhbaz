@@ -72,8 +72,26 @@
 
 ---
 
+## 🕯️ 5.3 — BEKLEME SAHNESİ (K33/F7)
+
+> **Ne eklendi?** Kahve/El okuması **hazırlanırken** (ilk yorum gelene kadar) "Okuman hazırlanıyor" loader'ının **altında** Konak Akışı havuzundan bir atmosfer kartı ("Beklerken konaktan"). **Eklemeli** — Bug 3 loader mantığına dokunmaz; akış boşsa hiç görünmez. "Davet" türü elenir (okuma sırasında okumaya davet tuhaf olmasın). Şimdilik **yalnız SessionScreen** (kahve/el — en uzun bekleme, görsel sıkıştırma); diğer okuma ekranları ileride.
+
+36. **Kahve** (veya El) okuması başlat → ilk yorum gelene kadar **loader'ın ALTINDA** "Beklerken konaktan" başlıklı bir kart (akış sözü) görünür → ilk yorum gelince kaybolur.
+37. **Regresyon (Bug 3):** "Okuman hazırlanıyor" loader'ı hâlâ **mount anında** görünüyor; bekleme kartı onu gizlemiyor, yalnız altına ekleniyor.
+38. **EN:** Dili EN yap → kart başlığı "While you wait, from the manor" + içerik İngilizce.
+39. **Regresyon:** Takip sorusu sorulurken bekleme kartı GÖRÜNMEZ (yalnız ilk hazırlıkta); okuma akışı bozulmadı.
+
+**Dosya → test eşlemesi (5.3):**
+| Değişen/yeni dosya | Test |
+|---|---|
+| `components/WaitingScene.tsx` | 36, 38 |
+| `screens/SessionScreen.tsx` (eklemeli render) | 36, 37, 39 |
+| `i18n/locales/tr.ts` + `en.ts` (manorFeed.whileYouWait) | 38 |
+
+---
+
 ## ⏳ KALAN (Faz 5 dilimleri eklendikçe doldurulacak)
-- 5.3 Bekleme sahnesi · 5.4 I-Ching + Rün · 5.5 Aura · 5.6 Bildirimler (YENİ APK).
+- 5.4 I-Ching + Rün (mimari not) · 5.5 Aura (tasarım not) · 5.6 Bildirimler (YENİ APK; taksonomi taslağı `24_`).
 - **Ozan bloğu (5.2):** Konak Akışı içerik onayı/genişletme + uzak feed yayını (GitHub Pages/Actions) + `EXPO_PUBLIC_MANOR_FEED_URL` set'leme.
 - **Kriz toplu-test:** final OVERALL teste (Ozan + Claude). Faz 5'te tek tek koşma.
 - **Tat onayları (Ozan):** favori kalp rengi/yeri (şu an altın ♥) · ileride feed içerik tonu, bildirim metinleri.

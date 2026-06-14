@@ -87,6 +87,7 @@ export const tr = {
     byManor: 'Konak',
     emptyTitle: 'Akış şu an boş',
     emptyText: 'Yeni içerikler hazırlandıkça burada görünecek.',
+    whileYouWait: 'Beklerken konaktan',
   },
   settings: {
     legalInfoButton: 'Yasal Bilgilendirme',
