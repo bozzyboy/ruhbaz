@@ -435,6 +435,12 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
           </View>
 
           <View style={[styles.panel, styles.questionPanel]}>
+            {!hasInterpretation ? (
+              <View style={styles.topicIntro}>
+                <Text style={styles.topicIntroTitle}>{t('divination.topicStepTitle')}</Text>
+                <Text style={styles.topicIntroHelper}>{t('divination.topicStepHelper')}</Text>
+              </View>
+            ) : null}
             <TouchableOpacity style={styles.questionInput} activeOpacity={0.88} onPress={() => setEditorVisible(true)}>
               <Text style={[styles.composePreviewText, !questionText.trim() && styles.composePreviewPlaceholder]}>
                 {questionText.trim() || t('divination.askPlaceholder')}
@@ -468,7 +474,7 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                       onPress={() => void handleSend()}
                       disabled={isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())}
                     >
-                      <Text style={styles.editorSendText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
+                      <Text style={styles.editorSendText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('divination.startReading')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -488,7 +494,7 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                 onPress={() => void handleSend()}
                 disabled={isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())}
               >
-                <Text style={styles.primaryActionText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
+                <Text style={styles.primaryActionText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('divination.startReading')}</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -552,6 +558,9 @@ const styles = StyleSheet.create({
   },
   composePreviewText: { color: '#FFF5E8', fontSize: 15, lineHeight: 22 },
   composePreviewPlaceholder: { color: 'rgba(255,255,255,0.42)' },
+  topicIntro: { marginBottom: 2 },
+  topicIntroTitle: { color: '#E8C49A', fontSize: 15, fontWeight: '800', marginBottom: 4 },
+  topicIntroHelper: { color: 'rgba(255,255,255,0.66)', fontSize: 12, lineHeight: 17 },
   editorOverlay: { flex: 1, justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.55)', paddingTop: 20, paddingBottom: 20, paddingHorizontal: 10 },
   editorCard: { borderRadius: 18, backgroundColor: '#1E1E28', borderWidth: 1, borderColor: 'rgba(212,165,116,0.28)', padding: 14, maxHeight: '82%' },
   editorTitle: { color: '#E8C49A', fontSize: 14, fontWeight: '700', marginBottom: 8 },

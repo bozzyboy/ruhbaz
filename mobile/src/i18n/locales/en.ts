@@ -104,6 +104,9 @@ export const en: TranslationResource = {
     askPlaceholder: 'The topic you want to ask about (or "general reading")',
     editTitle: 'Write your topic',
     openingLoading: 'Preparing the spread',
+    topicStepTitle: 'What would you like this reading to explore?',
+    topicStepHelper: 'Write a topic or question; or leave it empty and I will still give you a personal, satisfying reading.',
+    startReading: 'Start the reading',
   },
   settings: {
     legalInfoButton: 'Legal Information',

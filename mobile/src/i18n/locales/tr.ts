@@ -102,6 +102,9 @@ export const tr = {
     askPlaceholder: 'Sormak istediğin konu (ya da "genel yorum")',
     editTitle: 'Konunu yaz',
     openingLoading: 'Açılım hazırlanıyor',
+    topicStepTitle: 'Bu okumadan ne öğrenmek istersin?',
+    topicStepHelper: 'Bir konu ya da soru yaz; istersen boş bırak, sana yine kişiye özel ve doyurucu bir okuma yaparım.',
+    startReading: 'Okumaya başla',
   },
   settings: {
     legalInfoButton: 'Yasal Bilgilendirme',

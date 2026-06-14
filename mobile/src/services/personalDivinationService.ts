@@ -264,6 +264,8 @@ function buildBaseSystem(params: {
       '- Sembol dilini sezgisel ve psikolojik oku; kesin hüküm, korkutucu felaket, ölüm, ağır hastalık veya geri dönülmez hüküm verme.',
       '- Yanıt başlıksız, listesiz, sohbet gibi akan düz yazı olsun. Markdown, yıldızlı vurgu, emoji, ikon veya dekoratif sembol kullanma.',
       `- Ana okuma yorumunda ${PERSONAL_INITIAL_READING_TOKEN_INSTRUCTION}`,
+      '- Ana yorum kısa cevap gibi KALMASIN: en az 3-4 dolu paragraf olsun ve geçmiş izi, şimdiki olasılık, yakın gelecek kapısı ile uygulanabilir tavsiyeyi birlikte, doyurucu biçimde taşısın. Tek-iki paragraflık kısa okuma eksik sayılır.',
+      '- Kullanıcı konu/soru GİRMESE bile (genel okuma) bu doluluk ve kişiye özellik aynen korunur: çekilişi kişinin bilinen bağlamına (mizaç, geçmiş temalar, öne çıkan ilişkiler) ve güncel hayat akışına bağlayarak yaz; jenerik, kısa veya herkese uyan bir metne kaçma.',
       `- Takip sorularında: ${FOLLOW_UP_CHAT_CONTRACT}`,
       '- Oturum boyunca aynı çekiliş, aynı profil ve önceki soru cevap bağlamı korunmalı.',
       '- Kapanışta yeni imza cümlesi üretme; sistem persona kapanışını sonradan ekleyecek.',
