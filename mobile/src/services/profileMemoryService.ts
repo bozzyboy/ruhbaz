@@ -286,6 +286,19 @@ async function saveState(state: AccountState) {
   await FileSystem.writeAsStringAsync(DATA_FILE, JSON.stringify(state, null, 2));
 }
 
+// Hesap durumu tek dosyada tutulur; eşzamanlı load-modify-save işlemleri kayıp
+// güncelleme (lost update) yaratabilir — örn. listede iki okumayı hızla favorilemek.
+// Bu mutex, durum mutasyonlarını sırayla kuyruklar (önceki bitmeden sonraki başlamaz).
+let stateWriteQueue: Promise<unknown> = Promise.resolve();
+function withStateLock<T>(fn: () => Promise<T>): Promise<T> {
+  const run = stateWriteQueue.then(fn, fn);
+  stateWriteQueue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
 async function ensureProfileMemoryFiles(profileId: string, accountId: string) {
   await ensureBaseDirs();
   await ensureDir(profileDir(profileId));
@@ -2834,17 +2847,19 @@ export function getAllReadingsForProfile(state: AccountState, profileId: string)
 
 /** K29: bir okumanın favori (kalp) durumunu değiştirir ve cihazda kalıcılaştırır. */
 export async function setReadingFavorite(readingId: string, favorite: boolean): Promise<AccountState> {
-  const state = await loadAccountState();
-  let changed = false;
-  const readings = state.readings.map((reading) => {
-    if (reading.readingId !== readingId || reading.favorite === favorite) return reading;
-    changed = true;
-    return { ...reading, favorite };
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    let changed = false;
+    const readings = state.readings.map((reading) => {
+      if (reading.readingId !== readingId || reading.favorite === favorite) return reading;
+      changed = true;
+      return { ...reading, favorite };
+    });
+    if (!changed) return state;
+    const nextState: AccountState = { ...state, readings };
+    await saveState(nextState);
+    return nextState;
   });
-  if (!changed) return state;
-  const nextState: AccountState = { ...state, readings };
-  await saveState(nextState);
-  return nextState;
 }
 
 export async function appendReadingSummary(
@@ -2939,33 +2954,37 @@ async function deleteMemoryV2ArtifactsForReading(reading: ReadingSummary): Promi
 }
 
 export async function deleteReading(readingId: string): Promise<AccountState> {
-  const state = await loadAccountState();
-  const reading = state.readings.find((item) => item.readingId === readingId);
-  if (reading) {
-    await deleteUserStatedTestMemoryForReading(reading, state).catch(() => {});
-    await deleteMemoryV2ArtifactsForReading(reading).catch(() => {});
-  }
-  const nextState: AccountState = {
-    ...state,
-    readings: state.readings.filter((reading) => reading.readingId !== readingId),
-  };
-  await saveState(nextState);
-  return nextState;
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const reading = state.readings.find((item) => item.readingId === readingId);
+    if (reading) {
+      await deleteUserStatedTestMemoryForReading(reading, state).catch(() => {});
+      await deleteMemoryV2ArtifactsForReading(reading).catch(() => {});
+    }
+    const nextState: AccountState = {
+      ...state,
+      readings: state.readings.filter((reading) => reading.readingId !== readingId),
+    };
+    await saveState(nextState);
+    return nextState;
+  });
 }
 
 export async function deleteAllReadingsForProfile(profileId: string): Promise<AccountState> {
-  const state = await loadAccountState();
-  const readingsToDelete = state.readings.filter((item) => item.profileId === profileId);
-  for (const reading of readingsToDelete) {
-    await deleteUserStatedTestMemoryForReading(reading, state).catch(() => {});
-    await deleteMemoryV2ArtifactsForReading(reading).catch(() => {});
-  }
-  const nextState: AccountState = {
-    ...state,
-    readings: state.readings.filter((reading) => reading.profileId !== profileId),
-  };
-  await saveState(nextState);
-  return nextState;
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const readingsToDelete = state.readings.filter((item) => item.profileId === profileId);
+    for (const reading of readingsToDelete) {
+      await deleteUserStatedTestMemoryForReading(reading, state).catch(() => {});
+      await deleteMemoryV2ArtifactsForReading(reading).catch(() => {});
+    }
+    const nextState: AccountState = {
+      ...state,
+      readings: state.readings.filter((reading) => reading.profileId !== profileId),
+    };
+    await saveState(nextState);
+    return nextState;
+  });
 }
 
 export async function clearProfileMemoryAndReadings(profileId: string): Promise<AccountState> {
