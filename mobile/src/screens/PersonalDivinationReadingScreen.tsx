@@ -19,6 +19,7 @@ import {
   appendReadingDerivedTheme,
   appendReadingSummary,
   appendUserConversationMemory,
+  appendUserReadingIntentMemory,
   loadAccountState,
   loadProfileMemorySnippet,
 } from '../services/profileMemoryService';
@@ -212,9 +213,10 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
 
   const handleSend = useCallback(async () => {
     const text = normalizeLimitedInput(questionText, FOLLOW_UP_QUESTION_MAX_CHARS);
-    if (!text || (hasInterpretation && text.length < FOLLOW_UP_QUESTION_MIN_CHARS) || isSending || isLoadingProfile || !cast) return;
-    const userMessage = makeMessage('user', text);
-    setMessages((current) => [...current, userMessage]);
+    // İlk okumada konu/soru opsiyoneldir (boş bırakılırsa genel okuma); takip sorusunda metin zorunlu ve min uzunlukta olmalı.
+    if (isSending || isLoadingProfile || !cast) return;
+    if (hasInterpretation && text.length < FOLLOW_UP_QUESTION_MIN_CHARS) return;
+    if (text) setMessages((current) => [...current, makeMessage('user', text)]);
     setQuestionText('');
     setEditorVisible(false);
     setIsSending(true);
@@ -223,20 +225,28 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         setInfoModal({ visible: true, title: t('flows.memoryMaintenanceTitle'), message: DAILY_MEMORY_WRITER_BUSY_MESSAGE });
         return;
       }
-      await appendUserConversationMemory(profileId, text).catch(() => {});
       const state = await loadAccountState();
       const profile = state.profiles.find((item) => item.profileId === profileId) || null;
       if (!profile) throw new Error(t('session.profileNotFound'));
-      const memorySnippet = await loadProfileMemorySnippet(state, profileId, { semanticQuery: text }).catch(() => null);
+      const memorySnippet = await loadProfileMemorySnippet(state, profileId, text ? { semanticQuery: text } : undefined).catch(() => null);
       const readingName = kind === 'iching' ? 'I-Ching Okuması' : 'Rün Okuması';
       if (!hasInterpretation) {
+        // Okuma öncesi konu/niyet girildiyse güçlü userStated 'okuma öncesi konu' olarak yazılır (astro/tarot ile aynı yol);
+        // hem bu okumaya hem sonraki okumaların hafıza bağlamına yansır. Boşsa genel okuma yapılır, hafızaya yazılmaz.
+        if (text) {
+          await appendUserReadingIntentMemory({
+            profileId,
+            text,
+            readingType: kind === 'iching' ? 'personal-iching' : 'personal-rune',
+          }).catch(() => {});
+        }
         const result = await createPersonalDivinationReading({
           profile,
           assistantId,
           assistantLabel,
           kind,
           cast,
-          question: text,
+          question: text || undefined,
           memorySnippet,
           usedClosings,
         });
@@ -245,6 +255,7 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         if (result.closingSentence) setUsedClosings((current) => [...current, result.closingSentence]);
         await addUsage(readingName, result);
       } else {
+        await appendUserConversationMemory(profileId, text).catch(() => {});
         const previousFollowUps: DivinationFollowUpMessage[] = messages
           .filter((message) => message.text !== interpretationText)
           .map(({ role, text: messageText }) => ({ role, text: messageText }));
@@ -445,9 +456,9 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                       <Text style={styles.editorGhostText}>{t('common.close')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.editorSendBtn, (!questionText.trim() || isSending || isLoadingProfile) && styles.disabledAction]}
+                      style={[styles.editorSendBtn, (isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())) && styles.disabledAction]}
                       onPress={() => void handleSend()}
-                      disabled={!questionText.trim() || isSending || isLoadingProfile}
+                      disabled={isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())}
                     >
                       <Text style={styles.editorSendText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
                     </TouchableOpacity>
@@ -465,9 +476,9 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
                 <Text style={styles.holdTalkActionText}>{isRecordingQuestion ? t('session.releaseToWrite') : t('session.holdToTalk')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.primaryAction, (!questionText.trim() || isSending || isLoadingProfile) && styles.disabledAction]}
+                style={[styles.primaryAction, (isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())) && styles.disabledAction]}
                 onPress={() => void handleSend()}
-                disabled={!questionText.trim() || isSending || isLoadingProfile}
+                disabled={isSending || isLoadingProfile || (hasInterpretation && !questionText.trim())}
               >
                 <Text style={styles.primaryActionText}>{isSending ? t('session.interpreting') : hasInterpretation ? t('session.ask') : t('session.interpret')}</Text>
               </TouchableOpacity>
