@@ -42,5 +42,13 @@ Faz 5'in **özerk yapılabilir TÜM dilimleri (5.1 + 5.2 + 5.3) BİTTİ ve adver
 
 Mandat "devam et" + "Ozan-bloklu işlere girme" + "üründe-his kararı yapma" birlikte değerlendirildi → bu nokta doğru durak. **Karar beklemeden ilerlenecek başka özerk Faz 5 KOD işi yok.** **SONRAKİ OTURUM:** Ozan kararlarını al (5.4 A/B + alt-kararlar, 5.5 tema yaklaşımı, 5.6 taksonomi onayı) → uygula. 5.4 için somut plan `25_`'te hazır.
 
+## 🔁 EK — Ozan 22_/21_ geri bildirimi (2026-06-14, durak sonrası)
+Ozan 22_ turunu indi: "her şey ok, 2 şey hariç." → İşlendi:
+1. **Rüya varsayılan reader → Ayşe** (`00ede91`): reader-seç ekranında Suzan default geliyordu, Ozan Ayşe istedi (PersonalAssistantSelect defaultAssistantId). Bug 2 fix'iyle birlikte tam tutarlı.
+2. **Kriz + A-2 kod-doğrulaması** (Ozan 21_ talebi: "senin kod tarafından TR+EN kontrol et"): `scripts/moderation-battery.js` (`npm run check:moderation`) — kriz + 9 A-2 kategorisi × TR+EN × question/chat/dream = **43/43**. Entegrasyon doğrulandı (tüm tipler non-dream bağlam; rüya-initial dar). Battery **gerçek CSAM açığı buldu**: "çocuk" k-hâli kaçıyordu → düzeltildi (`89df4de`, CSAM her bağlamda blok).
+3. **22_ KALAN** Ozan'ın gerçek 21_ sonuçlarına (`benim testlerim/dikkat çekenler2.txt`) göre yeniden yazıldı (`904c25f`): çoğu kapatıldı; gerçek kalan = okuma uzunluk/konu toplu review, D-3, B-section.
+
+**Sonra:** Ozan dedi "5.4 ve sonrası kararlarımı sen bunları yaptıktan sonra söylerim." → bunlar bitti; 5.4 A/B + 5.5 + 5.6 kararları Ozan'da.
+
 ## 📌 DURUM
 ✅ Faz 4.5 (kod tam + cihaz-testi-1 3 bug + öz-review). 🔄 Faz 5: **5.1 + 5.2 + 5.3 BİTTİ** (favoriler, Konak Akışı feed, bekleme sahnesi; hepsi öz-review temiz); 5.4 haritalandı (`25_`, Ozan kararı), 5.5/5.6 Ozan-kapılı. Taslaklar: `24_` taksonomi, `25_` I-Ching/Rün. 🔶 Hiçbiri cihazda doğrulanmadı (reload yeter; 5.6 hariç YENİ APK). Ozan cihaz turları (21_/22_/23_) + tat onayları + bloklar bekliyor.
