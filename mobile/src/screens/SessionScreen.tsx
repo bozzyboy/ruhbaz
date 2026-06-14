@@ -639,7 +639,12 @@ export function SessionScreen({ route, navigation }: Props) {
               ) : null}
             </View>
           ))}
-          {state.isAiSpeaking ? (
+          {state.isAiSpeaking || (state.messages.length === 0 && state.status !== 'ended') ? (
+            // Bug 3: loader'ı okuma başlar başlamaz (mount anında) göster. Önceden yalnız
+            // isAiSpeaking'e bağlıydı; useSession.startSession ise görselleri (compressImage)
+            // ve token okumalarını askAgent'ten önce await ediyor; bu sürede ekran boş
+            // kalıyor, "Okuman hazırlanıyor" geç geliyordu (donmuş algısı). İlk mesaj gelene
+            // kadar (messages boş + oturum bitmemiş) açılış loader'ı görünür kalır.
             <AssistantLoading
               label={state.messages.length ? t('session.responsePreparing') : t('session.readingPreparing')}
               detail={state.messages.length ? undefined : t('session.pleaseWaitKeepOpen')}
