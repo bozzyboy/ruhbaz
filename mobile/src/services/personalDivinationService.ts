@@ -321,6 +321,7 @@ export async function createPersonalDivinationReading(params: {
     memorySnippet: params.memorySnippet,
     focusQuestion: params.question,
     messages: [],
+    isAnimalProfile: isAnimal,
   });
   const userText = [
     `Profil adı: ${params.profile.displayName}`,

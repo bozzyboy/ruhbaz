@@ -1558,9 +1558,12 @@ export function selectDivinationLifeEvents(params: {
   memorySnippet?: ProfileMemorySnippet | null;
   focusQuestion?: string | null;
   messages?: ReadingMessage[];
+  isAnimalProfile?: boolean;
 }): SpecificityItem[] {
   const count = params.count ?? 2;
-  const isAnimalProfile = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
+  // Hayvan/insan ayrımı önce çağırandan (profil objesi = kesin); verilmediyse memorySnippet'e düş.
+  // Snippet null gelse bile pet profil yanlışlıkla insan olayı almaz.
+  const isAnimalProfile = params.isAnimalProfile ?? params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
   const messages = params.messages || [];
   const recent = recentText(params.memorySnippet, messages);
   const allowHealthEvents = userAskedHealthConcern(
@@ -1604,16 +1607,18 @@ export function buildDivinationSpecificityContext(params: {
   focusQuestion?: string | null;
   messages?: ReadingMessage[];
   count?: number;
+  isAnimalProfile?: boolean;
 }): { text: string; usage: SpecificityUsage } {
+  const isAnimalProfile = params.isAnimalProfile ?? params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
   const events = selectDivinationLifeEvents({
     seed: params.seed,
     count: params.count ?? 2,
     memorySnippet: params.memorySnippet,
     focusQuestion: params.focusQuestion,
     messages: params.messages,
+    isAnimalProfile,
   });
   if (!events.length) return { text: '', usage: { events: [], cues: [] } };
-  const isAnimalProfile = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
   return {
     text: [
       '## Somut Hayat Malzemesi',
