@@ -90,8 +90,42 @@
 
 ---
 
-## ⏳ KALAN (Faz 5 dilimleri eklendikçe doldurulacak)
-- 5.4 I-Ching + Rün (mimari not) · 5.5 Aura (tasarım not) · 5.6 Bildirimler (YENİ APK; taksonomi taslağı `24_`).
+## 🔮 5.4 — I-CHING + RÜN KİŞİSEL OKUMA (konuşmalı; Ozan kararı: B)
+
+> **Ne eklendi?** Salon'a (Senin Evin) iki yeni **konuşmalı** okuma türü: **I-Ching** ve **Rün**. Çekiliş (hexagram / 3 rün) cihazda deterministik yapılır; yorum Gemini + persona sesi + hafıza + takip sorularıyla (tarot kalıbı). Varsayılan reader: **I-Ching = Teoman**, **Rün = Arın** (tat onayı Ozan).
+
+### 5.4-A · Akış
+40. Salon → kart listesinde **I-CHING** ve **RÜN** kartları görünür. **I-CHING**'e dokun → profil onayı → reader-seç (Teoman varsayılan) → devam.
+41. **Açılış:** ekran açılır açılmaz **çekilen hexagram** (şimdiki durum + varsa değişen çizgiler/dönüşüm) + "sormak istediğin konuyu yaz" daveti görünür.
+42. Bir konu yaz (örn. "iş değişikliği düşünüyorum") → **Yorumla** → **Beklenen:** Teoman sesinde, hexagram + soru bağlamında konuşan bir okuma. Kahve/fincan/telve/tarot/el objesi GEÇMEZ.
+43. **Takip sorusu** sor → cevap aynı çekiliş + bağlamda (kart değişmez).
+44. **RÜN** ile aynı akış (Arın varsayılan) → **3 rün** (kök/şu an/yönelim + anlamları) gösterilir → yorum Arın sesinde.
+
+### 5.4-B · Regresyon + kalite
+45. **Bitir** → History'de okuma **"Kişiye Özel I-Ching / Rün"** olarak görünür; aç / sil / favori (5.1) çalışır.
+46. **EN:** dili EN → kart adları (I-Ching / Runes), açılış, çekiliş etiketleri (Present state / Changing lines) ve okuma İngilizce. TR'ye dön → Türkçe.
+47. **Regresyon:** Tarot / Rüya / Astro / Numeroloji Salon akışları bozulmadı (reading-type union genişledi; mevcutlar aynı).
+48. **Kriz/677:** konu alanına kriz cümlesi → nazik red (battery doğrulandı); okuma kesin gelecek/"fal" dili kullanmaz, persona adı gövdede geçmez.
+
+**Dosya → test eşlemesi (5.4):**
+| Değişen/yeni dosya | Test |
+|---|---|
+| `services/personalDivinationService.ts` (cast + okuma + takip) | 41–44 |
+| `screens/PersonalDivinationReadingScreen.tsx` | 41–45 |
+| `screens/PersonalReadingsScreen.tsx` (flowTypes I-Ching/Rün) | 40, 47 |
+| `screens/PersonalAssistantSelectScreen.tsx` (default + navigate) | 40, 44 |
+| `services/personaClosingService.ts` (iching/rune domain) | 42, 44 |
+| `types/memory.ts` + `profileMemoryService.ts` (readingType + label) | 45 |
+| `App.tsx` (PersonalDivinationReading route) | 40, 46 |
+| `i18n` (divination + readings I-Ching/Rün) | 46 |
+
+> **Tat (Ozan):** varsayılan persona (Teoman/Arın), açılış/okuma tonu, ekran tasarımı → cihaz turu. (5.4=B kararın uygulandı.)
+
+---
+
+## ⏳ KALAN (Faz 5)
+- **5.5 Aura:** ⏸️ Ozan kararı: **UI kararı sonraya** (full UI değişiminde yeniden sorulacak). Ertelendi.
+- **5.6 Bildirimler:** ⏸️ Ozan kararı: **şimdilik kapalı; taksonomi (`24_`) şimdilik böyle**; metin tonu (persona vs konak) sonraya; B2/B7 push yerel-türlerden sonraya (onaylı). NATIVE → YENİ APK gerektirir; ileride hem genişlet hem değiştir.
 - **Ozan bloğu (5.2):** Konak Akışı içerik onayı/genişletme + uzak feed yayını (GitHub Pages/Actions) + `EXPO_PUBLIC_MANOR_FEED_URL` set'leme.
 - **Kriz toplu-test:** final OVERALL teste (Ozan + Claude). Faz 5'te tek tek koşma.
 - **Tat onayları (Ozan):** favori kalp rengi/yeri (şu an altın ♥) · ileride feed içerik tonu, bildirim metinleri.
