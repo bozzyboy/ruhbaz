@@ -903,7 +903,9 @@ function mergeUsedLifeEvents(
       count: (existing?.count || 0) + 1,
     });
   }
-  return next.slice(-120);
+  // 240'lık pencere: divination 2 olay/okuma -> 30+ okuma tekrar-yok; kahve/numeroloji ile
+  // karışık profilde de cross-modality tekrar-önleme için yeterli headroom (Faz 5.4 review).
+  return next.slice(-240);
 }
 
 function mergeUsedSurfaceCues(
