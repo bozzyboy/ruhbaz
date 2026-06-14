@@ -140,6 +140,25 @@
 
 ---
 
+## 🛡️ GÜVENLİK ÇEKİRDEĞİ — tüm okumalara ortak (Faz 5.4 PIECE 2, 2026-06-14) — KURULUM: yalnız JS/TS, `r` ile reload
+> **Ne değişti?** common.md'nin "Safety And Boundaries" bölümü artık `getReadingSafetyCore()` ile **TÜM okuma** sistem prompt'larına (I-Ching/Rün, tarot, rüya, kahve/el, astro, numeroloji, genel astro) **hem ilk okuma hem takip** olarak ekleniyor. Önceden her okuma kendi inline alt-kümesini taşıyordu; eksik kalan çıktı kuralları (fal/kehanet kelime yasağı, din, siyaset, cinsel, ayrımcılık, kriz, kumar, büyü, 3. kişi iddiası, insan-iddiası) artık her okumada açık. Bir bekçi (`npm run check:safety:core`, her `.ts/.tsx` düzenlemesinde otomatik) yeni eklenen bir okumada çekirdek eksikse build'i kırar.
+
+56. **Regresyon — her okuma hâlâ normal çalışıyor:** Kahve, el, tarot, rüya, astro (doğum haritası + ilişki), numeroloji, genel astro (günlük/haftalık) ve I-Ching/Rün okumalarını sırayla aç → **Beklenen:** her biri eskisi gibi normal, doyurucu okuma üretir; güvenlik çekirdeği eklendi diye kısalma, bozulma veya garip giriş YOK.
+57. **Çıktı guardrail'i:** herhangi bir okumada konuya din/siyaset/şans-oyunu sok → **Beklenen:** input zaten nazikçe reddeder; sınır durumlarda bile okuma bu temalara girmez, "fal/kehanet/medyum" kelimelerini kullanmaz, kesin gelecek/ölüm/felaket dili kurmaz.
+58. **EN paritesi:** dili EN → güvenlik davranışı TR ile aynı (EN Safety bölümü, İngilizce-dili item 24 dahil, enjekte edilir). TR'ye dön → Türkçe.
+
+**Dosya → test eşlemesi (PIECE 2):**
+| Değişen/yeni dosya | Test |
+|---|---|
+| `services/readingCommonPrompt.ts` (getReadingSafetyCore + extractSection) | 56–58 |
+| `services/personalDivination/Tarot/dreamInterpretation/astroEngine/personalNumerology/generalAstroApi` + `readingPromptBuilder.ts` (enjekte) | 56–58 |
+| `identity/.../common.md` + `common.en.md` (Vision kaldırıldı + Implementation Notes 3-4) + üretilen `readingPersonaData.ts/.en.ts` | 58 |
+| `scripts/check-safety-core.js` + `post-edit-check.js` hook + `package.json` | (statik bekçi; cihaz testi yok) |
+
+> **Not (gelecek):** Yeni bir fal/okuma türü eklenirse sistem prompt'una `getReadingSafetyCore()` eklenmeli + `check-safety-core.js` REQUIRED listesine yazılmalı; unutulursa bekçi yakalar. İnline güvenlik satırları şimdilik korundu (çekirdeği pekiştirir, çelişmez); temiz dedupe ayrı bir tur.
+
+---
+
 ## ⏳ KALAN (Faz 5)
 - **5.5 Aura:** ⏸️ Ozan kararı: **UI kararı sonraya** (full UI değişiminde yeniden sorulacak). Ertelendi.
 - **5.6 Bildirimler:** ⏸️ Ozan kararı: **şimdilik kapalı; taksonomi (`24_`) şimdilik böyle**; metin tonu (persona vs konak) sonraya; B2/B7 push yerel-türlerden sonraya (onaylı). NATIVE → YENİ APK gerektirir; ileride hem genişlet hem değiştir.
