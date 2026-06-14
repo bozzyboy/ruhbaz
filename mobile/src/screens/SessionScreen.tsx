@@ -128,10 +128,6 @@ export function SessionScreen({ route, navigation }: Props) {
     title: APP_NAME,
     message: '',
   });
-  const [messageActionModal, setMessageActionModal] = useState<{ visible: boolean; text: string }>({
-    visible: false,
-    text: '',
-  });
   const [startupError, setStartupError] = useState<{ title: string; message: string; isRetry?: boolean } | null>(null);
   const lastAssistantMessageIdRef = useRef<string | null>(null);
 
@@ -339,13 +335,6 @@ export function SessionScreen({ route, navigation }: Props) {
     setEditorVisible(false);
     setSttHint('');
     setHoldRemainingMs(MAX_HOLD_TO_TALK_SECONDS * 1000);
-  };
-
-  const handleMessageActions = (message: { role: 'user' | 'assistant'; text: string }) => {
-    const value = message.text.trim();
-    if (!value) return;
-    if (message.role !== 'user') return;
-    setMessageActionModal({ visible: true, text: value });
   };
 
   const handleSessionImageSelected = async (slot: 'cup' | 'cup2' | 'saucer' | 'palm', uri: string) => {
@@ -629,15 +618,6 @@ export function SessionScreen({ route, navigation }: Props) {
                 selectionColor={msg.role === 'user' ? '#E8C49A' : '#E6D7C6'}
                 style={[styles.chatText, msg.role === 'user' ? styles.textUser : styles.textAi]}
               />
-              {msg.role === 'user' ? (
-                <TouchableOpacity
-                  style={styles.messageActionsButton}
-                  activeOpacity={0.78}
-                  onPress={() => handleMessageActions(msg)}
-                >
-                  <Text style={styles.messageActionsText}>{t('session.resendOrEdit')}</Text>
-                </TouchableOpacity>
-              ) : null}
             </View>
           ))}
           {state.isAiSpeaking || (state.messages.length === 0 && state.status !== 'ended') ? (
@@ -804,29 +784,6 @@ export function SessionScreen({ route, navigation }: Props) {
           onConfirm={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
           onCancel={() => setInfoModal({ visible: false, title: APP_NAME, message: '' })}
         />
-        <BrandedConfirmModal
-          visible={messageActionModal.visible}
-          title={t('session.messageTitle')}
-          message={t('session.messageActionPrompt')}
-          confirmLabel={t('session.resend')}
-          cancelLabel={t('common.close')}
-          extraActionLabel={t('profile.editButton')}
-          onExtraAction={() => {
-            setDraftText(messageActionModal.text);
-            setEditorVisible(true);
-            setMessageActionModal({ visible: false, text: '' });
-          }}
-          onConfirm={() => {
-            const value = messageActionModal.text;
-            setMessageActionModal({ visible: false, text: '' });
-            if (isTurnLocked || isRecording) {
-              setInfoModal({ visible: true, title: t('session.turnFlowTitle'), message: t('session.turnLockedResend') });
-              return;
-            }
-            void sendUserTranscriptRef.current(value);
-          }}
-          onCancel={() => setMessageActionModal({ visible: false, text: '' })}
-        />
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
@@ -969,7 +926,9 @@ const styles = StyleSheet.create({
   bubbleUser: {
     alignSelf: 'flex-end',
     maxWidth: '84%',
-    backgroundColor: 'rgba(168,130,82,0.2)',
+    backgroundColor: 'rgba(125,220,154,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(125,220,154,0.28)',
     borderBottomRightRadius: 4,
   },
   bubbleAi: {
@@ -983,16 +942,6 @@ const styles = StyleSheet.create({
   chatText: {
     fontSize: 15,
     lineHeight: 22,
-  },
-  messageActionsButton: {
-    alignSelf: 'flex-start',
-    marginTop: 8,
-    paddingVertical: 4,
-  },
-  messageActionsText: {
-    color: '#CFA46E',
-    fontSize: 12,
-    fontWeight: '700',
   },
   textUser: { color: '#E8C49A' },
   textAi: { color: '#FFF' },
