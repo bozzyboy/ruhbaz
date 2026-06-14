@@ -57,7 +57,7 @@
 > **Ne değişti?** Rüya açılış sözlüklerine **Ayşe** ve **Deniz** eklendi. Eskiden bu ikisi seçilince açılış mesajı **Suzan'ın sesine** düşüyordu (header'da Ayşe yazarken açılış Suzan gibi okunuyordu — Ozan #5). Ana yorum/kapanış zaten doğru personadaydı; eksik olan yalnız ilk **açılış** cümlesiydi.
 
 ### 2-A · Ayşe ve Deniz ile rüya açılışı artık kendi seslerinde
-16. Salon → **Rüya Yorumu** → reader-seç → **Ayşe** seç → devam. → **Beklenen:** sağ-üst header **Ayşe** + ilk açılış mesajı **Ayşe'nin sesinde** ("Gel evladım… toprağa düşen bir tohum gibi…"), Suzan'ın "Gel canım…" açılışı DEĞİL.
+16. Salon → **Rüya Yorumu** → reader-seç ekranı → **Beklenen:** **Ayşe VARSAYILAN seçili gelir** (Ozan kararı, `00ede91`; artık Suzan değil). Ayşe ile devam → sağ-üst header **Ayşe** + ilk açılış mesajı **Ayşe'nin sesinde** ("Gel evladım… toprağa düşen bir tohum gibi…"), Suzan'ın "Gel canım…" açılışı DEĞİL.
 17. Aynısı **Deniz** ile → açılış Deniz'in kıvrak/meraklı sesinde ("Anlat bakalım canım… çok merak ettim").
 18. **Tat kararı (Ozan):** Ayşe/Deniz açılış metinlerinin TONU sence uygun mu? (TASLAK — persona ses beğeni turuna bırakıldı; aksiyon gerekmez, beğeni notu yeter.)
 
@@ -66,7 +66,7 @@
 20. **Evcil hayvan profili** seç → Rüya/Uyku → **Ayşe** ve **Deniz** ile → açılış hayvan-uyku bağlamında ve doğru personada. Diğer 5 persona ile de hayvan açılışı doğru.
 21. Açılıştan sonra rüya metni yaz → üret → ana yorum + kapanış da seçili personanın sesinde (zaten doğruydu, teyit).
 
-> **Not (tat — Ozan):** Rüya için **varsayılan** reader şu an Suzan (listenin ilki). Tematik bir varsayılan (örn. Ayşe veya Arın) istersen söyle — bu bir TAT kararı, koda otomatik girmedim.
+> **✅ Ozan kararı uygulandı:** Rüya **varsayılan** reader'ı **Ayşe** yapıldı (`00ede91`; eskiden Suzan/liste-ilki). Reader-seç açılınca Ayşe seçili gelir; Bug 2 fix'iyle açılış da Ayşe sesinde → tam tutarlı.
 
 ---
 
@@ -96,9 +96,16 @@
 
 ---
 
-## 🔴 KRİZ TOPLU-TEST — ERTELENDİ (en son, Ozan + Claude birlikte)
+## 🔴 KRİZ + A-2 MODERASYON — KOD DOĞRULAMASI YAPILDI (Ozan talebi)
 
-> Ozan kararı (2026-06-14): Kriz girdilerini her okuma tipinde TEK TEK test etme. Kriz tespiti kod tarafında battery ile genişletildi/doğrulandı (cihaz-testi-1 oturumu). **Kriz toplu doğrulaması final OVERALL teste bırakıldı; ikimiz birlikte bakacağız.** Bu turda kriz maddesi KOŞMA.
+> Ozan (21_ sonuçları): kriz tespiti cihazda tutarsızdı (#3 tarot uzun uzun, #4 kahve/el initial kaçırdı, #6 stabil değil) → "senin kod tarafından, hem TR hem EN, 2'şer kez her okuma tipini kontrol etmen gerekiyor; böyle cihazda çok uzun sürüyor."
+>
+> **YAPILDI (bu tur):**
+> 1. **Entegrasyon doğrulandı** (çağrı yerleri): tüm okuma tiplerinin initial + followup'u `'question'`/`'chat'` bağlamı (→ GENİŞ regex, bare "intihar" yakalar) kullanıyor; yalnız **rüya-initial** `'dream'` (bilinçli dar, kâbus anlatımı bloklanmaz). #3/#4/#6 kök nedeni (dar regex) önceki oturumda geniş regexle kapatılmıştı.
+> 2. **`moderation-battery.js`** (`npm run check:moderation`): kriz + A-2 (cinsel, nefret, şiddet, şans-oyunu, taciz, hayvan, CSAM, din, siyaset) × **TR+EN** × question/chat/dream → **43/43 geçti** (yanlış-pozitif yok; kâbus anlatımı allow).
+> 3. Battery **GERÇEK bir CSAM açığı buldu**: "çocuk" k-hâli ("çocukla") CSAM regexinde kaçıyordu → rüya bağlamında ALLOW oluyordu (mutlak blok ihlali). **Düzeltildi** (`89df4de`); CSAM artık her bağlamda blokluyor.
+>
+> **Cihaz toplu kriz-testi** yine final OVERALL'a (Ozan + Claude); bu turda cihazda TEK TEK KOŞMA. Kod-doğrulama tarafı tamam — re-run: `npm run check:moderation`.
 
 ---
 
@@ -112,14 +119,32 @@
 | `mobile/src/services/dreamInterpretationService.ts` | 2 | 16–21 |
 | `mobile/src/services/astroEngine.ts` (domainNeutralPersonaSignature) | 2 (öz-review) | 27 |
 | `mobile/src/services/personalNumerologyEngine.ts` (domainNeutralPersonaSignature) | 2 (öz-review) | 28 |
+| `mobile/src/screens/PersonalAssistantSelectScreen.tsx` (rüya varsayılan Ayşe) | 2 (Ozan kararı) | 16 |
+| `mobile/src/services/inputModerationService.ts` (CSAM çocuk k-hâli) + `scripts/moderation-battery.js` | A / A-2 | kriz bölümü (battery 43/43) |
 | `mobile/src/screens/SessionScreen.tsx` | 3 | 22–26 |
 
 **Kapsama notu:** Bug 1 BrandedPicker paylaşılan bir bileşendir; ProfileSettings dışında başka ekranlarda da kullanılıyorsa (öz-review bunu taradı) oradaki dropdown'lar da bu değişiklikten etkilenir — fırsat olursa o ekranlardaki bir dropdown'u da aç/seç (regresyon).
 
 ---
 
-## ⏳ KALAN / DEVREDEN (bu turda KOŞULMAYAN)
+## ⏳ KALAN / DEVREDEN — `21_` turu sonuçlarına göre güncellendi
 
-- **Kriz toplu-test:** yukarıda — final overall'a ertelendi (Ozan + Claude).
-- **`21_` turu hâlâ Ozan'ı bekliyor:** EN okuma ÇIKTISI (C1), C2 cache, C3/C4/C5/C6, A grubu güvenlik, E1. Bu `22_` turu onların yerine geçmez; 3 bug + regresyonuna odaklıdır (E1 ülke/şehir kısmı 1-E/15 ile örtüşür).
-- **Tat onayları (Ozan, aksiyon yok — beğeni notu yeter):** Ayşe/Deniz rüya açılış tonu (madde 18) · rüya varsayılan reader tercihi (2-B notu) · ayrıca `21_`'den taşınan: EN persona sesleri, C5/C6 EN tagline/etiket, B2 telaş tonu.
+> **`21_` turu YAPILDI** (Ozan sonuçları: `benim testlerim/dikkat çekenler2.txt`, bu turdan ÖNCE yazılmıştı). Bulguların çoğu önceki oturum + bu oturum KAPATILDI. Aşağıda gerçek durum:
+
+**✅ 21_'den kapatılanlar (cihazda yalnız re-confirm yeter):**
+- C1–C5 (Ozan: "TAMAM GUZEL") · D1–D2 (TAMAM) · A-3 profil-giriş moderasyonu (TAMAM) · B-4 astro "sen" hitap (TAMAM).
+- **C6 alt-3-kelime İ/I** (32-signs/luck-triplet altındaki 3 öğede noktalı İ) → locale-aware uppercase ile düzeltildi (önceki oturum).
+- **B-4 genel astro kişisel footer** (sevgili [ad], [güneş burcu] burcun için… → Salon-Astroloji daveti) → eklendi (önceki oturum, isim+güneş burcu, TR+EN).
+- **El okuması yanlış-görsel hata mesajı karışık dil** → dil-duyarlı yapıldı (önceki oturum).
+- **Palm setup "analitik ama sıcak…" tagline** kaldırıldı · **kendini-tanı numeroloji gereksiz pressable** kaldırıldı · **"dream reading"→"dream interpretation"** (önceki oturum).
+- **"okumanız hazırlanıyor" geç render** → Bug 3, bu tur (Grup 3).
+- **Kahve/el okuma-başı yanlış-görsel değinmesi** kaldırıldı · **"benim yerime iç" kısa-kesme + rol-yapma** düzeltildi (önceki oturum).
+- **Kriz (#3/#4/#5/#6) + A-2** → kod-doğrulaması yapıldı (battery 43/43 + CSAM fix; yukarıdaki Kriz bölümü). #5 rüya default+açılış bu turda (Ayşe default + Bug 2).
+
+**⏳ 21_'den GERÇEK kalan (devrediyor):**
+- **Okuma uzunlukları + konuya sadakat TOPLU review** (Ozan: "her şey bitince yeniden bakalım") → final tur.
+- **D-3** (DB/klasör adı migration + EN onay) → release-öncesi pakette (Ozan: "kalanlara ekle, en sonda bakarım").
+- **B-section kalite** (Ozan: "kullandıkça belli olacak") → kullanım sonrası.
+
+**Tat onayları (aksiyon yok — beğeni notu yeter):** Ayşe/Deniz rüya açılış + astro/num imza tonu · feed içerik tonu (`23_`/5.2) · EN persona sesleri · C5/C6 EN tagline/etiket · B2 telaş tonu.
+**Kriz cihaz toplu-testi:** final OVERALL (Ozan + Claude); kod tarafı doğrulandı (`npm run check:moderation`).
