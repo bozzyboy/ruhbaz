@@ -23,5 +23,22 @@
 6. **Cihaz re-test:** Ozan **her okuma tipini TR+EN, 2'şer kez** kriz girdisiyle test etsin (kriz genişletildi ama cihazda teyit; A-2). Dream INITIAL bilinçli dar (kâbus-güvenli) — yalnız açık niyet ("intihar etmek istiyorum") yakalanır; dream FOLLOWUP question-context → geniş.
 7. Daha önceden park: D-3 EN onay (doğrulama tamam, cihazda teyit) · B-section kalite (kullandıkça).
 
-## SONRAKİ CLAUDE İLK İŞ
-`00_HANDOFF.md` + bu dosya → **1-3 teşhis bug'larını** bir workflow/paralel ajanla çöz (perf, dream persona, loading) → Ozan kısa re-test. Faz 5 (Konak Akışı) bunlar + tat onayları sonrası.
+## ✅ EK DÜZELTMELER (Ozan'ın 8-madde incelemesinden, bu oturumda yapıldı)
+- **Kahve ai-brew rol-yapma:** "kullanıcı içmiş / içerken aklından geçenler" varsayımı yasaklandı; persona kahveyi kullanıcının NİYETİNE/yerine içer, yorum fincan/tabaktaki ŞEKİLLER üzerinden kurulur (kullanıcının içme deneyimi değil). "Ben senin yerine içtim" demek serbest.
+- **Genel astro footer ifadesi:** "Ay'ın" → "ay burcunu", "yükselen burcun" → "yükselen burcunu" (TR+EN düzeltildi).
+
+## 🔴 KRİZ TESTİ — ERTELENDİ (SAĞLAM NOT)
+Ozan: "krizlere en son OVERALL testlerde bakacağım, artık tek tek hepsine bakamam; **ikimiz de (Ozan + Claude) en sonda tekrar bakacağız.**" → Kriz girdisini her okuma tipinde tek tek TEST ETME; cihaz test dokümanlarına "kriz toplu-test (en son, Ozan+Claude birlikte)" maddesi koy ama tek tek koşturma. Kriz tespiti kod tarafında battery ile genişletildi/doğrulandı (bu oturum); kalan = final overall doğrulama.
+
+## ⛔ ÖZERK MANDAT (Ozan, 2026-06-14 — uyumaya gitti)
+Ozan: "bana sormadan BÜTÜN FAZLARI tek tek ilerle, özerk. Cihaz testi dosyalarını yine bana hazırla (önceki oturumlardaki gibi)." → Sonraki Claude:
+1. Bu handoff'taki **kalan 3 teşhis-UX bug'ını** (ProfileSettings perf, rüya persona display, loading geç-render) çöz → Faz 4.5 cihaz-testi-1 turu kapanır.
+2. Sonra **Faz 5 → Faz 6 → ...** yol haritası sırasıyla (`05_YOL_HARITASI.md`; Faz 5 brifingi `handoffs/faz4-bitti_ingilizce-i18n_2026-06-11.md` §4) **ONAY BEKLEMEDEN** ilerle.
+3. **Her faz/round için ayrı cihaz test dokümanı** hazırla (kural: `NN_FAZ<N>_CIHAZ_TESTLERI_<tarih>.md`, kurulum kutusu + step-by-step + regresyon + değişen-dosya→test eşlemesi). Cihaz-testi-1 düzeltmeleri için → `22_FAZ4-5_CIHAZ_TESTLERI_2_<tarih>.md`.
+4. Disiplin: her mantıksal adım ayrı commit + tsc/utf8/image-contract bekçileri + **her batch/faz sonunda bağımsız adversarial öz-review ajanı** + regresyon-önleme prensibi (00:63). Ultracode AÇIK → hacimli/paralel iş için workflow/paralel ajan kullan.
+5. **Ozan-bloklu işlere GİRME** (avukat, yasal final onayı, Play Console, IAP ürün/fiyat, store metni final, marka/logo onayı, analitik araç seçimi) — taslak hazırla, "blok: Ozan" işaretle, geç.
+6. Tat onayları (EN persona sesleri, C5/C6 EN tagline/etiket, B2 telaş) → cihaz turuna bırak, kod akışını durdurma.
+7. Her faz geçişinde 00 + handoff snapshot güncelle (kesinti sigortası). Context dolunca yeni handoff + bu mandatı taşıyan devam-promptu yaz.
+
+## 📋 YENİ SESSION İÇİN PROMPT (Ozan kopyalayıp yapıştıracak)
+> Ruhbaz Manor'a devam. **Özerk çalışıyorsun, sana sormadan bütün fazları tek tek ilerleteceksin** (Ozan uyuyor). Önce oku: `00_HANDOFF.md` + `handoffs/faz4-5-cihaztest1_2026-06-14.md` (özellikle "ÖZERK MANDAT" ve "KRİZ TESTİ ERTELENDİ" bölümleri). Sonra: **(1)** Faz 4.5 cihaz-testi-1'in kalan 3 teşhis-UX bug'ını çöz (ProfileSettings yavaşlama, rüya persona display, "hazırlanıyor" geç-render) ve bunlar için `22_FAZ4-5_CIHAZ_TESTLERI_2_<tarih>.md` hazırla. **(2)** Sonra yol haritası sırasıyla **Faz 5 (Konak Akışı + bildirimler)** ve sonraki fazlara onay beklemeden geç; her faz için ayrı cihaz test dokümanı. Her mantıksal adım ayrı commit + bekçiler (tsc/utf8/image-contract) + her faz sonunda bağımsız öz-review. **Krizleri tek tek TEST ETME** — final overall teste bırak (ikimiz birlikte bakacağız). **Ozan-bloklu işlere girme** (avukat/IAP/fiyat/store/marka/analitik/yasal-final = taslak + "blok: Ozan"). Ultracode açık: hacimli işte workflow/paralel ajan kullan. Tat onaylarını (EN persona ses, EN tagline/etiket, B2) cihaz turuna bırak. Başla.
