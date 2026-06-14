@@ -18,7 +18,7 @@
 - `9f19d35`: `components/WaitingScene.tsx` — okuma hazırlanırken (ilk yorum gelene kadar) Konak Akışı havuzundan bir atmosfer kartı; "davet" türü elenir; akış boşsa null. SessionScreen'de loader ALTINA **eklemeli** render (Bug 3 mantığı değişmedi). i18n `manorFeed.whileYouWait`. **Şimdilik yalnız SessionScreen** (kahve/el — en uzun bekleme); diğer reading ekranları + kart rotasyonu/animasyon ileride. Öz-review **TEMİZ** (Bug 3 loader korundu — WaitingScene koşulu loader koşulunun alt-kümesi, eklemeli render; yaşam döngüsü/dil-cache/i18n hepsi temiz). Öz-review notu üzerine kullanılmayan `pickFeedHighlights` export kaldırıldı (`acdef7c`).
 
 ## 🔜 KALAN FAZ 5 DİLİMLERİ (özerk sıra)
-- **5.4 I-Ching + Rün kişisel okuma türleri:** ⚠️ **MİMARİ NOT:** kişisel-okuma giriş noktaları PARÇALI — `PersonalReadingTypeSelectScreen`'de tarot-personal bile `currentlyAvailable:false`, dream burada listede YOK (başka yoldan giriliyor). I-Ching/Rün'ü temiz eklemek bu menü mimarisini çözmeyi gerektirir (sandığımdan büyük). Genel divinationData'da I-Ching(64)+Rün(24) zaten var. Önce understand-workflow ile akışı haritalamak iyi olur.
+- **5.4 I-Ching + Rün kişisel okuma türleri:** ✅ **HARİTALANDI** (understand-workflow, 5 ajan) → **`25_FAZ5_5-4_ICHING_RUNE_KARAR_2026-06-14.md`**. Teknik yapılabilir (tarot kalıbı şablon; ~16-18 dosya). **BLOK: Ozan kararı** = (A) statik mı (B) konuşmalı mı (öneri B). Parçalı menü BLOKAJ DEĞİLMİŞ (canlı akış `PersonalReadingsScreen.flowTypes`; legacy ekran kullanılmıyor). Kritik: `personaClosingService` domain union'ına `iching`/`rune` eklenmeli (terimleri kendi domain'inde serbest bırak). Karar gelince adım-adım plan 25_'te.
 - **5.5 Aura günlük tema (K39):** ⚠️ **TASARIM KARARI:** app-geneli dinamik tema = HER ekrana dokunur (yüksek regresyon riski; regresyon-önleme ihlali). Öneri: **kapsamlı tema yerine Home'da günlük "Aura" kartı/şeridi** (astroEngine günlük gökyüzünden renk+atmosfer satırı, erişilebilirlik + sabitleme). Tam tema = Ozan taste/mimari kararı.
 - **5.6 Bildirimler + taksonomi:** ⚠️ **NATIVE → YENİ APK GEREKİR** (`expo-notifications` paket yok, eklenince native). Yerel günlük astro + etkileşimli + re-engagement + doğum günü + rating. **Bildirim taksonomisi tasarım dokümanı** (her tür: tetikleyici/frekans tavanı/kapatma/677-dil) Ozan onayına hazırlanmalı (briefing'in gerektirdiği tasarım turu). Metin onayları = Ozan bloğu.
 
@@ -34,5 +34,13 @@
 - **Tat onayları** cihaz turuna: favori kalp rengi · Ayşe/Deniz rüya açılış + astro/num imza tonu · rüya varsayılan reader · feed içerik tonu/tasarımı · (21_'den) EN persona sesleri, C5/C6 EN, B2.
 - **Bekçi tuzağı (yeni hafıza):** kod yorumlarında/string'lerde ASCII apostrof (`save'ler`) utf8 bekçisinin tırnak paritesini bozar → yeniden ifade et veya curly `'`. Commit mesajında da apostrof/`||`/boşluklu-`/` PowerShell here-string'i bozar. Bkz. memory [[ps-commit-heredoc-apostrof]].
 
+## ▶ DURAK NOKTASI — özerk inşa burada (sağlıklı) durdu
+Faz 5'in **özerk yapılabilir TÜM dilimleri (5.1 + 5.2 + 5.3) BİTTİ ve adversarial öz-review'den geçti.** Kalan 3 dilimin HEPSİ Ozan-kapısına dayanıyor:
+- **5.4** → Ozan kararı: statik (A) vs konuşmalı (B) mimari (`25_`).
+- **5.5 Aura** → ürün-his/taste kararı (app-geneli tema = regresyon riski; kapsamlı = renk/atmosfer tat). Mandat "emin olmadığın üründe-his kararı yapma" → Ozan.
+- **5.6 bildirimler** → native (YENİ APK; Ozan derleyip kurar) + bildirim taksonomisi Ozan onayı (`24_`).
+
+Mandat "devam et" + "Ozan-bloklu işlere girme" + "üründe-his kararı yapma" birlikte değerlendirildi → bu nokta doğru durak. **Karar beklemeden ilerlenecek başka özerk Faz 5 KOD işi yok.** **SONRAKİ OTURUM:** Ozan kararlarını al (5.4 A/B + alt-kararlar, 5.5 tema yaklaşımı, 5.6 taksonomi onayı) → uygula. 5.4 için somut plan `25_`'te hazır.
+
 ## 📌 DURUM
-✅ Faz 4.5 (kod tam + cihaz-testi-1 3 bug + öz-review). 🔄 Faz 5: **5.1 + 5.2 + 5.3 BİTTİ** (favoriler, Konak Akışı feed, bekleme sahnesi); 5.4–5.6 kaldı + 5.6 taksonomi taslağı (`24_`) hazır. 🔶 Hiçbiri cihazda doğrulanmadı (reload yeter; 5.6 hariç YENİ APK). Ozan cihaz turları (21_/22_/23_) + tat onayları + bloklar bekliyor.
+✅ Faz 4.5 (kod tam + cihaz-testi-1 3 bug + öz-review). 🔄 Faz 5: **5.1 + 5.2 + 5.3 BİTTİ** (favoriler, Konak Akışı feed, bekleme sahnesi; hepsi öz-review temiz); 5.4 haritalandı (`25_`, Ozan kararı), 5.5/5.6 Ozan-kapılı. Taslaklar: `24_` taksonomi, `25_` I-Ching/Rün. 🔶 Hiçbiri cihazda doğrulanmadı (reload yeter; 5.6 hariç YENİ APK). Ozan cihaz turları (21_/22_/23_) + tat onayları + bloklar bekliyor.
