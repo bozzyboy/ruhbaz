@@ -40,6 +40,21 @@ const SIGN_TR: Record<(typeof SIGN_ORDER)[number], string> = {
   pisces: 'Balık',
 };
 
+const SIGN_EN: Record<(typeof SIGN_ORDER)[number], string> = {
+  aries: 'Aries',
+  taurus: 'Taurus',
+  gemini: 'Gemini',
+  cancer: 'Cancer',
+  leo: 'Leo',
+  virgo: 'Virgo',
+  libra: 'Libra',
+  scorpio: 'Scorpio',
+  sagittarius: 'Sagittarius',
+  capricorn: 'Capricorn',
+  aquarius: 'Aquarius',
+  pisces: 'Pisces',
+};
+
 const PERIOD_TR: Record<Exclude<AstroPeriod, 'yearly'>, string> = {
   daily: 'günlük',
   weekly: 'haftalık',
@@ -460,6 +475,28 @@ async function rememberGeneralAstroReading(params: {
   }).catch(() => {});
 }
 
+/**
+ * Genel astro yorumunun sonuna kişisel astrolojiye davet eden çapraz-satış dipnotu ekler.
+ * Deterministik (modele bağlı değil), dil-duyarlı ve idempotenttir; hayvan profillerinde atlanır.
+ * Sanitize sonrası çağrılmalı ki cache'lenen reading.text dipnotu da içersin.
+ */
+function appendGeneralAstroFooter(params: {
+  text: string;
+  profile: SubjectProfile;
+  sign: (typeof SIGN_ORDER)[number];
+}): string {
+  const text = params.text.trimEnd();
+  if (isAnimalProfile(params.profile)) return text;
+  const displayName = params.profile.displayName;
+  const footer =
+    getAppLanguage() === 'en'
+      ? `\n\nDear ${displayName}, that was a general reading for your ${SIGN_EN[params.sign]} sign. Remember, whenever you like you can visit the Parlour → Astrology section for an interpretation made entirely for you and your exact moment of birth — one that also takes your rising sign, your Moon and the full sky chart at your birth into account.`
+      : `\n\nSevgili ${displayName}, bu senin ${SIGN_TR[params.sign]} burcun için genel bir yorumdu. Unutma, dilediğin zaman yükselen burcun, Ay'ın ve doğduğun andaki gökyüzü haritasının da göz önünde bulundurulduğu, tamamen sana ve doğum anına özel astroloji yorumun için Salon → Astroloji bölümünü ziyaret edebilirsin.`;
+  // İdempotent: metin zaten bu dipnotla bitiyorsa tekrar ekleme.
+  if (text.endsWith(footer.trimEnd())) return text;
+  return text + footer;
+}
+
 export async function fetchGeneralAstroDirect(params: {
   period: Exclude<AstroPeriod, 'yearly'>;
   profile: SubjectProfile;
@@ -488,7 +525,11 @@ export async function fetchGeneralAstroDirect(params: {
       periodKey: context.key,
       timezone: context.timezone,
     });
-    const sanitizedText = sanitizePublicReadingLanguage(text);
+    const sanitizedText = appendGeneralAstroFooter({
+      text: sanitizePublicReadingLanguage(text),
+      profile: params.profile,
+      sign,
+    });
     const reading: AstroReadingResult = {
       text: sanitizedText,
       sign: signLabel,
@@ -512,7 +553,11 @@ export async function fetchGeneralAstroDirect(params: {
         skyContextJson,
         repeatMemory,
       });
-      const sanitizedText = sanitizePublicReadingLanguage(generated.text);
+      const sanitizedText = appendGeneralAstroFooter({
+        text: sanitizePublicReadingLanguage(generated.text),
+        profile: params.profile,
+        sign,
+      });
       const reading: AstroReadingResult = {
         text: sanitizedText,
         sign: signLabel,
@@ -531,7 +576,11 @@ export async function fetchGeneralAstroDirect(params: {
       label: context.label,
       repeatMemory,
     });
-    const sanitizedText = sanitizePublicReadingLanguage(fallback);
+    const sanitizedText = appendGeneralAstroFooter({
+      text: sanitizePublicReadingLanguage(fallback),
+      profile: params.profile,
+      sign,
+    });
     const reading: AstroReadingResult = {
       text: sanitizedText,
       sign: signLabel,

@@ -125,11 +125,10 @@ export function useSession() {
     return msg;
   }, []);
 
-  const buildSeedMessage = useCallback((config: SessionConfig, rejectedUploadCount: number): string => {
-    const retryNotice =
-      rejectedUploadCount > 0
-        ? `Bu okumadan önce bu oturum için ${rejectedUploadCount} kez yanlış görsel denemesi yapıldı ve kredi hesabına dahil edildi. Yoruma bunu kısa bir arka plan notu olarak dahil et ama ana odağı okumada tut.`
-        : '';
+  const buildSeedMessage = useCallback((config: SessionConfig, _rejectedUploadCount: number): string => {
+    // FIX 2: Yanlış görsel denemeleri hâlâ kredi hesabına dâhil edilir (consumeRejectedUploadAttempts),
+    // ama persona'ya "yoruma bunu arka plan notu olarak ekle" talimatı VERİLMEZ. Okumanın gövdesi
+    // asla önceki yanlış yükleme hatalarına değinmemeli; rejectedUploadCount sadece muhasebe içindir.
     const focusQuestion = config.focusQuestion?.replace(/\s+/g, ' ').trim() || '';
     const focusNotice = focusQuestion
       ? `Kullanıcının yorumlanmasını istediği konu/soru: ${focusQuestion}. Bu konu ana eksendir; görseli ve hafıza bağlamını bu soruyla ilişkili olduğu ölçüde yorumla.`
@@ -142,7 +141,6 @@ export function useSession() {
         focusNotice,
         'Gerçek görsel yok; seçili profilin hafızası ve önceki temaları varsa onlardan sezgisel destek al.',
         'İlk yorumu doğal ve dolu dolu aç.',
-        retryNotice,
       ]
         .filter(Boolean)
         .join(' ');
@@ -150,7 +148,7 @@ export function useSession() {
 
     if (config.readingType === 'palm') {
       const target = config.profileIsSelf ? 'Benim' : `${config.profileName} için`;
-      return [`${target} avuç içi fotoğrafını gönderdim. El yorumumu başlat lütfen.`, focusNotice, retryNotice]
+      return [`${target} avuç içi fotoğrafını gönderdim. El yorumumu başlat lütfen.`, focusNotice]
         .filter(Boolean)
         .join(' ');
     }
@@ -169,7 +167,6 @@ export function useSession() {
         : '',
       focusNotice,
       'Yorumuma başla lütfen.',
-      retryNotice,
     ]
       .filter(Boolean)
       .join(' ')

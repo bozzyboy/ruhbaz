@@ -12,7 +12,6 @@ import {
   DEFAULT_DEV_SETTINGS,
   applyAssistantPreset,
   getAssistantLabel,
-  getAssistantPreset,
 } from '../config/constants';
 import { normalizeLimitedInput, OPTIONAL_READING_TOPIC_MAX_CHARS } from '../config/llmTokenPolicy';
 import { appendUserReadingIntentMemory, getPrimaryProfile, loadAccountState, loadProfileMemorySnippet } from '../services/profileMemoryService';
@@ -59,7 +58,6 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
   );
 
   const assistantLabel = getAssistantLabel(devSettings.assistantId);
-  const assistantPreset = getAssistantPreset(devSettings.assistantId);
   const normalizedTopicText = normalizeLimitedInput(topicText, OPTIONAL_READING_TOPIC_MAX_CHARS);
 
   const selectedProfile = useMemo(
@@ -217,7 +215,6 @@ export function PersonalReadingSetupScreen({ navigation, route }: Props) {
 
           <View style={styles.panel}>
             <Text style={styles.panelTitle}>{readingType === 'coffee' ? t('flows.startCoffeeTitle') : t('flows.startPalmTitle')}</Text>
-            <Text style={styles.assistantBlurb}>{assistantPreset.tagline}</Text>
             <Text style={styles.inlineLabel}>{t('flows.topicLabel')}</Text>
             <TouchableOpacity style={styles.topicPromptBox} activeOpacity={0.88} onPress={() => setTopicEditorVisible(true)}>
               <Text style={[styles.topicPromptText, !normalizedTopicText && styles.topicPromptPlaceholder]}>

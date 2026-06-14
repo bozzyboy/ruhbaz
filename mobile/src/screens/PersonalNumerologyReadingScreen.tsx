@@ -474,21 +474,23 @@ export function PersonalNumerologyReadingScreen({ route, navigation }: Props) {
           <Text style={styles.sessionHeaderText}>{assistantLabel}</Text>
         </View>
         <View style={styles.panel}>
-          <View style={styles.modeRow}>
-            {availableModes.map((item) => {
-              const selected = mode === item;
-              return (
-                <TouchableOpacity
-                  key={item}
-                  style={[styles.modeButton, selected && styles.modeButtonSelected, isBusy && styles.disabledAction]}
-                  onPress={() => void handleSelectMode(item)}
-                  disabled={isBusy}
-                >
-                  <Text style={[styles.modeButtonText, selected && styles.modeButtonTextSelected]}>{modeUiLabel(item, t)}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+          {availableModes.length > 1 ? (
+            <View style={styles.modeRow}>
+              {availableModes.map((item) => {
+                const selected = mode === item;
+                return (
+                  <TouchableOpacity
+                    key={item}
+                    style={[styles.modeButton, selected && styles.modeButtonSelected, isBusy && styles.disabledAction]}
+                    onPress={() => void handleSelectMode(item)}
+                    disabled={isBusy}
+                  >
+                    <Text style={[styles.modeButtonText, selected && styles.modeButtonTextSelected]}>{modeUiLabel(item, t)}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : null}
 
           <TouchableOpacity
             style={[styles.refreshButton, !canPrepareReading && styles.refreshButtonDisabled]}

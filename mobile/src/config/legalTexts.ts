@@ -57,7 +57,7 @@ export const LEGAL_INFO_SECTIONS: ReadonlyArray<{ title: string; body: string }>
     body:
       'Buradaki hiçbir içerik tıbbi teşhis veya tedavi, hukuki görüş, finansal ya da yatırım tavsiyesi, ' +
       'psikolojik danışmanlık veya terapi yerine geçmez. Bu alanlardaki ihtiyaçların için lütfen ilgili uzmana başvur. ' +
-      'Acil bir durumda 112 Acil Çağrı Merkezi’ni arayabilirsin.',
+      'Acil bir durumda yerel acil servislere ulaşabilirsin.',
   },
   {
     title: 'Verilerin nerede saklanır?',

@@ -13,6 +13,7 @@ import Svg, {
   Text as SvgText
 } from 'react-native-svg';
 import { formatReadableText } from './SelectableFormattedText';
+import { getAppLanguage } from '../i18n';
 
 interface FortuneCookieCardProps {
   data: { text: string; sign: string };
@@ -116,7 +117,9 @@ const FortuneCookieCard: React.FC<FortuneCookieCardProps> = ({
 
           <View style={styles.signBox}>
             <Text style={styles.signTitle}>{t('cards.fortuneTripletLabel')}</Text>
-            <Text style={styles.signText}>{formatReadableText(data.sign)}</Text>
+            <Text style={styles.signText}>
+              {formatReadableText(data.sign).toLocaleUpperCase(getAppLanguage() === 'en' ? 'en-US' : 'tr-TR')}
+            </Text>
           </View>
         </View>
       </ImageBackground>
@@ -185,7 +188,6 @@ const styles = StyleSheet.create({
     color: '#5a4634',
     textAlign: 'center',
     fontWeight: '700',
-    textTransform: 'uppercase',
   },
 });
 

@@ -21,6 +21,7 @@ import {
 } from './personaClosingService';
 import { cleanFollowUpReply, getSimpleFollowUpReply } from './followUpResponseService';
 import { filterModeratedFollowUps, isAllowedUserText, moderateUserInput } from './inputModerationService';
+import { getAppLanguage } from '../i18n';
 
 export type ReadingMessage = BuilderReadingMessage;
 
@@ -52,10 +53,18 @@ export interface ReadingReplyResult {
 
 type GeminiUsage = ReadingReplyResult['usage'];
 
-const PHOTO_RETRY_MESSAGE =
-  'Fotoğraf şu an net okunamadı canım. Işığı biraz artırıp telveyi ya da avuç içini daha yakından göstererek yeniden deneyelim.';
-const FRIENDLY_FALLBACK =
-  'Bu fotoğraf bu okuma türü için uygun görünmüyor canım. Uygun okuma türünü seçip fotoğrafı yeniden yükleyelim.';
+// FIX 3: Görsel-red mesajları dil-duyarlı. EN modda İngilizce, TR modda Türkçe döner.
+// TR metinleri bayt-aynı korunur (Türkçe UTF-8 bekçisi için kritik).
+const isEnglishApp = () => getAppLanguage() === 'en';
+
+const photoRetryMessage = () =>
+  isEnglishApp()
+    ? "The photo could not be read clearly right now. Let's brighten the light a little and try again, showing the grounds or the palm from closer up."
+    : 'Fotoğraf şu an net okunamadı canım. Işığı biraz artırıp telveyi ya da avuç içini daha yakından göstererek yeniden deneyelim.';
+const friendlyFallback = () =>
+  isEnglishApp()
+    ? "This photo does not look suitable for this reading type. Let's pick the right reading type and upload the photo again."
+    : 'Bu fotoğraf bu okuma türü için uygun görünmüyor canım. Uygun okuma türünü seçip fotoğrafı yeniden yükleyelim.';
 const SURFACE_INITIAL_MIN_OUTPUT_TOKENS: Partial<Record<ReadingReadingType, number>> = {
   coffee: 900,
   palm: 750,
@@ -77,10 +86,10 @@ function addUsage(total: GeminiUsage, usage?: Partial<GeminiUsage>) {
 
 function friendlyApiMessage(raw?: string | null) {
   const text = (raw || '').trim();
-  if (!text) return FRIENDLY_FALLBACK;
+  if (!text) return friendlyFallback();
   const looksTechnical =
     /Gemini|HTTP|JSON|RuntimeError|Traceback|candidate|generateContent|API|token|exception|returned/i.test(text);
-  return looksTechnical ? FRIENDLY_FALLBACK : text;
+  return looksTechnical ? friendlyFallback() : text;
 }
 
 function jsonPayloadError(message: string, usage: GeminiUsage) {
@@ -228,7 +237,7 @@ async function validateCoffeeImages(images: ReadingImages) {
       result = classified.parsed;
       addUsage(usage, classified.usage);
     } catch {
-      throw jsonPayloadError(PHOTO_RETRY_MESSAGE, usage);
+      throw jsonPayloadError(photoRetryMessage(), usage);
     }
     let surfaceCode = coffeeSurfaceCode(result);
     const hasGrounds =
@@ -261,7 +270,12 @@ async function validateCoffeeImages(images: ReadingImages) {
     addSurfaceFromCode(surfaces, surfaceCode);
   }
   if (!loadedCoffeeImageCount) {
-    throw jsonPayloadError('Kahve yorumu için en az bir telveli kahve görseli yükle.', usage);
+    throw jsonPayloadError(
+      isEnglishApp()
+        ? 'For a coffee reading, upload at least one coffee photo with grounds in it.'
+        : 'Kahve yorumu için en az bir telveli kahve görseli yükle.',
+      usage,
+    );
   }
   // En az 1 telveli görsel bulunduysa okuma BAŞLAR; diğer kareler okumayı düşürmez.
   if (analyses.length && surfaces.length) {
@@ -270,18 +284,24 @@ async function validateCoffeeImages(images: ReadingImages) {
   // Buraya düştüysek hiçbir karede telveli fincan/tabak yok — bilgilendirici red.
   if (groundlessLabels.length && !rejectedLabels.length) {
     throw jsonPayloadError(
-      `${groundlessLabels.join(', ')} telvesiz/temiz görünüyor. Kahve yorumu için fincan veya tabakta telve izi, damla, akıntı ya da kalıntı görünen fotoğraf yükle.`,
+      isEnglishApp()
+        ? `${groundlessLabels.join(', ')} looks clean / without grounds. For a coffee reading, upload a photo where coffee-ground traces, drops, streaks or residue are visible in the cup or on the saucer.`
+        : `${groundlessLabels.join(', ')} telvesiz/temiz görünüyor. Kahve yorumu için fincan veya tabakta telve izi, damla, akıntı ya da kalıntı görünen fotoğraf yükle.`,
       usage,
     );
   }
   if (suggestedPalm) {
     throw jsonPayloadError(
-      'Bu görsel kahve telvesinden çok avuç içi gibi görünüyor; kahve yorumu için telveli fincan veya tabak fotoğrafı yükle.',
+      isEnglishApp()
+        ? 'This image looks more like a palm than coffee grounds; for a coffee reading, upload a photo of a cup or saucer with grounds in it.'
+        : 'Bu görsel kahve telvesinden çok avuç içi gibi görünüyor; kahve yorumu için telveli fincan veya tabak fotoğrafı yükle.',
       usage,
     );
   }
   throw jsonPayloadError(
-    `${rejectedLabels.length ? `${rejectedLabels.join(', ')} telveli fincan veya tabak içermiyor. ` : ''}Kahve yorumu için en az bir telve izi görünen fincan ya da tabak fotoğrafı yükle.`,
+    isEnglishApp()
+      ? `${rejectedLabels.length ? `${rejectedLabels.join(', ')} does not contain a cup or saucer with grounds. ` : ''}For a coffee reading, upload at least one photo of a cup or saucer where a trace of grounds is visible.`
+      : `${rejectedLabels.length ? `${rejectedLabels.join(', ')} telveli fincan veya tabak içermiyor. ` : ''}Kahve yorumu için en az bir telve izi görünen fincan ya da tabak fotoğrafı yükle.`,
     usage,
   );
 }
@@ -366,27 +386,38 @@ function speciesTr(species?: string | null, fallback?: string | null) {
 async function validatePalmImage(images: ReadingImages, memorySnippet?: ProfileMemorySnippet | null) {
   const image = images.palm;
   const usage = emptyUsage();
-  if (!image) throw jsonPayloadError('El/pati okuması için fotoğraf gerekli.', usage);
+  if (!image) throw jsonPayloadError(isEnglishApp() ? 'A photo is required for a palm/paw reading.' : 'El/pati okuması için fotoğraf gerekli.', usage);
   let result: PalmClassification;
   try {
     const classified = await classifyPalmImage(image);
     result = classified.parsed;
     addUsage(usage, classified.usage);
   } catch {
-    throw jsonPayloadError(PHOTO_RETRY_MESSAGE, usage);
+    throw jsonPayloadError(photoRetryMessage(), usage);
   }
-  const loadedLabel = result.visualLabelTr || 'uygun olmayan bir görsel';
+  const en = isEnglishApp();
+  const loadedLabel = result.visualLabelTr || (en ? 'an unsuitable image' : 'uygun olmayan bir görsel');
   const isPet = memorySnippet?.relationshipPrimary === 'evcil_hayvan';
   if (isPet) {
     const expectedSpecies = normalizePetSpecies(memorySnippet?.petSpecies);
     const expectedLabel = speciesTr(expectedSpecies, memorySnippet?.petSpecies);
     if (!isAnimalPawVisual(result)) {
-      throw jsonPayloadError(`${memorySnippet?.profileName || 'Bu profil'} için pati okuması istemiştin fakat ${loadedLabel} yükledin. Pati okumasında hayvanın patisi, pençesi ya da ayağı yeterli — altı da üstü de olur; patinin göründüğü bir ${expectedLabel} fotoğrafıyla yeniden deneyelim.`, usage);
+      throw jsonPayloadError(
+        en
+          ? `You asked for a paw reading for ${memorySnippet?.profileName || 'this profile'} but you uploaded ${loadedLabel}. For a paw reading the animal's paw, claw or foot is enough — the underside or the top both work; let's try again with a photo of a ${expectedLabel} where the paw is visible.`
+          : `${memorySnippet?.profileName || 'Bu profil'} için pati okuması istemiştin fakat ${loadedLabel} yükledin. Pati okumasında hayvanın patisi, pençesi ya da ayağı yeterli — altı da üstü de olur; patinin göründüğü bir ${expectedLabel} fotoğrafıyla yeniden deneyelim.`,
+        usage,
+      );
     }
     return { validation: result, usage };
   }
   if (!isHumanPalmVisual(result)) {
-    throw jsonPayloadError(`El okuması için avuç içinin ve parmakların göründüğü bir fotoğraf gerekli; el sırtı/dış yüz ya da başka bir görsel yüklenirse okuyamam. Avuç içi çizgilerinin seçildiği bir fotoğrafla yeniden deneyelim.`, usage);
+    throw jsonPayloadError(
+      en
+        ? `A palm reading needs a photo where the inner palm and the fingers are visible; if the back of the hand/outer side or another image is uploaded, I cannot read it. Let's try again with a photo where the palm lines are clear.`
+        : `El okuması için avuç içinin ve parmakların göründüğü bir fotoğraf gerekli; el sırtı/dış yüz ya da başka bir görsel yüklenirse okuyamam. Avuç içi çizgilerinin seçildiği bir fotoğrafla yeniden deneyelim.`,
+      usage,
+    );
   }
   return { validation: result, usage };
 }
@@ -512,7 +543,9 @@ function shouldExpandInitialSurfaceReading(params: {
   text: string;
 }) {
   if (params.isFollowUp) return false;
-  if (params.readingType === 'coffee' && (params.coffeeMode || 'upload') !== 'upload') return false;
+  // FIX 1: görselsiz ("ai-brew" / benim yerime) kahve okuması da uzunluk genişletmesine
+  // dahil edilir; yüklemeli kahve gibi aynı minimum uzunluğu hedeflesin. Eskiden bu mod
+  // genişletmeden hariç tutulduğu için kısa kalıyordu. Upload davranışı değişmez.
   const minTokens = SURFACE_INITIAL_MIN_OUTPUT_TOKENS[params.readingType];
   if (!minTokens) return false;
   const paragraphCount = (params.text || '').split(/\n\s*\n/).filter((part) => part.trim().length > 40).length;

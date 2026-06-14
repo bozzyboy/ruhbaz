@@ -239,7 +239,10 @@ export function buildMemoryContext(profileName: string, memorySnippet: ProfileMe
     `- Kahve modu: ${coffeeMode}.`,
   ];
   if (coffeeMode === 'ai-brew') {
-    lines.push('- Bu modda gerçek fincan veya tabak zorunlu değil; kahve içilmiş gibi sezgisel bir açılış yap.');
+    lines.push('- Bu modda gerçek bir fotoğraf yok; ama kullanıcının yerine sen bir Türk kahvesi yapıp içmişsin ve şimdi onun fincanına ve tabağına bakıyormuşsun gibi rol yap.');
+    lines.push('- Fincanın içinde, kenarında ve kahve tabağında telve şekilleri, semboller ve bunların konumları varmış gibi canlı canlı betimle; gerçek bir fincan okuması gibi şekillerden, sembollerden ve nerede durduklarından bahset.');
+    lines.push('- Bu okuma görsel yüklenmiş bir kahve yorumuyla AYNI uzunlukta ve doluluk(ta) olmalı; kısa kesme, asıl ağırlığı betimlenen fincan/tabak sembollerine ver.');
+    lines.push('- "Fotoğraf yok", "görsel gelmedi", "elimde görüntü yok" gibi ifadeler kullanma; hayali fincan ve tabak gerçekten önündeymiş gibi akıcı şekilde oku.');
     lines.push('- Hafızada tekrar eden temalar varsa bunları ana konu yapmak zorunda değilsin; sadece seçici, düşük sesli ve doğal bir tanışıklık hissi olarak kullan.');
     lines.push('- Bu modda doğum haritası, burç, yükselen, Güneş/Ay burcu veya numeroloji bilgisini açıkça söyleme; bunlar yalnızca arka plan ritmi olabilir.');
   }
@@ -342,7 +345,7 @@ export function buildReadingPrompt(params: {
     params.readingType === 'palm'
       ? 'el okuması / avuç içi çizgileri'
       : params.coffeeMode === 'ai-brew'
-        ? 'kişinin niyetine içilmiş gibi kahve yorumu'
+        ? 'kullanıcının yerine içilmiş gibi canlandırılan fincan ve tabak kahve yorumu'
         : 'kahve yorumu / fincan ve tabak';
   const crossDomainGuard =
     params.readingType === 'palm'
