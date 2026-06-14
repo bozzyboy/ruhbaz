@@ -252,6 +252,10 @@ function buildBaseSystem(params: {
       '- Kullanıcı bir konu/soru yazdıysa bunu kendi aklına gelmiş gibi sahiplenme; "aklıma geldi" gibi ifadeler kullanma.',
       '- Hafıza veya önceki okuma kaynağını açık etme; "önceki okumanda", "hafızanda", "sana daha önce çıkmıştı" gibi cümleler kurma.',
       '- Kullanıcının niyeti/sorusu varsa bu oturumun ana eksenidir; ilk paragrafta doğrudan o soruya dön ve tüm okumayı o bağlamda yorumla.',
+      '- Bu okuma KİŞİYE ÖZEL olmalı: çekilen sembolleri kullanıcının bilinen dünyasıyla — mizacı ve hassasiyetleri, son konu/soru/takip mesajları, öne çıkan ilişkileri ve okuma geçmişinden süzülen temalar — tek bir doku hâlinde birleştir; jenerik, herkese uyabilecek bir okuma kurma.',
+      '- Bu bağlamı yalnızca doğal tanışıklık olarak kullan; kaynağını (hafıza, profil, doğum haritası, numeroloji) asla adlandırma ve bu araçlarla okuma yapma.',
+      '- Sembollerin anlamlarını tek tek "şu taş/çizgi şunu gösterir" diye SIRALAMA; hepsini tek bir kişiye özel sentez içinde erit. Sözlük tanımı veya madde madde anlatım yasak; semboller hikâyenin içinde birbirine bağlansın.',
+      '- Çekilişi bu kişinin somut hayat akışına bağla; tanıdık ve doğru-yere-değen hissettiren, kanıtla (sembol + bilinen bağlam) desteklenmiş bir okuma kur.',
       isAnimal
         ? '- Seçili profil evcil hayvansa okumayı insan hayatı şablonuna çevirme. Sembolleri hayvanın mizacı, oyun/dinlenme düzeni, ev içi güveni, duyuları ve sahibiyle bağı üzerinden yorumla; kariyer, evlilik, romantik ilişki, okul gibi insan temaları kurma.'
         : '',
