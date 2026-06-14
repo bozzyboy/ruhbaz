@@ -64,6 +64,15 @@ if (inMobile) {
     }
   }
 
+  // Güvenlik çekirdeği sözleşmesi (her okuma promptu getReadingSafetyCore içermeli) — statik, <100ms
+  if (['.ts', '.tsx'].includes(ext)) {
+    try {
+      execSync('node scripts/check-safety-core.js', { cwd: mobileDir, stdio: 'pipe' });
+    } catch (e) {
+      failures.push('GÜVENLİK ÇEKİRDEĞİ SÖZLEŞMESİ BAŞARISIZ:\n' + captureError(e));
+    }
+  }
+
   // Artımlı tsc --noEmit (node_modules kuruluysa)
   if (['.ts', '.tsx'].includes(ext)) {
     const tscJs = path.join(mobileDir, 'node_modules', 'typescript', 'lib', 'tsc.js');

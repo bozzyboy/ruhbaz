@@ -10,6 +10,7 @@
     "check:turkish:utf8": "node scripts/check-turkish-utf8.js",
     "check:image:contract": "node scripts/check-image-contract.js",
     "check:moderation": "node scripts/moderation-battery.js",
+    "check:safety:core": "node scripts/check-safety-core.js",
     "qr": "node scripts/qr.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
