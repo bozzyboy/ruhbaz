@@ -58,6 +58,14 @@ const PERSONA_DREAM_OPENINGS: Record<string, string[]> = {
     'Güzel ruh, rüyanın kapısını yavaşça aralayalım. Bana görüntüleri, hisleri ve uyandığında içinde kalan titreşimi anlat.',
     'Canım, rüyalar bazen iç dünyanın sembollerle konuşan şiiridir. Ne gördüğünü, hangi rengin veya sahnenin seni tuttuğunu tarif et.',
   ],
+  ayse: [
+    'Gel evladım, rüyanı toprağa düşen bir tohum gibi sabırla ele alalım. Ne gördüğünü, hangi duygunun içinde kaldığını ve uyandığında ruhunda ne bıraktığını anlat.',
+    'Otur şöyle, derin bir nefes al; rüyalar bazen iç bahçemizin sessiz fısıltısıdır. Sahneyi, renkleri ve uyanınca üstünde kalan hissi yavaşça anlat bana.',
+  ],
+  deniz: [
+    'Anlat bakalım canım, gece zihnin sana nasıl bir sahne kurmuş çok merak ettim. Kimler vardı, neredeydin ve uyanınca içinde hangi his kaldı, hepsini dök.',
+    'Gel kanka, şu rüyayı birlikte didikleyelim; bazen en ufak detay koca bir alt metni ele verir. Ne gördün, en çok hangi an aklına takıldı, tek tek anlat.',
+  ],
 };
 
 const ANIMAL_DREAM_OPENINGS: Record<string, string[]> = {
@@ -80,6 +88,14 @@ const ANIMAL_DREAM_OPENINGS: Record<string, string[]> = {
   arin: [
     'Güzel ruh, bu kez rüyanın kapısı onun küçük dünyasına aralansın. Uykudaki hali, minik sesleri ya da kalbine düşen sahneyi anlat.',
     'Canım, hayvanların sessiz dünyası bazen rüya gibi parlar. Onun kokularını, ışıklarını ve sevgi bağını yumuşak bir sembol diliyle okuyalım.',
+  ],
+  ayse: [
+    'Gel evladım, bu minik canın uyku hâlini toprak kadar sabırlı, bir ana kadar şefkatli bir dille okuyalım. Uyurken yaptığı küçük hareketleri, seslerini ya da içine doğan sahneyi anlat.',
+    'Otur şöyle; hayvanların uykusu da doğanın sessiz bir nefesidir. Onun gün içindeki hâlini, kokulara verdiği tepkiyi ve seninle kurduğu o sıcak bağı anlat, biz de sevgiyle yorumlayalım.',
+  ],
+  deniz: [
+    'Anlat bakalım canım, bu minik dostun uyurken neler yaşıyor çok merak ettim. Patisinin kıpırtısını, çıkardığı tatlı sesleri ya da gün içindeki o sevimli hâllerini dök bakalım.',
+    'Gel kanka, küçük dostunun uyku dünyasını birlikte okuyalım; kokular, sesler, evdeki minik kıskançlıklar bile koca bir hikâye anlatır. Ne yaptı, nasıl uyudu, anlat.',
   ],
 };
 
