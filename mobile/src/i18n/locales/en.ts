@@ -94,8 +94,8 @@ export const en: TranslationResource = {
   divination: {
     ichingMode: 'I-Ching',
     runeMode: 'Runes',
-    openingIChing: 'I drew an I-Ching hexagram for you; you can see it below. Write the topic you want to ask about, or say "a general reading".',
-    openingRune: 'I drew the runes for you; you can see them below. Write the topic you want to ask about, or say "a general reading".',
+    openingIChing: 'Write the topic or question on your mind below and start the reading; or leave it empty and I will still give you a personal reading.',
+    openingRune: 'Write the topic or question on your mind below and start the reading; or leave it empty and I will still give you a personal reading.',
     drawnLabel: 'Drawn',
     presentState: 'Present state',
     unfolding: 'Unfolding potential',
@@ -107,6 +107,9 @@ export const en: TranslationResource = {
     topicStepTitle: 'What would you like this reading to explore?',
     topicStepHelper: 'Write a topic or question; or leave it empty and I will still give you a personal, satisfying reading.',
     startReading: 'Start the reading',
+    runePosRoot: 'Root / past',
+    runePosNow: 'Now',
+    runePosPath: 'Path ahead',
   },
   settings: {
     legalInfoButton: 'Legal Information',

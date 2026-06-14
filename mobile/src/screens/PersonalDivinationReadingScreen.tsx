@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../App';
 import { APP_NAME, getAssistantLabel } from '../config/constants';
@@ -12,6 +11,7 @@ import { FOLLOW_UP_QUESTION_MAX_CHARS, FOLLOW_UP_QUESTION_MIN_CHARS, normalizeLi
 import { AssistantLoading } from '../components/AssistantLoading';
 import { BrandedConfirmModal } from '../components/BrandedConfirmModal';
 import { SelectableFormattedText } from '../components/SelectableFormattedText';
+import { DivinationCastView } from '../components/DivinationCastView';
 import { BrandedScrollView } from '../components/BrandedScrollView';
 import { TokenUsage } from '../components/TokenUsage';
 import {
@@ -60,31 +60,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PersonalDivinationReadi
 
 type ChatMessage = { id: string; role: 'user' | 'assistant'; text: string };
 
+// Açılış davet baloncuğu sabit id'li: okuma başlayınca listeden çıkarılır (yerini cast görseli + yorum alır).
+const OPENING_MESSAGE_ID = 'opening-invite';
+
 function makeMessage(role: 'user' | 'assistant', text: string): ChatMessage {
   return { id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, role, text };
 }
 
 function compactSummary(text: string) {
   return text.replace(/\s+/g, ' ').trim().slice(0, 420);
-}
-
-function formatCastDisplay(cast: DivinationCast, t: TFunction): string {
-  if (cast.kind === 'iching' && cast.iching) {
-    const ic = cast.iching;
-    const parts = [`${t('divination.presentState')}: ${ic.present.name}`, ic.present.situation];
-    if (ic.future) {
-      parts.push(`${t('divination.changingLines')}: ${ic.changingLineNumbers.join(', ')}`);
-      parts.push(`${t('divination.unfolding')}: ${ic.future.name}`);
-      parts.push(ic.future.situation);
-    } else {
-      parts.push(t('divination.noChangingLines'));
-    }
-    return parts.join('\n\n');
-  }
-  if (cast.kind === 'rune' && cast.rune) {
-    return cast.rune.runes.map((r) => `${r.rune} — ${r.keyword}\n${r.message}`).join('\n\n');
-  }
-  return '';
 }
 
 function themeFromCast(cast: DivinationCast) {
@@ -141,11 +125,13 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
         setProfileName(profile.displayName);
         const drawn = castDivination(kind, `${profileId}:${assistantId}:${sessionNonceRef.current}`);
         setCast(drawn);
-        const opening = [
-          kind === 'iching' ? t('divination.openingIChing') : t('divination.openingRune'),
-          `${t('divination.drawnLabel')}:\n\n${formatCastDisplay(drawn, t)}`,
-        ].join('\n\n');
-        setMessages([makeMessage('assistant', opening)]);
+        setMessages([
+          {
+            id: OPENING_MESSAGE_ID,
+            role: 'assistant',
+            text: kind === 'iching' ? t('divination.openingIChing') : t('divination.openingRune'),
+          },
+        ]);
       })
       .catch((err: any) => {
         if (mounted) setInfoModal({ visible: true, title: APP_NAME, message: err?.message || t('session.profileLoadFailed') });
@@ -414,12 +400,15 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
               {isLoadingProfile ? (
                 <AssistantLoading label={t('divination.openingLoading')} detail={t('session.pleaseWait')} />
               ) : (
-                messages.map((message) => (
-                  <View key={message.id} style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
-                    <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
-                    <SelectableFormattedText text={message.text} style={styles.chatText} />
-                  </View>
-                ))
+                <>
+                  {hasInterpretation && cast ? <DivinationCastView cast={cast} /> : null}
+                  {(hasInterpretation ? messages.filter((message) => message.id !== OPENING_MESSAGE_ID) : messages).map((message) => (
+                    <View key={message.id} style={[styles.chatBubble, message.role === 'user' ? styles.userBubble : styles.assistantBubble]}>
+                      <Text style={styles.chatRole}>{message.role === 'user' ? t('session.you') : assistantLabel}</Text>
+                      <SelectableFormattedText text={message.text} style={styles.chatText} />
+                    </View>
+                  ))}
+                </>
               )}
               {isSending ? <AssistantLoading compact /> : null}
             </BrandedScrollView>

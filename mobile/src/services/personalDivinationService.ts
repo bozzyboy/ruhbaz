@@ -40,6 +40,8 @@ export interface IChingCast {
   present: { name: string; situation: string; advice: string };
   future: { name: string; situation: string; advice: string } | null;
   changingLineNumbers: number[];
+  baseLines: number[];
+  endLines: number[];
 }
 export interface RuneDraw {
   positionNo: number;
@@ -104,6 +106,8 @@ function castIChing(seed: string): IChingCast {
     .map((l, idx) => (l === 6 || l === 9 ? idx + 1 : null))
     .filter((x): x is number => x !== null);
   const endHex = changingLineNumbers.length ? hexagrams.find((h) => h.binary === endBinary) || hexagrams[0] : null;
+  // Değişen Yin (6) -> sabit Yang (7), değişen Yang (9) -> sabit Yin (8): dönüşüm hexagramının çizgileri.
+  const endLines = lines.map((l) => (l === 6 ? 7 : l === 9 ? 8 : l));
   return {
     present: { name: baseHex.name, situation: baseHex.situation, advice: baseHex.advice },
     future:
@@ -111,6 +115,8 @@ function castIChing(seed: string): IChingCast {
         ? { name: endHex.name, situation: endHex.situation, advice: endHex.advice }
         : null,
     changingLineNumbers,
+    baseLines: lines,
+    endLines,
   };
 }
 

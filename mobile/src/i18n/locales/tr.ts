@@ -92,8 +92,8 @@ export const tr = {
   divination: {
     ichingMode: 'I-Ching',
     runeMode: 'Rün',
-    openingIChing: 'Senin için I-Ching ile bir hexagram çektim; aşağıda görüyorsun. Sormak istediğin konuyu yazabilir ya da "genel bir yorum" diyebilirsin.',
-    openingRune: 'Senin için rünleri çektim; aşağıda görüyorsun. Sormak istediğin konuyu yazabilir ya da "genel bir yorum" diyebilirsin.',
+    openingIChing: 'Aklındaki konu ya da soruyu aşağıya yazıp okumayı başlatabilirsin; istersen boş bırak, sana yine kişiye özel bir okuma yaparım.',
+    openingRune: 'Aklındaki konu ya da soruyu aşağıya yazıp okumayı başlatabilirsin; istersen boş bırak, sana yine kişiye özel bir okuma yaparım.',
     drawnLabel: 'Çekilen',
     presentState: 'Şimdiki durum',
     unfolding: 'Gelecek potansiyeli',
@@ -105,6 +105,9 @@ export const tr = {
     topicStepTitle: 'Bu okumadan ne öğrenmek istersin?',
     topicStepHelper: 'Bir konu ya da soru yaz; istersen boş bırak, sana yine kişiye özel ve doyurucu bir okuma yaparım.',
     startReading: 'Okumaya başla',
+    runePosRoot: 'Kök / geçmiş',
+    runePosNow: 'Şu an',
+    runePosPath: 'Yönelim',
   },
   settings: {
     legalInfoButton: 'Yasal Bilgilendirme',
