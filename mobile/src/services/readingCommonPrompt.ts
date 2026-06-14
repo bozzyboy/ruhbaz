@@ -11,6 +11,11 @@ function stripMarkdownSection(body: string, heading: string) {
     .trim();
 }
 
+function extractSection(body: string, heading: string) {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return body.match(new RegExp(`(# ${escaped}\\n\\n[\\s\\S]*?)(?:\\n\\n# |$)`))?.[1]?.trim() || '';
+}
+
 export const COMMON_READING_GUARDRAIL_BODY = stripMarkdownSection(
   stripMarkdownSection(COMMON_READING_IDENTITY_BODY, 'Vision Protocol'),
   'Implementation Notes',
@@ -22,6 +27,19 @@ export function getCommonReadingGuardrailBody(): string {
     stripMarkdownSection(getCommonReadingIdentityBody(), 'Vision Protocol'),
     'Implementation Notes',
   );
+}
+
+/**
+ * CANLI GÜVENLİK ÇEKİRDEĞİ (Faz 5.4) — common.md'nin yalnız "Safety And Boundaries" bölümü.
+ * TÜM okuma sistem prompt'larına (ilk okuma + takip) eklenir; tek güvenlik kaynağıdır:
+ * ölüm/felaket yok, sağlık/finans/hukuk/yatırım tavsiyesi yok, fal/kehanet/medyum/büyü kelime
+ * yasağı, kriz, kumar, din, siyaset, cinsel, ayrımcılık/nefret, 3. kişi iddiası, insan-iddiası.
+ * Dil-duyarlı (EN'de common.en.md, item 24 İngilizce-dili dahil).
+ * YENİ BİR FAL/OKUMA TÜRÜ EKLERSEN: o servisin sistem prompt'una bunu MUTLAKA kat
+ * (scripts/check-reading-safety-core.js bekçisi eksik olanı build'de yakalar).
+ */
+export function getReadingSafetyCore(): string {
+  return extractSection(getCommonReadingIdentityBody(), 'Safety And Boundaries');
 }
 
 function coffeeVisionProtocol() {
