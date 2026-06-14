@@ -148,7 +148,9 @@ const SEXUAL_RE = new RegExp(
 
 // CSAM — çocuk terimi + cinsel terim YAKIN; doğurganlık bağlamı ("çocuğum olacak mı") hariç.
 const CSAM_CHILD_RE = new RegExp(
-  `(${B_START}çocu[ğg]|${B_START}cocug|re[şs]it de[ğg]il|resit degil|küçük k[ıi]z${B_END}|kucuk kiz${B_END}|${B_START}1[0-7]\\s*ya[şs][ıi]nda)`,
+  // 'çocuk' (k-hâli) de yakalanır; eskiden yalnız 'çocuğ/çocug' (oblik) vardı, en
+  // yaygın nominatif/instrumental ('çocuk', 'çocukla') kaçıyordu (moderation-battery bulgusu).
+  `(${B_START}çocu[ğgk]|${B_START}cocu[gk]|re[şs]it de[ğg]il|resit degil|küçük k[ıi]z${B_END}|kucuk kiz${B_END}|${B_START}1[0-7]\\s*ya[şs][ıi]nda)`,
   'iu',
 );
 const FERTILITY_CONTEXT_RE =

@@ -9,7 +9,7 @@
     "web": "expo start --web",
     "check:turkish:utf8": "node scripts/check-turkish-utf8.js",
     "check:image:contract": "node scripts/check-image-contract.js",
-    "check:crisis": "node scripts/crisis-battery.js",
+    "check:moderation": "node scripts/moderation-battery.js",
     "qr": "node scripts/qr.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
