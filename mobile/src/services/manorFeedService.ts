@@ -94,8 +94,3 @@ export async function getManorFeed(opts?: { force?: boolean }): Promise<Resolved
   resolvedCache = { lang, items };
   return items;
 }
-
-/** Bekleme sahnesi (5.3) gibi yerler için ilk N öğe (deterministik; ek gecikme yok). */
-export function pickFeedHighlights(items: ResolvedManorFeedItem[], count: number): ResolvedManorFeedItem[] {
-  return items.slice(0, Math.max(0, count));
-}
