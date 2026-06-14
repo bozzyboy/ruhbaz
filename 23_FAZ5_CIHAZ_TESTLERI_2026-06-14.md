@@ -107,6 +107,19 @@
 47. **Regresyon:** Tarot / Rüya / Astro / Numeroloji Salon akışları bozulmadı (reading-type union genişledi; mevcutlar aynı).
 48. **Kriz/677:** konu alanına kriz cümlesi → nazik red (battery doğrulandı); okuma kesin gelecek/"fal" dili kullanmaz, persona adı gövdede geçmez.
 
+### 5.4-C · REWORK kişiselleştirme (2026-06-14) — KURULUM: yalnız JS/TS, app'i `r` ile reload yeter
+> **Ne değişti?** Okuma "taş/hexagram anlamlarını alt alta dizme"den **kişiye özel senteze** çevrildi: (1) başta konu girişi **opsiyonel** + girilirse **güçlü userStated** (okuma öncesi konu, astro/tarot yolu); (2) her okumada havuzdan **2 micro hayat olayı** (anlamsal seçim + ~30 okuma tekrar yok); (3) doğum haritası/numeroloji mizacı + son konu/soru/takip + öne çıkan ilişkiler + okuma geçmişi temaları **dokunarak** weave edilir (kaynak adı verilmez).
+
+49. **Opsiyonel konu (genel okuma):** I-Ching aç → **hiçbir şey yazmadan "Yorumla"ya bas** → **Beklenen:** buton aktif; genel bir okuma gelir (hata yok, boş kullanıcı balonu eklenmez). Rün'de de aynı.
+50. **Konulu okuma + kişiye özellik:** yeni okuma aç → konu yaz (örn. "annemle ilişkim") → **Yorumla** → **Beklenen:** ilk paragraftan o konuya değer; semboller **tek bir hikâyede eritilir**, "şu taş şu demek" diye **liste/sözlük tanımı yapılmaz**; kişinin bilinen bağlamı (ilişkiler / önceki temalar varsa) doğal biçimde sezilir.
+51. **2 micro hayat olayı:** okumanın içinde **somut, gündelik 2 küçük olay** doğal cümlelere yedrilmiş geçer (ayrı liste değil). Aynı profille arka arkaya 3-4 okuma yap → **Beklenen:** aynı olaylar tekrarlanmaz; girilen konuya/son temalara yakın olaylar seçilir.
+52. **userStated yansıması:** konu yazıp okuma al → **aynı profil için** ikinci bir okuma (veya Astro) aç → **Beklenen:** önceki konu, kaynak söylenmeden hafif bir tanışıklık olarak sezilebilir ("önceki okumanda" / "hafızanda" / kaynak adı GEÇMEZ).
+53. **Evcil hayvan profili:** pet profille Rün/I-Ching → **Beklenen:** olaylar hayvan dünyasından (oyun/koku/pencere/ev içi güven), insan teması (iş/ilişki/para/okul) kurulmaz.
+54. **EN paritesi:** dili EN → opsiyonel konu daveti ("a general reading"), sentez ve 2 micro olay İngilizce ve TR ile **aynı davranışta**. TR'ye dön → Türkçe.
+
+**Regresyon (5.4-C):**
+55. **Kahve / Numeroloji micro olayları:** kahve okuması hâlâ 3-4 somut olay+cue alır, numeroloji kendi olaylarını alır; divination eklenince bunlar bozulmadı. Retention 240'a çıktı → kahve/numeroloji okumalarında olay tekrarı **artmadı** (aksine pencere genişledi).
+
 **Dosya → test eşlemesi (5.4):**
 | Değişen/yeni dosya | Test |
 |---|---|
@@ -118,6 +131,10 @@
 | `types/memory.ts` + `profileMemoryService.ts` (readingType + label) | 45 |
 | `App.tsx` (PersonalDivinationReading route) | 40, 46 |
 | `i18n` (divination + readings I-Ching/Rün) | 46 |
+| `services/readingSpecificityBank.ts` (selectDivinationLifeEvents + buildDivinationSpecificityContext) | 51, 53, 55 |
+| `services/personalDivinationService.ts` (micro-event enjekte + sentez direktifi + cast-seed) | 49–53 |
+| `screens/PersonalDivinationReadingScreen.tsx` (opsiyonel konu + userStated + persist + snippet sırası) | 49, 50, 52 |
+| `services/profileMemoryService.ts` (usedLifeEvents retention 120→240) | 51, 55 |
 
 > **Tat (Ozan):** varsayılan persona (Teoman/Arın), açılış/okuma tonu, ekran tasarımı → cihaz turu. (5.4=B kararın uygulandı.)
 
