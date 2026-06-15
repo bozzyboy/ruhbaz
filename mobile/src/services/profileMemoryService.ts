@@ -1209,62 +1209,66 @@ export interface UpdateProfileInput {
 }
 
 export async function createProfile(input: CreateProfileInput): Promise<AccountState> {
-  const state = await loadAccountState();
-  const profileId = makeId('profile');
-  const createdAt = nowIso();
-  const shouldBePrimary = input.isPrimary || state.profiles.length === 0;
-  const profile: SubjectProfile = {
-    profileId,
-    accountId: state.accountId,
-    isPrimary: shouldBePrimary,
-    displayName: input.displayName.trim(),
-    relationshipPrimary: shouldBePrimary ? 'kendi' : input.relationshipPrimary,
-    relationshipDetail: shouldBePrimary ? null : input.relationshipDetail,
-    relationshipFreeform: shouldBePrimary ? null : input.relationshipFreeform?.trim() || null,
-    gender: input.gender,
-    birth: input.birth,
-    chartPrecision: computeChartPrecision(input.birth),
-    createdAt,
-    updatedAt: createdAt,
-  };
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const profileId = makeId('profile');
+    const createdAt = nowIso();
+    const shouldBePrimary = input.isPrimary || state.profiles.length === 0;
+    const profile: SubjectProfile = {
+      profileId,
+      accountId: state.accountId,
+      isPrimary: shouldBePrimary,
+      displayName: input.displayName.trim(),
+      relationshipPrimary: shouldBePrimary ? 'kendi' : input.relationshipPrimary,
+      relationshipDetail: shouldBePrimary ? null : input.relationshipDetail,
+      relationshipFreeform: shouldBePrimary ? null : input.relationshipFreeform?.trim() || null,
+      gender: input.gender,
+      birth: input.birth,
+      chartPrecision: computeChartPrecision(input.birth),
+      createdAt,
+      updatedAt: createdAt,
+    };
 
-  const nextState: AccountState = {
-    ...state,
-    primaryProfileId: shouldBePrimary ? profileId : state.primaryProfileId,
-    profiles: shouldBePrimary ? [profile, ...state.profiles] : [...state.profiles, profile],
-  };
+    const nextState: AccountState = {
+      ...state,
+      primaryProfileId: shouldBePrimary ? profileId : state.primaryProfileId,
+      profiles: shouldBePrimary ? [profile, ...state.profiles] : [...state.profiles, profile],
+    };
 
-  await saveState(nextState);
-  await ensureProfileMemoryFiles(profileId, state.accountId);
-  await ensureProfileRelationshipMemoryLinks(nextState);
-  return nextState;
+    await saveState(nextState);
+    await ensureProfileMemoryFiles(profileId, state.accountId);
+    await ensureProfileRelationshipMemoryLinks(nextState);
+    return nextState;
+  });
 }
 
 export async function updateProfile(input: UpdateProfileInput): Promise<AccountState> {
-  const state = await loadAccountState();
-  const target = state.profiles.find((profile) => profile.profileId === input.profileId);
-  if (!target) return state;
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const target = state.profiles.find((profile) => profile.profileId === input.profileId);
+    if (!target) return state;
 
-  const updated: SubjectProfile = {
-    ...target,
-    displayName: input.displayName.trim(),
-    relationshipPrimary: input.relationshipPrimary,
-    relationshipDetail: input.relationshipDetail,
-    relationshipFreeform: input.relationshipFreeform?.trim() || null,
-    gender: input.gender,
-    birth: input.birth,
-    chartPrecision: computeChartPrecision(input.birth),
-    updatedAt: nowIso(),
-  };
+    const updated: SubjectProfile = {
+      ...target,
+      displayName: input.displayName.trim(),
+      relationshipPrimary: input.relationshipPrimary,
+      relationshipDetail: input.relationshipDetail,
+      relationshipFreeform: input.relationshipFreeform?.trim() || null,
+      gender: input.gender,
+      birth: input.birth,
+      chartPrecision: computeChartPrecision(input.birth),
+      updatedAt: nowIso(),
+    };
 
-  const nextState: AccountState = {
-    ...state,
-    profiles: state.profiles.map((profile) => (profile.profileId === input.profileId ? updated : profile)),
-  };
+    const nextState: AccountState = {
+      ...state,
+      profiles: state.profiles.map((profile) => (profile.profileId === input.profileId ? updated : profile)),
+    };
 
-  await saveState(nextState);
-  await ensureProfileRelationshipMemoryLinks(nextState);
-  return nextState;
+    await saveState(nextState);
+    await ensureProfileRelationshipMemoryLinks(nextState);
+    return nextState;
+  });
 }
 
 export function getPrimaryProfile(state: AccountState): SubjectProfile | null {
@@ -2871,37 +2875,42 @@ export async function setReadingFavorite(readingId: string, favorite: boolean): 
 export async function appendReadingSummary(
   reading: Omit<ReadingSummary, 'readingId' | 'createdAt' | 'accountId'>,
 ): Promise<AccountState> {
-  const state = await loadAccountState();
-  const entry: ReadingSummary = {
-    readingId: makeId('reading'),
-    accountId: state.accountId,
-    createdAt: nowIso(),
-    ...reading,
-  };
-  if (state.readings.some((item) => readingDedupeKey(item) === readingDedupeKey(entry))) {
-    return state;
-  }
+  // Okuma sonrası bu yazım çoğu zaman arka planda (fire-and-forget) çalışır ve başka durum
+  // mutasyonlarıyla (yeni okuma, favori, profil düzenleme) yarışabilir → kayıp güncellemeyi
+  // önlemek için durum kilidiyle sırala (favori/sil ile aynı kuyruk).
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const entry: ReadingSummary = {
+      readingId: makeId('reading'),
+      accountId: state.accountId,
+      createdAt: nowIso(),
+      ...reading,
+    };
+    if (state.readings.some((item) => readingDedupeKey(item) === readingDedupeKey(entry))) {
+      return state;
+    }
 
-  await ensureProfileMemoryFiles(reading.profileId, state.accountId);
-  const currentReadingMemory = await readJsonFile<ReadingDerivedMemoryFile>(
-    readingMemoryFile(reading.profileId),
-    emptyReadingDerivedMemory(reading.profileId, state.accountId),
-  );
-  const isSurfaceReading = reading.readingType === 'coffee' || reading.readingType === 'palm';
-  const nextReadingMemory = dampenReadingDerivedMemory(updateMemoryFromText(currentReadingMemory, reading.summary, {
-    includeTopics: !isSurfaceReading,
-    includePatterns: !isSurfaceReading,
-    includePeople: false,
-  }));
-  await writeJsonFile(readingMemoryFile(reading.profileId), nextReadingMemory);
-  await appendMemoryV2Artifacts(entry);
+    await ensureProfileMemoryFiles(reading.profileId, state.accountId);
+    const currentReadingMemory = await readJsonFile<ReadingDerivedMemoryFile>(
+      readingMemoryFile(reading.profileId),
+      emptyReadingDerivedMemory(reading.profileId, state.accountId),
+    );
+    const isSurfaceReading = reading.readingType === 'coffee' || reading.readingType === 'palm';
+    const nextReadingMemory = dampenReadingDerivedMemory(updateMemoryFromText(currentReadingMemory, reading.summary, {
+      includeTopics: !isSurfaceReading,
+      includePatterns: !isSurfaceReading,
+      includePeople: false,
+    }));
+    await writeJsonFile(readingMemoryFile(reading.profileId), nextReadingMemory);
+    await appendMemoryV2Artifacts(entry);
 
-  const nextState: AccountState = {
-    ...state,
-    readings: [entry, ...state.readings].slice(0, 100),
-  };
-  await saveState(nextState);
-  return nextState;
+    const nextState: AccountState = {
+      ...state,
+      readings: [entry, ...state.readings].slice(0, 100),
+    };
+    await saveState(nextState);
+    return nextState;
+  });
 }
 
 export async function appendReplacingProfileTestResult(
@@ -2910,37 +2919,39 @@ export async function appendReplacingProfileTestResult(
     testResult: NonNullable<ReadingSummary['testResult']>;
   },
 ): Promise<AccountState> {
-  const state = await loadAccountState();
-  const shouldReplaceExisting = reading.testResult.testId !== 'compatibility';
-  const readingsToRemove = shouldReplaceExisting
-    ? state.readings.filter(
-        (item) =>
-          item.profileId === reading.profileId &&
-          item.readingType === 'personality-test' &&
-          item.testResult?.testId === reading.testResult.testId,
-      )
-    : [];
-  for (const existing of readingsToRemove) {
-    await deleteUserStatedTestMemoryForReading(existing, state).catch(() => {});
-    await deleteMemoryV2ArtifactsForReading(existing).catch(() => {});
-  }
-  const entry: ReadingSummary = {
-    readingId: makeId('reading'),
-    accountId: state.accountId,
-    createdAt: nowIso(),
-    ...reading,
-  };
-  await ensureProfileMemoryFiles(reading.profileId, state.accountId);
-  const nextState: AccountState = {
-    ...state,
-    readings: [
-      entry,
-      ...state.readings.filter((item) => !readingsToRemove.some((removed) => removed.readingId === item.readingId)),
-    ].slice(0, 100),
-  };
-  await appendMemoryV2Artifacts(entry);
-  await saveState(nextState);
-  return nextState;
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const shouldReplaceExisting = reading.testResult.testId !== 'compatibility';
+    const readingsToRemove = shouldReplaceExisting
+      ? state.readings.filter(
+          (item) =>
+            item.profileId === reading.profileId &&
+            item.readingType === 'personality-test' &&
+            item.testResult?.testId === reading.testResult.testId,
+        )
+      : [];
+    for (const existing of readingsToRemove) {
+      await deleteUserStatedTestMemoryForReading(existing, state).catch(() => {});
+      await deleteMemoryV2ArtifactsForReading(existing).catch(() => {});
+    }
+    const entry: ReadingSummary = {
+      readingId: makeId('reading'),
+      accountId: state.accountId,
+      createdAt: nowIso(),
+      ...reading,
+    };
+    await ensureProfileMemoryFiles(reading.profileId, state.accountId);
+    const nextState: AccountState = {
+      ...state,
+      readings: [
+        entry,
+        ...state.readings.filter((item) => !readingsToRemove.some((removed) => removed.readingId === item.readingId)),
+      ].slice(0, 100),
+    };
+    await appendMemoryV2Artifacts(entry);
+    await saveState(nextState);
+    return nextState;
+  });
 }
 
 async function deleteMemoryV2ArtifactsForReading(reading: ReadingSummary): Promise<void> {
@@ -3023,66 +3034,70 @@ export async function deleteProfile(
   profileId: string,
   mode: 'profile-only' | 'profile-and-data',
 ): Promise<AccountState> {
-  const state = await loadAccountState();
-  const target = state.profiles.find((profile) => profile.profileId === profileId);
-  if (!target) return state;
-  const deletesPrimaryProfile = target.isPrimary || state.primaryProfileId === profileId || target.relationshipPrimary === 'kendi';
+  return withStateLock(async () => {
+    const state = await loadAccountState();
+    const target = state.profiles.find((profile) => profile.profileId === profileId);
+    if (!target) return state;
+    const deletesPrimaryProfile = target.isPrimary || state.primaryProfileId === profileId || target.relationshipPrimary === 'kendi';
 
-  if (deletesPrimaryProfile) {
+    if (deletesPrimaryProfile) {
+      const nextState: AccountState = {
+        ...state,
+        primaryProfileId: null,
+        profiles: [],
+        readings: [],
+      };
+
+      await saveState(nextState);
+      for (const profile of state.profiles) {
+        const dir = profileDir(profile.profileId);
+        const info = await FileSystem.getInfoAsync(dir);
+        if (info.exists) {
+          await FileSystem.deleteAsync(dir, { idempotent: true });
+        }
+      }
+      return nextState;
+    }
+
     const nextState: AccountState = {
       ...state,
-      primaryProfileId: null,
-      profiles: [],
-      readings: [],
+      primaryProfileId: state.primaryProfileId === profileId ? null : state.primaryProfileId,
+      profiles: state.profiles.filter((profile) => profile.profileId !== profileId),
+      readings:
+        mode === 'profile-and-data'
+          ? state.readings.filter(
+              (reading) =>
+                reading.profileId !== profileId &&
+                !reading.astroRelationship?.subjects.some((subject) => subject.profileId === profileId),
+            )
+          : state.readings,
     };
 
     await saveState(nextState);
-    for (const profile of state.profiles) {
-      const dir = profileDir(profile.profileId);
+    await ensureProfileRelationshipMemoryLinks(nextState);
+
+    if (mode === 'profile-and-data') {
+      const dir = profileDir(profileId);
       const info = await FileSystem.getInfoAsync(dir);
       if (info.exists) {
         await FileSystem.deleteAsync(dir, { idempotent: true });
       }
     }
+
     return nextState;
-  }
-
-  const nextState: AccountState = {
-    ...state,
-    primaryProfileId: state.primaryProfileId === profileId ? null : state.primaryProfileId,
-    profiles: state.profiles.filter((profile) => profile.profileId !== profileId),
-    readings:
-      mode === 'profile-and-data'
-        ? state.readings.filter(
-            (reading) =>
-              reading.profileId !== profileId &&
-              !reading.astroRelationship?.subjects.some((subject) => subject.profileId === profileId),
-          )
-        : state.readings,
-  };
-
-  await saveState(nextState);
-  await ensureProfileRelationshipMemoryLinks(nextState);
-
-  if (mode === 'profile-and-data') {
-    const dir = profileDir(profileId);
-    const info = await FileSystem.getInfoAsync(dir);
-    if (info.exists) {
-      await FileSystem.deleteAsync(dir, { idempotent: true });
-    }
-  }
-
-  return nextState;
+  });
 }
 
 export async function resetAllProfilesAndData(): Promise<AccountState> {
-  const emptyState = createEmptyState();
-  const info = await FileSystem.getInfoAsync(DATA_DIR);
-  if (info.exists) {
-    await FileSystem.deleteAsync(DATA_DIR, { idempotent: true });
-  }
-  await saveState(emptyState);
-  return emptyState;
+  return withStateLock(async () => {
+    const emptyState = createEmptyState();
+    const info = await FileSystem.getInfoAsync(DATA_DIR);
+    if (info.exists) {
+      await FileSystem.deleteAsync(DATA_DIR, { idempotent: true });
+    }
+    await saveState(emptyState);
+    return emptyState;
+  });
 }
 
 export function getReadingTypeLabel(reading: ReadingSummary): string {
