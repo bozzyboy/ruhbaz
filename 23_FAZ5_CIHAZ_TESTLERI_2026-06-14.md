@@ -201,6 +201,20 @@
 
 ---
 
+## 🎲 MICRO-EVENT AKILLI SEÇİM — kahve/el/genel + I-Ching/Rün (2026-06-15) — KURULUM: yalnız JS/TS, reload yeter
+> **Ne değişti?** "Somut Hayat Malzemesi" (gündelik olay adayları) seçimi tüm bu okumalarda birleşti ve akıllandı. Önce kahve/el rastgele seçiyordu, I-Ching/Rün ise tamamını konuya göre seçiyordu. Yeni kural: **konu/soru varsa anlamsal+rastgele KARIŞIM** (konuyla güçlü ilgili olay çoksa 2 anlamsal+1 rastgele, azsa 1 anlamsal+2 rastgele — her zaman en az 1 rastgele çeşitlilik), **konu yoksa 3 rastgele**. Takipte olay havuzu yok. Numeroloji ayrı (sayı-tabanlı, dokunulmadı). Bu içsel prompt davranışı; cihazda "his" olarak doğrulanır.
+
+71. **Konu girince ilgili ama kilitli değil:** Kahve VEYA I-Ching okumasında belirgin bir konu yaz (ör. "iş değişikliği düşünüyorum") → okumayı al → **Beklenen:** okuma o konuya değen gündelik olaylara girer (iş/ofis/karar) AMA tamamen tek konuya kilitlenmez; en az bir alakasız/sürpriz gündelik dokunuş da olur. Aynı okumada liste gibi sayılmaz, doğal akar.
+72. **Konu girmeyince çeşitli:** Konu/soru girmeden genel okuma al → **Beklenen:** olaylar çeşitli gündelik alanlardan (rastgele), tek temaya yığılmamış.
+73. **Takipte olay yok:** Okuma sonrası takip sorusu sor → **Beklenen:** cevap yeni "gündelik olay listesi" açmaz; önceki okuma + sorunun bağlamıyla devam eder.
+74. **Hayvan profilinde insan olayı yok (regresyon):** Evcil hayvan profili seç, kahve/I-Ching oku → **Beklenen:** olaylar hayvanın dünyasından (oyun, pencere, mama, ev içi); iş/evlilik/kariyer gibi insan olayı GEÇMEZ — konu girsen de girmesen de.
+
+**Dosya → test eşlemesi:** `services/readingSpecificityBank.ts` (`selectLifeEvents` birleşik; `buildSpecificityContext` kahve count 3 + karışım; `buildDivinationSpecificityContext` count 3) → 71–74.
+
+> **Regresyon:** Paylaşılan `readingSpecificityBank` tüm somutluk-kullanan okumaları (kahve/el/genel + I-Ching/Rün) etkiler. Tekrar-önleme (aynı olay arka arkaya çıkmasın) korunmalı: aynı profille 2-3 okuma üst üste al, olaylar belirgin tekrar etmesin.
+
+---
+
 ## ⏳ KALAN (Faz 5)
 - **5.5 Aura:** ⏸️ Ozan kararı: **UI kararı sonraya** (full UI değişiminde yeniden sorulacak). Ertelendi.
 - **5.6 Bildirimler:** ⏸️ Ozan kararı: **şimdilik kapalı; taksonomi (`24_`) şimdilik böyle**; metin tonu (persona vs konak) sonraya; B2/B7 push yerel-türlerden sonraya (onaylı). NATIVE → YENİ APK gerektirir; ileride hem genişlet hem değiştir.
