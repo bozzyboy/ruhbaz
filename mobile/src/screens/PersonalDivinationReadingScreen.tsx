@@ -99,7 +99,6 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
   const questionBaseRef = useRef('');
   const readingScrollRef = useRef<ScrollView>(null);
   const messageYRef = useRef<Record<string, number>>({});
-  const firstReadingScrolledRef = useRef(false);
   const sessionNonceRef = useRef(`${Date.now()}-${Math.random().toString(36).slice(2, 7)}`);
 
   const hasInterpretation = Boolean(interpretationText);
@@ -156,9 +155,12 @@ export function PersonalDivinationReadingScreen({ route, navigation }: Props) {
     const display = hasInterpretation ? messages.filter((message) => message.id !== OPENING_MESSAGE_ID) : messages;
     const last = display[display.length - 1];
     if (!last) return;
+    // Durumsuz kural: son mesaj İLK asistan-okuma ise en üst (y:0) → kullanıcı sorusu + hexagram/cast + okuma başı
+    // görünür. Sonraki cevaplarda son balonun başı. (Mutable bayrak yok → StrictMode/çift-render güvenli.)
+    const firstAssistantIndex = display.findIndex((message) => message.role === 'assistant');
+    const isFirstReading = last.role === 'assistant' && display.length - 1 === firstAssistantIndex;
     const scrollToStart = () => {
-      if (hasInterpretation && !firstReadingScrolledRef.current) {
-        firstReadingScrolledRef.current = true;
+      if (isFirstReading) {
         readingScrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }

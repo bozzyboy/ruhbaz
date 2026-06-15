@@ -110,7 +110,6 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
   const readingScrollRef = useRef<ScrollView>(null);
   const contextWarningShownRef = useRef(false);
   const messageYRef = useRef<Record<string, number>>({});
-  const firstReadingScrolledRef = useRef(false);
 
   const assistantLabel = 'Selin';
   const contextTokens = useMemo(() => estimateBirthChartContextTokens(session, questionText), [questionText, session]);
@@ -202,9 +201,10 @@ export function BirthChartInterpretationScreen({ route, navigation }: Props) {
   useEffect(() => {
     if (isLoading) return;
     const followUps = session?.followUps || [];
+    // Durumsuz kural: yorum var ve henüz takip yoksa = ilk okuma → en üst (y:0). Takip varsa son balonun başı.
+    const isFirstReading = Boolean(session?.interpretationText) && followUps.length === 0;
     const scrollToStart = () => {
-      if (session?.interpretationText && !firstReadingScrolledRef.current) {
-        firstReadingScrolledRef.current = true;
+      if (isFirstReading) {
         readingScrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }

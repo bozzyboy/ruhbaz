@@ -121,7 +121,6 @@ export function TarotReadingScreen({ route, navigation }: Props) {
   const pageScrollRef = useRef<ScrollView>(null);
   const readingScrollRef = useRef<ScrollView>(null);
   const messageYRef = useRef<Record<string, number>>({});
-  const firstReadingScrolledRef = useRef(false);
 
   const isBusy = isLoading || isSendingQuestion || isProfileLoading;
   const wantsInitialQuestion = true;
@@ -270,9 +269,11 @@ export function TarotReadingScreen({ route, navigation }: Props) {
     if (isProfileLoading) return;
     const last = messages[messages.length - 1];
     if (!last) return;
+    // Durumsuz kural: son mesaj İLK asistan-okuma ise en üst (y:0), sonra son balonun başı.
+    const firstAssistantIndex = messages.findIndex((message) => message.role === 'assistant');
+    const isFirstReading = last.role === 'assistant' && messages.length - 1 === firstAssistantIndex;
     const scrollToStart = () => {
-      if (readingText && !firstReadingScrolledRef.current) {
-        firstReadingScrolledRef.current = true;
+      if (isFirstReading) {
         readingScrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }

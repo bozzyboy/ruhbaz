@@ -107,7 +107,6 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
   const questionBaseRef = useRef('');
   const readingScrollRef = useRef<ScrollView>(null);
   const messageYRef = useRef<Record<string, number>>({});
-  const firstReadingScrolledRef = useRef(false);
 
   const hasInterpretation = Boolean(interpretationText);
   const isBusy = isLoadingProfile || isSending;
@@ -158,9 +157,11 @@ export function DreamInterpretationScreen({ route, navigation }: Props) {
     if (isLoadingProfile) return;
     const last = messages[messages.length - 1];
     if (!last) return;
+    // Durumsuz kural: son mesaj İLK asistan-okuma ise en üst (y:0), sonra son balonun başı.
+    const firstAssistantIndex = messages.findIndex((message) => message.role === 'assistant');
+    const isFirstReading = last.role === 'assistant' && messages.length - 1 === firstAssistantIndex;
     const scrollToStart = () => {
-      if (hasInterpretation && !firstReadingScrolledRef.current) {
-        firstReadingScrolledRef.current = true;
+      if (isFirstReading) {
         readingScrollRef.current?.scrollTo({ y: 0, animated: true });
         return;
       }
