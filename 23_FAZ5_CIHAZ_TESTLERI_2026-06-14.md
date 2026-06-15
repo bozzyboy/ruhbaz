@@ -215,6 +215,18 @@
 
 ---
 
+## 🌑 ASTRO GÖKYÜZÜ OLAYLARI — B-2 (2026-06-15) — KURULUM: yalnız JS/TS, reload yeter
+> **Ne değişti?** Astroloji okumalarında tutulma, retro, yeni ay/dolunay artık yüzeye çıkıyor. astronomy-engine ile cihazda deterministik hesaplanıp (LLM uydurmaz, anlatır) kişisel astro + genel astro (burç yorumu) prompt'larına "Gökyüzü Olayları" bloğu olarak ekleniyor; dönem horizonuna göre "bu dönemde" olanlar öne çıkarılıyor. Doğum haritası (natal) dokunulmadı.
+
+75. **Genel burç yorumu — olaylar görünür:** Home'dan genel astro (günlük/haftalık/aylık) burç yorumu al → **Beklenen:** yorum bir yerde **retro gezegen** (varsa), **ay evresi/yeni ay/dolunay** veya **yaklaşan tutulma**ya doğal, sembolik dille değiniyor; "kesin olay/kehanet" dili YOK. Daha önce hiç görünmeyen bu olaylar artık metne giriyor.
+76. **Kişisel astro — olaylar + dönem uyumu:** Kişisel astro okuması al (aylık seç) → **Beklenen:** o döneme düşen yeni ay/dolunay/tutulma öne çıkar; uzaktaki olaylar (ör. 2 ay sonraki tutulma) ya hiç ya da arka planda. Günlük seçince yalnız çok yakın olaylar vurgulanır.
+77. **Retro tutarlılığı (regresyon):** Birkaç farklı gün/dönem dene → **Beklenen:** o an gerçekten retro olan gezegenler anılıyor; "sadece Lilith/biri öne çıkıyor" sorunu yok (retro listesi eşit veriliyor). Retro yokken "belirgin retro yok" denebilir, uydurma retro YOK.
+78. **Doğruluk (kabaca):** Yorumdaki yeni ay/dolunay/tutulma tarihleri gerçek gökyüzüyle tutarlı olmalı (ör. bilinen bir dolunay tarihine yakın). Sapma varsa not düş.
+
+**Dosya → test eşlemesi:** `astroEngine.buildSkyEventsContext` + kişisel astro (`buildPersonalAstroGeminiPayload`) + genel astro (`generalAstroApiService`) → 75–78.
+
+---
+
 ## ⏳ KALAN (Faz 5)
 - **5.5 Aura:** ⏸️ Ozan kararı: **UI kararı sonraya** (full UI değişiminde yeniden sorulacak). Ertelendi.
 - **5.6 Bildirimler:** ⏸️ Ozan kararı: **şimdilik kapalı; taksonomi (`24_`) şimdilik böyle**; metin tonu (persona vs konak) sonraya; B2/B7 push yerel-türlerden sonraya (onaylı). NATIVE → YENİ APK gerektirir; ileride hem genişlet hem değiştir.
