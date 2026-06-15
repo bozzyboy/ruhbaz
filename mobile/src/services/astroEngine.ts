@@ -946,6 +946,102 @@ export function buildGeneralAstroSkyContext(signLabel: string, period: AstroPeri
   };
 }
 
+// B-2: Gökyüzü olayları (ay evresi / yeni ay / dolunay, aktif retrolar, yaklaşan tutulmalar)
+// astronomy-engine ile CIHAZDA deterministik hesaplanır (LLM üretmez, anlatır). Astro okuma
+// prompt'larına blok olarak enjekte edilir; hiyerarşi kuralı: ana cisimlerden sonra, yalnız
+// bu döneme düşen/sıkı olaylar öne çıkar.
+const ECLIPSE_KIND_TR: Record<string, string> = {
+  total: 'tam',
+  partial: 'parçalı',
+  penumbral: 'yarı-gölge',
+  annular: 'halkalı',
+};
+
+function moonPhaseNameTR(deg: number): string {
+  const d = ((deg % 360) + 360) % 360;
+  if (d < 22.5 || d >= 337.5) return 'Yeni Ay';
+  if (d < 67.5) return 'Büyüyen Hilal';
+  if (d < 112.5) return 'İlk Dördün';
+  if (d < 157.5) return 'Büyüyen Şişkin Ay';
+  if (d < 202.5) return 'Dolunay';
+  if (d < 247.5) return 'Küçülen Şişkin Ay';
+  if (d < 292.5) return 'Son Dördün';
+  return 'Küçülen Hilal';
+}
+
+function skyEventHorizonDays(period: AstroPeriod): number {
+  return period === 'daily' ? 2 : period === 'weekly' ? 9 : period === 'monthly' ? 34 : 370;
+}
+
+function formatSkyEventDate(date: Date): string {
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  return `${dd}.${mm}.${date.getUTCFullYear()}`;
+}
+
+function nextMoonQuarterDate(fromDate: Date, targetQuarter: number): Date | null {
+  try {
+    let mq = Astronomy.SearchMoonQuarter(fromDate);
+    for (let i = 0; i < 5; i += 1) {
+      if (mq.quarter === targetQuarter) return mq.time.date;
+      mq = Astronomy.NextMoonQuarter(mq);
+    }
+  } catch {
+    /* astronomy-engine arama başarısızsa olayı atla */
+  }
+  return null;
+}
+
+export function buildSkyEventsContext(period: AstroPeriod, refDate?: Date): string {
+  const now = refDate || new Date();
+  const horizon = skyEventHorizonDays(period);
+  const tagDate = (date: Date | null): string | null => {
+    if (!date) return null;
+    const n = Math.round((date.getTime() - now.getTime()) / 86400000);
+    const within = n >= 0 && n <= horizon ? ', BU DÖNEMDE' : '';
+    return `${formatSkyEventDate(date)} (${n <= 0 ? 'bugün' : `${n} gün sonra`}${within})`;
+  };
+  const lines: string[] = [];
+  try {
+    const phaseDeg = Astronomy.MoonPhase(now);
+    const illumPct = Math.round((Astronomy.Illumination(Astronomy.Body.Moon, now).phase_fraction || 0) * 100);
+    const newMoon = tagDate(nextMoonQuarterDate(now, 0));
+    const fullMoon = tagDate(nextMoonQuarterDate(now, 2));
+    lines.push(
+      `- Ay evresi: ${moonPhaseNameTR(phaseDeg)}, %${illumPct} aydınlık.${newMoon ? ` Sıradaki yeni ay: ${newMoon}.` : ''}${fullMoon ? ` Sıradaki dolunay: ${fullMoon}.` : ''}`,
+    );
+  } catch {
+    /* ay evresi hesabı başarısızsa atla */
+  }
+  try {
+    const retro = buildLocalPlanets(new Astronomy.AstroTime(now), null)
+      .filter((planet) => planet.retrograde)
+      .map((planet) => planet.name);
+    lines.push(retro.length ? `- Şu an retro: ${retro.join(', ')}.` : '- Şu an belirgin retro gezegen yok.');
+  } catch {
+    /* retro hesabı başarısızsa atla */
+  }
+  try {
+    const solar = Astronomy.SearchGlobalSolarEclipse(now);
+    const lunar = Astronomy.SearchLunarEclipse(now);
+    const solarTag = tagDate(solar?.peak?.date || null);
+    const lunarTag = tagDate(lunar?.peak?.date || null);
+    const parts: string[] = [];
+    if (solarTag) parts.push(`Güneş tutulması (${ECLIPSE_KIND_TR[solar.kind] || solar.kind}) ${solarTag}`);
+    if (lunarTag) parts.push(`Ay tutulması (${ECLIPSE_KIND_TR[lunar.kind] || lunar.kind}) ${lunarTag}`);
+    if (parts.length) lines.push(`- Yaklaşan tutulmalar: ${parts.join('; ')}.`);
+  } catch {
+    /* tutulma araması başarısızsa atla */
+  }
+  if (!lines.length) return '';
+  return [
+    '## Gökyüzü Olayları (cihazda deterministik hesaplandı — bu olayları SEN ÜRETME, yalnızca anlat)',
+    ...lines,
+    '- Hiyerarşi: Bu olayları ana gezegen/Güneş/Ay yorumunun ardından değerlendir; yalnız "BU DÖNEMDE" işaretli olanları (bu döneme düşen yeni ay/dolunay/tutulma) ya da sıkı bir retroyu öne çıkar, uzak olanları arka planda bırak.',
+    '- Tutulma/yeni ay/dolunay/retro için kesin olay/kehanet dili kurma; "sembolik olarak", "bu dönemin enerjisinde", "olasılık/eğilim" diliyle yorumla.',
+  ].join('\n');
+}
+
 function buildCompactAstroPayload(
   profile: SubjectProfile,
   chart: BirthChartSnapshot,
@@ -1628,6 +1724,7 @@ function buildPersonalAstroGeminiPayload(params: {
     'Seçili persona kişiye özel astrolojide yalnızca ses, hitap ritmi ve konuşma sıcaklığını belirler.',
     'Use only the provided on-device astronomy JSON. Do not invent houses, ascendant, exact Moon degree or birth-time-sensitive claims when timeKnown is false.',
     'A personal reading must compare natal placements/aspects with the selected period transits, transit-to-natal aspects and transit movement through natal houses when available; do not collapse it into a generic sky report.',
+    'Sana "Gökyüzü Olayları" başlıklı, cihazda hesaplanmış güncel bir blok verilebilir (ay evresi/yeni ay/dolunay, retro gezegenler, yaklaşan tutulmalar). Bu olayları UYDURMA; blok içindeki hiyerarşi kuralıyla yoruma kat — özellikle bu döneme düşen yeni ay/dolunay/tutulma ve retroları doğal, sembolik dille an.',
     'Astroloji yorumunda kahve, fincan, telve, tabak, avuç içi, el çizgisi, görsel, kart, tarot veya başka sembolik araç dili kullanma; natal yerleşimler, transitler ve dönem akışı üzerinden konuş.',
     'Persona sesi teknik astroloji dilinin üstünde hissedilmeli: kelime seçimi, ritim, hitap ve tavsiye tonu seçili tona ait olmalı. Kullanıcıya görünen metinde kendi adını, public labelını veya rolünü yazma.',
     'Kullanıcıya görünen metinde hukuken kesin gelecek iddiası kurma; "yorum", "okuma", "sembolik ritüel", "sembolik yorum", "izlenim", "olasılık", "eğilim" dili kullan.',
@@ -1647,6 +1744,7 @@ function buildPersonalAstroGeminiPayload(params: {
     memoryContext ? `Memory and repetition guard:\n${memoryContext}` : '',
     `Calculated key placements JSON:\n${JSON.stringify(keyPlacements)}`,
     `Period interpretation data JSON:\n${JSON.stringify(interpretationData)}`,
+    buildSkyEventsContext(params.period),
     [
       'Türkçe yaz. Başlık atma; düz, akıcı ve premium bir yorum ver.',
       focusQuestion ? 'Bu yorumda ilk paragraftan itibaren kullanıcının verdiği konuya doğrudan cevap ver; konuyu genel astroloji yorumunun arasında kaybetme.' : '',

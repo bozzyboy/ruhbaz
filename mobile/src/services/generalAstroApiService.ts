@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { getAppLanguage } from '../i18n';
 import type { SubjectProfile } from '../types/memory';
 import type { AstroPeriod, AstroReadingResult } from './astroEngine';
-import { buildGeneralAstroSkyContext } from './astroEngine';
+import { buildGeneralAstroSkyContext, buildSkyEventsContext } from './astroEngine';
 import { buildAnimalProfileInstructionFromProfile, isAnimalProfile } from './animalProfilePrompt';
 import { sanitizePublicReadingLanguage } from './personaClosingService';
 import { getReadingSafetyCore } from './readingCommonPrompt';
@@ -333,6 +333,7 @@ function buildGeneralAstroPayload(params: {
     params.skyContextJson
       ? `Gerçek gökyüzü verisi JSON:\n${params.skyContextJson}`
       : '',
+    buildSkyEventsContext(params.period),
     params.repeatMemory
       ? `Tekrar önleme hafızası: ${params.repeatMemory}. Bu önceki genel astro metinlerindeki ana kalıpları tekrar etme; aynı temayı kullanman gerekirse farklı açı ve farklı cümlelerle işle.`
       : '',
@@ -341,6 +342,7 @@ function buildGeneralAstroPayload(params: {
       'Verilen gerçek gökyüzü verisini kullan; yorumu yalnızca genel Güneş burcu bağlamında kur. Kullanıcının Ay burcu, yükseleni, doğum saati, natal evi veya kişisel doğum haritası varmış gibi yazma.',
       'Teknik dili ölçülü kullan: retro, kare, karşıt, kavuşum, sert etki, destekleyici etki gibi 1-3 doğal ifade yeterli. Derece listesi, tablo dili, ev numarası veya hesap raporu yazma.',
       'Gökyüzü verisiyle bağ kurmadan tamamen jenerik motivasyon metni yazma; en az bir gezegen/retro/açı veya dönem timeline vurgusu doğal biçimde yoruma girsin.',
+      'Sana "Gökyüzü Olayları" bloğu verilebilir (ay evresi/yeni ay/dolunay, retro gezegenler, yaklaşan tutulmalar); bu olayları uydurmadan, blok içindeki hiyerarşi kuralıyla — özellikle bu döneme düşen yeni ay/dolunay/tutulma ve retroları — doğal ve sembolik dille yoruma kat.',
       animalProfile
         ? '3-4 ana konuya değin: mizaç/duygu tonu, oyun ve dinlenme ritmi, ev içi güven ve sahibiyle bağ, küçük bir gözlem önerisi.'
         : '3-4 ana konuya değin: duygu hali, ilişkiler, iş/para ve küçük bir öneri.',
