@@ -1403,22 +1403,6 @@ function recentText(memorySnippet?: ProfileMemorySnippet | null, messages: Readi
     .toLocaleLowerCase('tr-TR');
 }
 
-function selectEvents(seedText: string, recent: string, allowHealthEvents = false) {
-  const candidates = shuffleSeeded(
-    LIFE_EVENT_BANK.filter(
-      (item) => !recent.includes(item.label.toLocaleLowerCase('tr-TR')) && (allowHealthEvents || item.group !== 'Sağlık Rutini'),
-    ),
-    seedText,
-  );
-  const selected: SpecificityItem[] = [];
-  for (const item of candidates) {
-    if (selected.some((chosen) => chosen.group === item.group)) continue;
-    selected.push(item);
-    if (selected.length >= PICKS_PER_READING) break;
-  }
-  return selected;
-}
-
 function selectAnimalEvents(seedText: string, recent: string, allowHealthEvents = false, allowedGroups?: Set<string>, count = PICKS_PER_READING) {
   const candidates = shuffleSeeded(
     ANIMAL_LIFE_EVENT_BANK.filter(
@@ -1548,11 +1532,17 @@ function semanticEventScore(signalTokens: Set<string>, item: SpecificityItem): n
   return score;
 }
 
-// I-Ching/Rün kişisel okuması için somut hayat olayı seçimi (count=2 varsayılan):
-// (a) tekrar-önlemeli (recentText -> usedLifeEvents), (b) grup-çeşitli, (c) ANLAMSAL —
-// girilen konu + son dönem userStated/okuma temalarına yakın olaylar öne çıkar,
-// (d) hayvan-duyarlı. selectEvents/buildSpecificityContext'i BOZMADAN paralel yol.
-export function selectDivinationLifeEvents(params: {
+// BİRLEŞİK somut-hayat-olayı seçimi — kahve/el/genel + I-Ching/Rün ortak yolu (Ozan 2026-06-15).
+// Kural:
+//  A) Konu/soru VARSA: anlamsal + rastgele KARIŞIM. Anlamsal sayısı sinyal gücüne UYARLANIR
+//     (konuyla güçlü eşleşen aday çoksa daha çok anlamsal, en fazla count-1); her zaman EN AZ
+//     1 rastgele kalır (sürpriz/çeşitlilik). Örn count=3: güçlü eşleşme>=2 ise 2 anlamsal+1
+//     rastgele, değilse 1 anlamsal+2 rastgele.
+//  B) Konu/soru YOKSA: tamamı rastgele.
+//  - Hayvan/insan ayrımı önce çağırandan (profil objesi = kesin); verilmediyse memorySnippet'e
+//    düşer — snippet null gelse bile pet profil yanlışlıkla insan olayı almaz.
+//  - Tekrar-önleme (recentText) + grup-çeşitliliği korunur. Takip turunda HİÇ çağrılmaz.
+export function selectLifeEvents(params: {
   seed: string;
   count?: number;
   memorySnippet?: ProfileMemorySnippet | null;
@@ -1560,9 +1550,7 @@ export function selectDivinationLifeEvents(params: {
   messages?: ReadingMessage[];
   isAnimalProfile?: boolean;
 }): SpecificityItem[] {
-  const count = params.count ?? 2;
-  // Hayvan/insan ayrımı önce çağırandan (profil objesi = kesin); verilmediyse memorySnippet'e düş.
-  // Snippet null gelse bile pet profil yanlışlıkla insan olayı almaz.
+  const count = params.count ?? 3;
   const isAnimalProfile = params.isAnimalProfile ?? params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
   const messages = params.messages || [];
   const recent = recentText(params.memorySnippet, messages);
@@ -1571,31 +1559,57 @@ export function selectDivinationLifeEvents(params: {
   );
   const healthGroup = isAnimalProfile ? 'Hayvan Sağlık Dikkati' : 'Sağlık Rutini';
   const bank = isAnimalProfile ? ANIMAL_LIFE_EVENT_BANK : LIFE_EVENT_BANK;
-
-  const signal = signalTokenSet([
-    params.focusQuestion,
-    ...(params.memorySnippet?.userStatedTopics || []),
-    ...(params.memorySnippet?.userTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
-    ...(params.memorySnippet?.readingTopics || []),
-    ...(params.memorySnippet?.readingTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
-  ]);
-
   const pool = bank.filter(
     (item) =>
       !recent.includes(item.label.toLocaleLowerCase('tr-TR')) && (allowHealthEvents || item.group !== healthGroup),
   );
-  // Önce seeded shuffle (deterministik tie-break), sonra anlamsal skora göre stabil sırala.
-  const ordered = shuffleSeeded(pool, `${params.seed}:divination-events`)
-    .map((item) => ({ item, score: semanticEventScore(signal, item) }))
-    .sort((a, b) => b.score - a.score);
+  // Rastgele temel sıralama (seed'li, deterministik tie-break ve rastgele seçim tabanı).
+  const shuffled = shuffleSeeded(pool, `${params.seed}:life-events`);
+
+  const topicPresent = Boolean((params.focusQuestion || '').trim());
+  const signal = topicPresent
+    ? signalTokenSet([
+        params.focusQuestion,
+        ...(params.memorySnippet?.userStatedTopics || []),
+        ...(params.memorySnippet?.userTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
+        ...(params.memorySnippet?.readingTopics || []),
+        ...(params.memorySnippet?.readingTopicGroups || []).map((item) => `${item.group || ''} ${item.label || ''}`),
+      ])
+    : new Set<string>();
+
+  // Konu varsa kaç anlamsal? Güçlü eşleşen (skor>0) aday sayısına göre; en az 1, en fazla count-1
+  // (her zaman >=1 rastgele kalsın). Konu yoksa 0 (tamamı rastgele).
+  let semanticCount = 0;
+  if (topicPresent) {
+    const strongMatches = shuffled.filter((item) => semanticEventScore(signal, item) > 0).length;
+    semanticCount = Math.min(Math.max(strongMatches, 1), Math.max(count - 1, 0));
+  }
 
   const selected: SpecificityItem[] = [];
-  for (const { item } of ordered) {
-    if (selected.some((chosen) => chosen.group === item.group)) continue;
-    selected.push(item);
-    if (selected.length >= count) break;
+  const usedGroups = new Set<string>();
+
+  // 1) Anlamsal seçimler — en yüksek skor önce (shuffled üzerinde stabil sıralama).
+  if (semanticCount > 0) {
+    const bySemantic = shuffled
+      .map((item) => ({ item, score: semanticEventScore(signal, item) }))
+      .sort((a, b) => b.score - a.score);
+    for (const { item } of bySemantic) {
+      if (selected.length >= semanticCount) break;
+      if (usedGroups.has(item.group)) continue;
+      selected.push(item);
+      usedGroups.add(item.group);
+    }
   }
-  return selected;
+
+  // 2) Rastgele seçimler — shuffled (rastgele) sırasından, kullanılan grupları atlayarak count'a kadar.
+  for (const item of shuffled) {
+    if (selected.length >= count) break;
+    if (usedGroups.has(item.group)) continue;
+    selected.push(item);
+    usedGroups.add(item.group);
+  }
+
+  return selected.slice(0, count);
 }
 
 // I-Ching/Rün okuması için "Somut Hayat Malzemesi" prompt bloğu (sembol/taş çerçeveli,
@@ -1610,9 +1624,9 @@ export function buildDivinationSpecificityContext(params: {
   isAnimalProfile?: boolean;
 }): { text: string; usage: SpecificityUsage } {
   const isAnimalProfile = params.isAnimalProfile ?? params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
-  const events = selectDivinationLifeEvents({
+  const events = selectLifeEvents({
     seed: params.seed,
-    count: params.count ?? 2,
+    count: params.count ?? 3,
     memorySnippet: params.memorySnippet,
     focusQuestion: params.focusQuestion,
     messages: params.messages,
@@ -1668,13 +1682,18 @@ export function buildSpecificityContext(params: {
     params.messages.map((message) => message.text).join('|').slice(0, 500),
   ].join(':');
   const recent = recentText(params.memorySnippet, params.messages);
-  const allowHealthEvents = userAskedHealthConcern(
-    [params.focusQuestion || '', ...params.messages.filter((message) => message.role === 'user').map((message) => message.text || '')].join(' '),
-  );
   const isAnimalProfile = params.memorySnippet?.relationshipPrimary === 'evcil_hayvan';
-  const selectedEvents = isAnimalProfile
-    ? selectAnimalEvents(seedText, recent, allowHealthEvents)
-    : selectEvents(seedText, recent, allowHealthEvents);
+  // Birleşik seçim: konu varsa anlamsal+rastgele karışım (>=1 rastgele), yoksa tamamı rastgele;
+  // sağlık-kapısı ve hayvan ayrımı selectLifeEvents içinde. (Eski selectEvents/selectAnimalEvents
+  // rastgele-yalnız yoluydu; artık kahve/el de I-Ching/Rün ile aynı akıllı seçimi kullanır.)
+  const selectedEvents = selectLifeEvents({
+    seed: seedText,
+    count: 3,
+    memorySnippet: params.memorySnippet,
+    focusQuestion: params.focusQuestion,
+    messages: params.messages,
+    isAnimalProfile,
+  });
   const selectedCues = selectCues(seedText, recent);
 
   return {
@@ -1682,13 +1701,12 @@ export function buildSpecificityContext(params: {
     '## Somut Hayat Malzemesi',
     isAnimalProfile
       ? '- Seçili profil evcil hayvan olduğu için aşağıdaki adaylar yalnızca hayvanın dünyasından seçildi. İnsan hayatı olayları, iş, ilişki, para, okul, evlilik veya kariyer temaları ekleme.'
-      : '- Okuma soyut ruh hali yazısı değil; aşağıdaki gündelik olay/olgu adaylarından 3-4 tanesini seçip telve veya çizgi izlerine bağla.',
+      : '- Okuma soyut ruh hali yazısı değil; aşağıdaki gündelik olay/olgu adaylarını telve veya çizgi izlerine bağla.',
     isAnimalProfile
       ? '- Hayvan olaylarını sahibine dönük pratik gözlem diliyle anlat; kesin bilgi gibi değil, sembolik izlenim gibi kur.'
       : '',
     '- Aşağıdaki yüzey cue adaylarından 3-4 tanesini kullan; aynı cue ve aynı olay labelını bu okuma içinde tekrar etme.',
-    '- Olayları 3-4 farklı gruptan seç; aynı gruba yığılma.',
-    '- Hepsini kullanma, liste gibi sayma, kesin olmuş gibi konuşma. Seçtiğin olayları sembolik yorum diliyle doğal cümlelerin içine yedir.',
+    '- Liste gibi sayma, kesin olmuş gibi konuşma. Bu olay adaylarını sembolik yorum diliyle doğal cümlelerin içine yedir.',
     '- Bu adaylar kesin bilgi değildir; “olacak” diye hüküm verme. “Görünene göre”, “yakına düşen ihtimal”, “bu iz şunu düşündürüyor” gibi olasılık dili kullan.',
     isAnimalProfile
       ? '- Hayvan profilde renkli, canlı ve çeşitli bir dünya kur: kokular, ışıklar, güneş alanları, oyuncaklar, pencere merakı, evdeki diğer hayvanlarla küçük kıskançlık/barışma halleri, insanların duymadığı sesler ve kokular, pencereye gelen hayvanlar, bitkiler, misafir kokuları ve insanlarının kalbindeki yeri öne çıkabilir.'
