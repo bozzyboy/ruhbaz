@@ -35,3 +35,8 @@ test_output.txt
 
 # Yerel Claude ayarları
 .claude/settings.local.json
+
+# Buyuk medya + kisisel klasorler (git disi; Drive/yerelde tutulur)
+ui icin fikirler/
+benim testlerim/
+victor_0.jpg
