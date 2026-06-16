@@ -1,6 +1,8 @@
 # 24 — FAZ 5 BİLDİRİM TAKSONOMİSİ (TASLAK — onay: Ozan) — 2026-06-14
 
-> **Durum:** TASLAK / **blok: Ozan**. Bu, 5.6 (bildirimler) KOD'una başlamadan önce gereken **tasarım turu** (yol haritası 05/Faz 5 Ozan notu: "bildirim türleri taksonomisini bu faza girerken topluca tasarla"). Burada **karar verilmez, önerilir**; Ozan onaylayınca/düzeltince kod yazılır. Hiçbir bildirim metni Ozan onayı olmadan yayınlanmaz.
+> ## ✅ OZAN KARARI (2026-06-14): **5.6 bildirimler ŞİMDİLİK KAPALI; taksonomi şimdilik BÖYLE KALSIN.** Persona-sesli vs konak-sesli metin tonu kararı SONRAYA (Ozan: "karar veremedim, sonraya atalım"). **B2/B7 push'u yerel türlerden SONRAYA bırakmak ONAYLANDI** (mantıklı). İleride hem GENİŞLETİLECEK hem DEĞİŞTİRİLECEK. → 5.6 kod işi ERTELENDİ; bu doc taksonomi referansı olarak kalır.
+>
+> **Durum:** ~~TASLAK / blok~~ → **ertelendi (Ozan: şimdilik kapalı)**. Bu, 5.6 (bildirimler) KOD'una başlamadan önce gereken **tasarım turu** (yol haritası 05/Faz 5 Ozan notu: "bildirim türleri taksonomisini bu faza girerken topluca tasarla"). Burada **karar verilmez, önerilir**; Ozan onaylayınca/düzeltince kod yazılır. Hiçbir bildirim metni Ozan onayı olmadan yayınlanmaz.
 >
 > **Teknik ön-koşul (önemli):** `expo-notifications` paketi şu an YOK. Eklenince **native modül → YENİ APK gerekir** (JS reload yetmez). Bu yüzden 5.6, JS/TS dilimlerinden (5.1–5.5) SONRA, tek APK turuyla yapılır. **Expo Push** (uzak push) ayrıca push-token + bir gönderim servisi/altyapı ister (Ozan/altyapı bloğu); **yerel bildirimler** (cihazda zamanlama) altyapısız çalışır → 5.6'da ÖNCE yerel bildirimler hedeflenir.
 

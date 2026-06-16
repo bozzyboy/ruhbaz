@@ -1,6 +1,8 @@
 # 25 — FAZ 5.4 I-Ching + Rün KİŞİSEL OKUMA: KARAR DOKÜMANI (blok: Ozan) — 2026-06-14
 
-> **Durum:** TASLAK / **blok: Ozan kararı**. 5.4'ü (I-Ching + Rün'ü "Senin Evin"e kişisel okuma türü olarak eklemek) özerk haritaladım (5 ajanlı understand-workflow, ~429k token). Teknik olarak **yapılabilir** ve tarot kalıbı temiz bir şablon. Ancak doğru mimariyi seçmek **tek bir ürün kararına** bağlı (aşağıda). Karar verilmeden kod yazmak, maliyet/UX hakkında Ozan'ın vermesi gereken bir varsayım olurdu → bekletiyorum.
+> ## ✅ OZAN KARARI (2026-06-14): **5.4 = B (KONUŞMALI)** — Gemini + moderasyon + persona + hafıza + takip soruları. Uygulamaya geçildi (bu doc plan referansı).
+>
+> **Durum:** ~~TASLAK / blok~~ → **B onaylandı, uygulanıyor**. 5.4'ü (I-Ching + Rün'ü "Senin Evin"e kişisel okuma türü olarak eklemek) özerk haritaladım (5 ajanlı understand-workflow, ~429k token). Teknik olarak **yapılabilir** ve tarot kalıbı temiz bir şablon. Ancak doğru mimariyi seçmek **tek bir ürün kararına** bağlı (aşağıda). Karar verilmeden kod yazmak, maliyet/UX hakkında Ozan'ın vermesi gereken bir varsayım olurdu → bekletiyorum.
 
 ## ⭐ GEREKEN KARAR (Ozan): kişisel I-Ching/Rün nasıl çalışsın?
 
