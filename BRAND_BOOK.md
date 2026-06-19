@@ -15,6 +15,7 @@
 - Soyad kanonu: Suzan/Teoman/Selin/Berk/Arın = **Ruhbaz**; Ayşe = **Ateşbaz**; Deniz = **Dilbaz**. Soyadlar UI'da gösterilmez; lore'da yaşar.
 - Oda adları (K50): **İkram Masası · Salon · Simya Odası · Ayna Odası**. Kullanıcı odalara "girer", içerik "ikram edilir", persona "konağın sakinidir".
 - **Karşılama (lobi):** persona-kişi gösterilmez; giriş = **Kendin keşfet + Kâhya ile gez** (B yönü).
+- **Kâhya — EN UI karşılığı: "the Keeper"** (Ozan kararı, 2026-06-19; "Kâhya" Türkçe ad EN arayüzde kullanılmaz). Tüm EN Kâhya metinlerinde tutarlı kullanılır.
 
 ## 3. Renk sistemi — Aura (gün ↔ gece)
 > EVRİM NOTU: v0.1 "yalnız koyu zemin + altın, beyaz zemin kullanılmaz" diyordu. Yeni yön: uygulama **günün saatine göre** gündüz-pastel ↔ gece-koyu arasında geçer (Aura). Lobi/gündüz = açık pastel; gece/giriş videosu/derin anlar = koyu. İkisi de premium; geçiş yumuşak.
