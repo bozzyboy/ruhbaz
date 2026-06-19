@@ -11,8 +11,13 @@
 6. **ONBOARDING EKRANI KODU BİTTİ** (asıl iş): handoff `Ruhbaz Design System/design_handoff_onboarding` → RN. `mobile/src/theme/ruhbaz.ts` + `OnboardingScreen.tsx` (full-bleed expo-video muted/loop-yok/son-frame-donar + Cinzel wordmark + elmas ayraç + Nunito italik alt metin + 2 dairesel cam buton: **Kendin Keşfet→Home**, **Kâhya ile Dolaş→"yakında"**) + Aura **cihaz-saati otomatik** (06–19 gündüz) + reduce-motion + RN-Animated. Nav `initialRouteName=Onboarding` (yasal onaydan sonra, headersiz, her açılışta; Ozan: a). i18n `onboarding.*` TR+EN (**Kâhya EN = "the Keeper"**). Dev-gating: TokenUsage bileşen-seviyesi (9 ekran) + MemoryDebug kayıt/buton, hepsi `ENABLE_DEVELOPER_DEBUG_UI=__DEV__`. Native paketler eklendi (expo-video/blur/linear-gradient/font + cinzel/nunito) → **YENİ APK gerekir**. Video sesleri %50↓. Bekçiler yeşil.
 7. **APK:** eski (Faz 0) korundu → `apk/ruhbaz_ESKI_faz0_2026-06-11.apk`; yeni onboarding'li APK bu oturumda derlendi → `apk/ruhbaz_YENI_onboarding_2026-06-19.apk` (yol aşağıda/güncellenecek). Not: proje `gradle-wrapper.jar` autocrlf ile bozuktu; cache'teki gradle 8.14.3 ile build alındı (wrapper ayrıca düzeltilebilir).
 
+## ✅ ONBOARDING CİHAZDA DOĞRULANDI (Ozan onayı, 2026-06-19)
+"çok güzel görünüyor, videolar akıyor, metin doğru, Kâhya parıltısı nice touch; Kendin Keşfet→eski akış, diğeri→yakında. Hepsi OK şimdilik." → Onboarding ekranı kabul edildi. İnce ayar/düzeltme YOK (şimdilik).
+
+**BAĞLANTI ÇÖZÜLDÜ (önemli — yeni session bunu kullan):** Wi-Fi/QR takıldı (manuel :8081 girince bile "port 80" hatası — 8081'i tutan yabancı metro yüzünden). KESİN ÇÖZÜM = **USB + adb reverse + localhost**: 8081'i boşalt → `npx expo start --dev-client --lan --port 8081` (mobile) + token (agent, HOST=0.0.0.0, 8080) → telefon USB + izin → `adb reverse tcp:8081 tcp:8081` + `tcp:8080 tcp:8080` → telefonda "Enter URL manually" `http://localhost:8081`. Detay: memory [[baglanti-sorunlari-protokolu]] (2026-06-19 güncel). adb: `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`.
+
 ## ⏭️ SIRADAKİ İŞ (öncelik sırası)
-1. **Ozan: yeni onboarding APK'sını cihaza kur + test** → `handoffs/onboarding-bitti_2026-06-19.md` (adım adım). Kendin Keşfet→eski uygulama, Kâhya→"yakında".
+1. **YENİ TASARIMLAR (Ozan, yarın "Claude design" ile devam):** Ozan yeni ekran tasarımlarını üretip getirecek → Claude RN'de uygular (onboarding kalıbı + `ruhbaz.ts` token'ları + cam bileşenleri örnek). Onboarding cihaz-testi BİTTİ (yukarıda).
 2. **Ozan üretiyor:** Flow giriş videoları (`handoffs/intro-video-prompt_2026-06-15.md`) + GPT image 2 sanat (logo/persona/bg — `handoffs/gpt-image2-prompt-seti-v2_2026-06-15.md`). Geldikçe Claude UI'a yerleştirir.
 3. **UI redesign devamı:** B lobiyi tam premium'a taşı (artık APK'da expo-video/blur var → Fidelity-2); persona portrelerini reader-seçime; token'ları (`ruhbaz.ts`) ekranlara yay; eski ekranları yeni tasarıma geçir. Dok: `BRAND_BOOK.md`, memory `ui-redesign-durumu`.
 4. **Bekleyen cihaz testleri (Ozan):** Faz 4.5 (`21_`) + Faz 5 (`23_` md 49–78).
@@ -40,9 +45,11 @@
 ```
 Ruhbaz Manor'a devam. ÖNCE OKU (bu sırayla): 00_HANDOFF.md + handoffs/oturum_onboarding-apk_2026-06-19.md (bu oturum snapshot'ı) + handoffs/onboarding-bitti_2026-06-19.md + BRAND_BOOK.md + memory (ui-redesign-durumu, ozerk-oturum-durumu). Tüm file:line ipuçları o dokümanlarda.
 
-DURUM: Onboarding/giriş ekranı kodu BİTTİ ve yeni APK derlendi (apk/ klasöründe; eski Faz 0 APK'sı da orada korunuyor). Faz 5 + teknik borç + B-2 astro + GitHub yedeği tamam. UI redesign yönü = B lobi (gündüz-pastel full-bleed video bg + Kendin keşfet / Kâhya ile gez). Sanat (logo/persona/arka plan) ve giriş videolarını Ozan GPT image 2 + Google Flow'da üretiyor; prompt'lar handoffs/'ta.
+DURUM: Onboarding/giriş ekranı BİTTİ ve CİHAZDA DOĞRULANDI (Ozan onayı 2026-06-19: videolar akıyor, metin doğru, Kâhya parıltısı OK, Kendin Keşfet→eski akış, Kâhya→"yakında"; ince ayar yok). Yeni APK apk/'da (eski Faz 0 da korunuyor). Faz 5 + teknik borç + B-2 astro + GitHub yedeği tamam. UI redesign yönü = B lobi (gündüz-pastel full-bleed video bg + Kendin keşfet / Kâhya ile gez). Sanat + giriş videolarını Ozan dış araçlarda üretiyor; prompt'lar handoffs/'ta.
 
-İŞ: [Ozan buraya o anki isteğini yazar — örn: "ürettiğim logoyu/persona görsellerini ekledim, UI'a yerleştir" VEYA "B lobiyi tam premium'a taşı (artık APK'da expo-video+blur var)" VEYA "şu ekranı yeni tasarıma geçir".]
+İŞ: Ozan yeni ekran tasarımlarını Claude (claude.ai design) ile üretip getiriyor → RN'de uygula. Referans kalıp: OnboardingScreen.tsx + mobile/src/theme/ruhbaz.ts token'ları + cam (BlurView) bileşenleri + Aura gün↔gece. [Ozan o anki ekranı/akışı buraya yazar — örn "şu lobi tasarımını uygula", "persona-seçim ekranını yenile".]
+
+BAĞLANTI (cihaz testi yapılacaksa): Wi-Fi/QR GÜVENİLMEZ (port-80 takılması) → direkt USB + adb reverse + telefonda http://localhost:8081 kullan. Adımlar bu dosyanın üstünde ("BAĞLANTI ÇÖZÜLDÜ") + memory baglanti-sorunlari-protokolu (2026-06-19 güncel).
 
 DİSİPLİN: 677 (fal/kehanet YASAK → sembolik yorum/içe bakış) + EN=TR parite (Kâhya EN = "the Keeper") + her adım ayrı commit + bekçiler (npm --prefix mobile run typecheck / check:turkish:utf8 / check:image:contract / check:moderation / check:safety:core) + mevcut ekranları bozma + otomatik GitHub push. Native paket eklersen YENİ APK gerekir (Ozan'a haber ver). Ozan-bloklu (avukat/IAP/fiyat/store/marka/feed) = taslak + "blok: Ozan".
 
