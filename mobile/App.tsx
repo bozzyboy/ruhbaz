@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { OnboardingScreen } from './src/screens/OnboardingScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { SessionScreen } from './src/screens/SessionScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
@@ -41,6 +42,17 @@ import { LegalInfoScreen } from './src/screens/LegalInfoScreen';
 import { hasAcceptedLegalConsent } from './src/services/legalConsentService';
 import { useTranslation } from 'react-i18next';
 import { initI18n } from './src/i18n';
+import { useFonts } from 'expo-font';
+import { Cinzel_600SemiBold } from '@expo-google-fonts/cinzel';
+import {
+  Nunito_400Regular,
+  Nunito_600SemiBold,
+  Nunito_600SemiBold_Italic,
+  Nunito_700Bold,
+  Nunito_800ExtraBold,
+  Nunito_800ExtraBold_Italic,
+} from '@expo-google-fonts/nunito';
+import { ENABLE_DEVELOPER_DEBUG_UI } from './src/config/featureFlags';
 import type { TarotDeckId } from './src/data/tarotImageMap';
 import type { DevSettings, SessionConfig } from './src/types';
 import type { GeneralDivinationType } from './src/services/divinationEngine';
@@ -50,6 +62,7 @@ import type { ReadingSummary } from './src/types/memory';
 initI18n();
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Home: { freshStartToken?: number } | undefined;
   ProfileSettings: { profileId?: string } | undefined;
   LegalInfo: undefined;
@@ -172,6 +185,15 @@ function useAndroidImmersiveNavigation() {
 export default function App() {
   useAndroidImmersiveNavigation();
   const { t } = useTranslation();
+  const [fontsLoaded, fontError] = useFonts({
+    Cinzel_600SemiBold,
+    Nunito_400Regular,
+    Nunito_600SemiBold,
+    Nunito_600SemiBold_Italic,
+    Nunito_700Bold,
+    Nunito_800ExtraBold,
+    Nunito_800ExtraBold_Italic,
+  });
 
   // Yasal onay kapısı: null = kontrol sürüyor, false = onay ekranı, true = konak açık.
   const [consentAccepted, setConsentAccepted] = useState<boolean | null>(null);
@@ -188,8 +210,8 @@ export default function App() {
     };
   }, []);
 
-  if (consentAccepted === null) {
-    // Kısa dosya kontrolü; boş karanlık ekran yeterli (flash önleme).
+  if (consentAccepted === null || (!fontsLoaded && !fontError)) {
+    // Kısa dosya/font kontrolü; boş karanlık ekran yeterli (flash önleme).
     return <SafeAreaProvider><View style={styles.bootScreen} /></SafeAreaProvider>;
   }
 
@@ -205,6 +227,7 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator
+          initialRouteName="Onboarding"
           screenOptions={({ navigation, route }) => ({
             headerStyle: { backgroundColor: '#1E1E28' },
             headerTintColor: '#D4A574',
@@ -249,6 +272,7 @@ export default function App() {
             ),
           })}
         >
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} options={{ headerShown: false }} />
           <Stack.Screen name="Home" component={HomeScreen} options={{ title: t('nav.home') }} />
           <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ title: t('nav.profileSettings') }} />
           <Stack.Screen name="LegalInfo" component={LegalInfoScreen} options={{ title: t('nav.legalInfo') }} />
@@ -346,7 +370,9 @@ export default function App() {
             options={{ title: t('nav.home'), headerBackVisible: false }}
           />
           <Stack.Screen name="History" component={HistoryScreen} options={{ title: t('nav.history') }} />
-          <Stack.Screen name="MemoryDebug" component={MemoryDebugScreen} options={{ title: t('nav.memoryDebug') }} />
+          {ENABLE_DEVELOPER_DEBUG_UI ? (
+            <Stack.Screen name="MemoryDebug" component={MemoryDebugScreen} options={{ title: t('nav.memoryDebug') }} />
+          ) : null}
           <Stack.Screen name="ReadingDetail" component={ReadingDetailScreen} options={{ title: t('nav.readingDetail') }} />
         </Stack.Navigator>
       </NavigationContainer>

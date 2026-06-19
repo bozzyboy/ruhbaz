@@ -25,6 +25,14 @@ export const en: TranslationResource = {
     search: 'Search...',
     noResults: 'No results found',
   },
+  onboarding: {
+    wordmarkLine1: 'RUHBAZ',
+    wordmarkLine2: 'MANOR',
+    subtitle: 'A calm space designed for symbolic readings, intuitive guidance and personal reflection.',
+    exploreLabel: 'Explore Yourself',
+    kahyaLabel: 'Wander with the Kâhya',
+    kahyaSoon: 'The Kâhya is joining us soon.',
+  },
   nav: {
     home: 'Ruhbaz',
     profileSettings: 'Profile Settings',

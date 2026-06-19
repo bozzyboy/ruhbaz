@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import type { TokenUsageData } from '../types';
+import { ENABLE_DEVELOPER_DEBUG_UI } from '../config/featureFlags';
 
 interface TokenUsageProps {
   usage: TokenUsageData;
@@ -14,6 +15,8 @@ interface TokenUsageProps {
 }
 
 export function TokenUsage({ usage, inputPrice, outputPrice }: TokenUsageProps) {
+  // Token/maliyet sayaçları yalnız geliştirme yüzeyidir; release'de tüm ekranlarda düşer.
+  if (!ENABLE_DEVELOPER_DEBUG_UI) return null;
   const imageInputTokens = usage.imageInputTokens || 0;
   const textInputTokens = usage.textInputTokens ?? Math.max(0, usage.inputTokens - imageInputTokens);
   const total = imageInputTokens + textInputTokens + usage.outputTokens;

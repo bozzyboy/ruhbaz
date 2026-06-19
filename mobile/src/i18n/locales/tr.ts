@@ -23,6 +23,14 @@ export const tr = {
     search: 'Ara...',
     noResults: 'Sonuç bulunamadı',
   },
+  onboarding: {
+    wordmarkLine1: 'RUHBAZ',
+    wordmarkLine2: 'KONAĞI',
+    subtitle: 'Sembolik yorumlar, sezgisel rehberlik ve kişisel içe bakış için tasarlanmış dingin bir alan.',
+    exploreLabel: 'Kendin Keşfet',
+    kahyaLabel: 'Kâhya ile Dolaş',
+    kahyaSoon: 'Kâhya yakında aramızda.',
+  },
   nav: {
     home: 'Ruhbaz',
     profileSettings: 'Profil Ayarları',

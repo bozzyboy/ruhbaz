@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { ENABLE_DEVELOPER_DEBUG_UI } from '../config/featureFlags';
 import type { TFunction } from 'i18next';
 import { getAppLanguage, setAppLanguage, type AppLanguage } from '../i18n';
 import type { RootStackParamList } from '../../App';
@@ -729,17 +730,19 @@ export function ProfileSettingsScreen({ navigation, route }: Props) {
 
             {selectedProfile ? (
               <View style={styles.linkRow}>
-                <TouchableOpacity
-                  style={styles.linkButton}
-                  onPress={() =>
-                    navigation.navigate('MemoryDebug', {
-                      profileId: selectedProfile.profileId,
-                      profileName: selectedProfile.displayName,
-                    })
-                  }
-                >
-                  <Text style={styles.linkButtonText}>{t('profile.memorySummaryButton')}</Text>
-                </TouchableOpacity>
+                {ENABLE_DEVELOPER_DEBUG_UI ? (
+                  <TouchableOpacity
+                    style={styles.linkButton}
+                    onPress={() =>
+                      navigation.navigate('MemoryDebug', {
+                        profileId: selectedProfile.profileId,
+                        profileName: selectedProfile.displayName,
+                      })
+                    }
+                  >
+                    <Text style={styles.linkButtonText}>{t('profile.memorySummaryButton')}</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <TouchableOpacity
                   style={styles.linkButton}
                   onPress={() =>
