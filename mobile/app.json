@@ -43,7 +43,9 @@
       "expo-speech-recognition",
       "expo-camera",
       "expo-sqlite",
-      "expo-background-task"
+      "expo-background-task",
+      "expo-video",
+      "expo-font"
     ]
   }
 }
