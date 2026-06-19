@@ -30,8 +30,8 @@ export const en: TranslationResource = {
     wordmarkLine2: 'MANOR',
     subtitle: 'A calm space designed for symbolic readings, intuitive guidance and personal reflection.',
     exploreLabel: 'Explore Yourself',
-    kahyaLabel: 'Wander with the Kâhya',
-    kahyaSoon: 'The Kâhya is joining us soon.',
+    kahyaLabel: 'Wander with the Steward',
+    kahyaSoon: 'The Steward is joining us soon.',
   },
   nav: {
     home: 'Ruhbaz',
