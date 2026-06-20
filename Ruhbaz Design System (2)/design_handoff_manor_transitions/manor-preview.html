@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruhbaz Konağı — kepenk geçişi prototipi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ruh-font-ui:'Nunito',-apple-system,system-ui,sans-serif;
+    --ruh-font-display:'Cormorant Garamond',Georgia,serif;
+    --ruh-ease:cubic-bezier(.22,1,.36,1);
+    --ruh-aura-day:linear-gradient(165deg,#F6EFE6 0%,#EBE2D6 36%,#D9D0E0 68%,#AFCBE0 100%);
+    --ruh-aura-night:linear-gradient(165deg,#221C31 0%,#171626 42%,#14141E 70%,#10131F 100%);
+    --ruh-shadow-card:0 10px 26px rgba(74,47,90,0.16);
+    --ruh-shadow-soft:0 6px 16px rgba(74,47,90,0.12);
+    --ruh-shadow-lift:0 26px 60px rgba(74,47,90,0.34);
+    --ruh-glow-gold:0 0 0 1px rgba(201,162,74,0.35),0 6px 20px rgba(201,162,74,0.28);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#E3D9CC;font-family:var(--ruh-font-ui);padding:22px}
+  @keyframes ruhRise {from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes ruhDrift{0%,100%{transform:translateY(0);opacity:.32}50%{transform:translateY(-10px);opacity:.8}}
+  @keyframes ruhGlow {0%,100%{opacity:.45;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+  @keyframes ruhFog  {0%,100%{transform:translate3d(0,0,0) scale(1.05)}50%{transform:translate3d(-3%,2%,0) scale(1.12)}}
+  @keyframes ruhSheet{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes ruhEq   {0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1)}}
+  @keyframes ruhPetal{to{opacity:0;transform:translate(var(--px,20px),60px) rotate(var(--pr,60deg))}}
+  @keyframes ruhSpin {to{transform:rotate(360deg)}}
+  .ruh-win{animation:ruhRise .6s var(--ruh-ease) both}
+  .ruh-win:nth-child(1){animation-delay:.05s}.ruh-win:nth-child(2){animation-delay:.12s}.ruh-win:nth-child(3){animation-delay:.19s}
+  .ruh-card{animation:ruhRise .5s var(--ruh-ease) both}
+  [data-motion="off"] [data-anim],[data-motion="off"] .ruh-win,[data-motion="off"] .ruh-card{animation:none!important}
+  .ruh-scroll{scrollbar-width:thin;scrollbar-color:rgba(201,162,74,.5) transparent}
+  .ruh-scroll::-webkit-scrollbar{width:7px}
+  .ruh-scroll::-webkit-scrollbar-thumb{background:rgba(201,162,74,.5);border-radius:999px;border:2px solid transparent;background-clip:padding-box}
+  .ruh-xrow{scrollbar-width:none}.ruh-xrow::-webkit-scrollbar{display:none}
+  .bezel{position:relative;width:390px;height:812px;border-radius:52px;padding:11px;background:linear-gradient(160deg,#FBF3E9,#E4D5C6);box-shadow:0 40px 90px rgba(74,47,90,.28),inset 0 0 0 1px rgba(255,255,255,.6)}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:116px;height:28px;border-radius:999px;background:rgba(40,28,44,.82);z-index:60}
+  .win{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:9px;text-align:center;cursor:pointer;padding:20px 8px 14px;min-height:150px;border-radius:64px 64px 18px 18px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-card),inset 0 1px 0 rgba(255,255,255,.5);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);overflow:hidden;transition:transform .14s var(--ruh-ease)}
+  .win:active{transform:scale(.96)}
+  .med{position:relative;width:48px;height:48px;border-radius:999px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring),0 6px 14px rgba(74,47,90,.12)}
+  .med .glow{position:absolute;inset:-4px;border-radius:999px;border:1px solid var(--medallion-ring);opacity:.55;animation:ruhGlow 7s ease-in-out infinite;pointer-events:none}
+  .soonbadge{position:absolute;top:9px;right:9px;z-index:2;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7A5A12;background:rgba(232,201,138,.85);border:1px solid rgba(201,162,74,.6);padding:2px 6px;border-radius:999px;white-space:nowrap}
+  .backbtn{flex:none;display:flex;align-items:center;gap:5px;cursor:pointer;padding:8px 13px 8px 10px;border-radius:999px;background:var(--door-bg);border:1px solid var(--door-border);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:var(--ruh-shadow-soft);font-family:var(--ruh-font-ui);font-size:12.5px;font-weight:700;color:var(--door-ink)}
+  .backbtn:active{transform:scale(.96)}
+  .pill{cursor:pointer;border-radius:999px;font-family:var(--ruh-font-ui);font-weight:800}
+  .sendbtn{border:1px solid var(--send-border);background:var(--send-bg);box-shadow:var(--send-shadow);color:#FFF6EA}
+  .typecard{position:relative;display:flex;flex-direction:row;align-items:center;gap:11px;text-align:left;cursor:pointer;padding:13px 14px;min-height:60px;border-radius:17px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-card),inset 0 1px 0 rgba(255,255,255,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:transform .16s var(--ruh-ease)}
+  .typecard:hover{transform:translateY(-2px)}.typecard:active{transform:scale(.97)}
+  .lab{font-family:var(--ruh-font-ui);font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);text-shadow:var(--tsh)}
+  .lab2{font-family:var(--ruh-font-ui);font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--door-sub)}
+  .fld{width:100%;box-sizing:border-box;padding:12px;border-radius:14px;border:1px solid var(--door-border);background:var(--field-bg);font-family:var(--ruh-font-ui);font-size:14px;font-weight:700;color:var(--door-ink);outline:none}
+  .sel{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23B98F3C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px;cursor:pointer}
+  option{background-color:var(--opt-bg);color:var(--opt-ink)}
+  .devbar{display:flex;gap:8px;align-items:center;font-family:var(--ruh-font-ui);font-size:12px;color:#5A4A52}
+  .devbar button{cursor:pointer;border:1px solid rgba(140,110,70,.4);background:rgba(255,255,255,.55);border-radius:999px;padding:7px 14px;font-weight:700;color:#4A2F5A;font-family:var(--ruh-font-ui)}
+  .devbar button.on{background:#C9A24A;color:#fff;border-color:#C9A24A}
+</style>
+</head>
+<body data-motion="on">
+  <div class="bezel">
+    <div class="notch"></div>
+    <div id="root" style="position:relative;width:100%;height:100%;border-radius:42px;overflow:hidden;background:var(--ruh-aura-day)">
+      <div id="scene" style="position:absolute;inset:0;background:var(--ruh-aura-day)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(180deg,rgba(169,199,216,0) 0%,rgba(169,199,216,.30) 70%,rgba(146,182,205,.46) 100%);pointer-events:none"></div>
+      <span data-anim style="position:absolute;top:12%;left:16%;width:6px;height:6px;border-radius:999px;background:#fff;box-shadow:0 0 12px 4px rgba(255,255,255,.6);animation:ruhDrift 9s ease-in-out infinite;pointer-events:none"></span>
+      <span data-anim style="position:absolute;top:22%;left:80%;width:5px;height:5px;border-radius:999px;background:#fff;box-shadow:0 0 12px 4px rgba(255,255,255,.6);animation:ruhDrift 12s ease-in-out 1s infinite;pointer-events:none"></span>
+      <span data-anim style="position:absolute;top:54%;left:26%;width:5px;height:5px;border-radius:999px;background:#fff;box-shadow:0 0 12px 4px rgba(255,255,255,.6);animation:ruhDrift 11s ease-in-out .6s infinite;pointer-events:none"></span>
+      <div id="mist" data-anim style="position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s ease"></div>
+      <div id="statusbar" style="position:absolute;top:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;z-index:40;color:#4A2F5A">
+        <span style="font-size:15px;font-weight:700">9:41</span>
+        <div style="display:flex;align-items:flex-end;gap:2px;height:11px">
+          <span style="width:3px;height:5px;border-radius:1px;background:currentColor"></span>
+          <span style="width:3px;height:7px;border-radius:1px;background:currentColor"></span>
+          <span style="width:3px;height:9px;border-radius:1px;background:currentColor"></span>
+          <span style="width:3px;height:11px;border-radius:1px;background:currentColor"></span>
+        </div>
+      </div>
+      <div id="lobby" style="position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;padding:68px 22px 26px"></div>
+      <div id="interior" style="position:absolute;inset:0;z-index:35;opacity:0;transform:scale(.25);transform-origin:50% 34%;pointer-events:none">
+        <div id="interiorScene" style="position:absolute;inset:0;background:var(--ruh-aura-day)"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 18%,rgba(255,255,255,.30),transparent 55%),linear-gradient(180deg,rgba(20,16,30,.04) 0%,rgba(20,16,30,.16) 100%);pointer-events:none"></div>
+        <div id="interiorContent" style="position:absolute;inset:0;z-index:1"></div>
+        <div id="shutterL" style="position:absolute;top:0;bottom:0;left:0;width:50.5%;z-index:5;pointer-events:none;transform:translateX(0);background-image:url('reference/manor-lobby/shutter-left-wide.jpeg');background-size:cover;background-position:right center;border-right:1px solid var(--shutter-edge);box-shadow:8px 0 34px rgba(74,47,90,.28),inset -10px 0 26px rgba(48,30,54,.14)"></div>
+        <div id="shutterR" style="position:absolute;top:0;bottom:0;right:0;width:50.5%;z-index:5;pointer-events:none;transform:translateX(0);background-image:url('reference/manor-lobby/shutter-right-wide.jpeg');background-size:cover;background-position:left center;border-left:1px solid var(--shutter-edge);box-shadow:-8px 0 34px rgba(74,47,90,.28),inset 10px 0 26px rgba(48,30,54,.14)"></div>
+      </div>
+      <div id="modals"></div>
+    </div>
+  </div>
+  <div class="devbar">
+    <span>Aura:</span>
+    <button id="auraDay" class="on" data-act="aura" data-v="gündüz">Gündüz</button>
+    <button id="auraNight" data-act="aura" data-v="gece">Gece</button>
+    <span style="margin-left:10px">Hareket:</span>
+    <button id="motionBtn" class="on" data-act="motion">Açık</button>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+  var S={view:'lobby',active:null,shut:false,aura:'gündüz',motion:true,soon:false,toast:'',toastT:null,
+    ozelStep:'types',ozelProfile:0,ozelType:null,ozelPersona:null,ozelConfirm:null,
+    rdStage:'read',rdMessages:[],rdInput:'',rdReplyIdx:0,rdPlaying:false,rdRecording:false,rdLightbox:false,rdThinking:false,rdDeck:null,rdMode:0,rdTopic:'',rdDream:'',rdSpread:null,rdCoffeeMode:'upload',rdPhotos:[],rdCardZoom:null,rdAstroSpecial:null,rdAstroGen:false,rdAstroTopic:'',rdCompatPerson:null,rdCompatRel:'Sevgili',rdFamily:[],
+    ikProfile:0,ikCard:null,ikPlaying:false,ikSignA:'Koç',ikSignB:'Terazi',ikRelType:'Romantik / Aşk',ikMatchText:'',ikMatchPct:0,ikMatchSubs:[],ikIchingVal:50,ikIchingIdx:0,
+    ayView:'home',ayProfile:0,ayChartText:'',ayChartMsgs:[],ayTest:null,ayQ:0,ayAns:[],
+    pfSel:0,pfLang:'tr',pfEditing:false,pfEditIdx:null,pfForm:null,pfConfirm:null,
+    pfProfiles:[
+      {name:'Ozan',rel:'Kendim',gender:'E',day:'14',month:'Temmuz',year:'1990',hour:'08:00',country:'Türkiye',city:'İzmir',district:'Konak'},
+      {name:'Selin',rel:'Eş',gender:'K',day:'02',month:'Kasım',year:'1992',hour:'Bilmiyorum',country:'Türkiye',city:'İstanbul',district:'Kadıköy'},
+      {name:'Deniz',rel:'Çocuk',gender:'K',day:'20',month:'Mart',year:'2018',hour:'14:00',country:'Türkiye',city:'İzmir',district:'Konak'}
+    ]};
+  var openT,closeT,closing=false;
+  function el(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function lc(s){return String(s).toLocaleLowerCase('tr');}
+
+  var ICONS={
+    chevron:'<polyline points="9 6 15 12 9 18"/>',
+    coffee:'<path d="M4 9h13v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2.4a2.4 2.4 0 0 1 0 4.8H17"/><path d="M7 3v2.2M10 3v2.2M13 3v2.2"/>',
+    cezve:'<path d="M5 9h9v4a4.5 4.5 0 0 1-4.5 4.5H9.5A4.5 4.5 0 0 1 5 13z"/><path d="M14 11l6-2.2"/><path d="M8 4v2.2M11 4v2.2"/>',
+    hand:'<path d="M8 11V6.2a1.4 1.4 0 0 1 2.8 0V10"/><path d="M10.8 10V4.8a1.4 1.4 0 0 1 2.8 0V10"/><path d="M13.6 10.4V6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M16.4 12a1.4 1.4 0 0 1 2.8 0v2.6A6.4 6.4 0 0 1 12.8 21h-1.2a6.4 6.4 0 0 1-5.4-3l-2.1-3.4a1.4 1.4 0 0 1 2.4-1.4L8 14.6"/>',
+    zodiac:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/>',
+    card:'<rect x="6" y="3" width="12" height="18" rx="2.2"/><path d="M12 7.5l1.1 2.3 2.5.3-1.8 1.7.5 2.5L12 15l-2.3 1.2.5-2.5-1.8-1.7 2.5-.3z" fill="currentColor" stroke="none"/>',
+    numerology:'<path d="M9.5 3.5L7.5 20.5M16.5 3.5l-2 17M4 8.5h16M3.5 15.5h16"/>',
+    moon:'<path d="M20 13a8 8 0 1 1-9-9 6 6 0 0 0 9 9z"/>',
+    iching:'<path d="M4 7h16"/><path d="M4 12h6.2M13.8 12H20"/><path d="M4 17h16"/>',
+    rune:'<path d="M7 3.5v17"/><path d="M7 3.5l8 5.5-8 5.5"/>',
+    sparkles:'<path d="M12 3l1.5 4.3L18 9l-4.5 1.7L12 15l-1.5-4.3L6 9l4.5-1.7z" fill="currentColor" stroke="none"/><path d="M18 14l.7 1.7L20.5 16.5l-1.8.7L18 19l-.7-1.8L15.5 16.5l1.8-.8z" fill="currentColor" stroke="none"/>',
+    compass:'<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" fill="currentColor" stroke="none"/>',
+    gem:'<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4L7 9l5 11M15 4l2 5-5 11"/>',
+    users:'<circle cx="9" cy="8" r="3"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3 3 0 0 1 0 5.8M20.5 20a5.5 5.5 0 0 0-4-5.3"/>',
+    settings:'<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>',
+    leaf:'<path d="M5 19c0-8 6-13 14-14 0 8-5 14-14 14z"/><path d="M5 19c4-4 6.5-7 9.5-9.5"/>',
+    sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2l-2.1 2.1M7.3 16.7l-2.1 2.1"/>',
+    star:'<path d="M12 3l2.4 6.3L21 9.8l-5 4 1.7 6.9L12 17.1 6.3 20.7 8 13.8 3 9.8l6.6-.5z" fill="currentColor" stroke="none"/>',
+    daisy:'<circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/><g stroke="currentColor"><ellipse cx="12" cy="6" rx="1.7" ry="3.2"/><ellipse cx="12" cy="18" rx="1.7" ry="3.2"/><ellipse cx="6" cy="12" rx="3.2" ry="1.7"/><ellipse cx="18" cy="12" rx="3.2" ry="1.7"/><ellipse cx="7.8" cy="7.8" rx="1.7" ry="3.2" transform="rotate(45 7.8 7.8)"/><ellipse cx="16.2" cy="16.2" rx="1.7" ry="3.2" transform="rotate(45 16.2 16.2)"/><ellipse cx="16.2" cy="7.8" rx="3.2" ry="1.7" transform="rotate(45 16.2 7.8)"/><ellipse cx="7.8" cy="16.2" rx="3.2" ry="1.7" transform="rotate(45 7.8 16.2)"/></g>',
+    cookie:'<circle cx="12" cy="12" r="8.5"/><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="9.5" r="1" fill="currentColor" stroke="none"/><circle cx="13.5" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="15" r="1" fill="currentColor" stroke="none"/>',
+    crystal:'<circle cx="12" cy="10.5" r="7"/><path d="M9 8.5a3.2 3.2 0 0 1 3-2.2"/><path d="M5 20h14"/>',
+    affirm:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+    heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+    wings:'<path d="M12 5v14"/><path d="M12 8C9.2 5.4 4.5 5.4 3.5 8.4c2 1 2 3.8 5 4.2M12 8c2.8-2.6 7.5-2.6 8.5.4-2 1-2 3.8-5 4.2"/>',
+    angelnumber:'<path d="M7 7v10M10.5 7v10M14 7v10M17.5 7v10"/>',
+    speaker:'<path d="M4 9.5v5h3.5l5 4v-13l-5 4z"/><path d="M16 9.5a4 4 0 0 1 0 5"/>',
+    close:'<path d="M6 6l12 12M18 6L6 18"/>',
+    mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+    send:'<path d="M21 3L3 10.5l7 2.5 2.5 7z"/><path d="M21 3L10 14"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>',
+    user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>'
+  };
+  function icon(name,size,color,sw){size=size||22;color=color||'var(--door-icon)';sw=sw||1.6;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round">'+(ICONS[name]||ICONS.sparkles)+'</svg>';}
+
+  /* ===== data ===== */
+  var ROOMS=[
+    {key:'ikram',icon:'cezve',title:'İkram Masası',caption:'Günün genel okumaları',kind:'ikram'},
+    {key:'ozel',icon:'sparkles',title:'Sana Özel',caption:'Kişisel okumalar',kind:'ozel'},
+    {key:'ayna',icon:'compass',title:'Aynalı Oda',caption:'Kendini tanıma',kind:'ayna'},
+    {key:'simya',icon:'gem',title:'Simya Odası',caption:'Manifest köşesi',kind:'soon',soon:true},
+    {key:'salon',icon:'users',title:'Salon',caption:'Konakta neler oluyor',kind:'feed'},
+    {key:'profil',icon:'settings',title:'Profil & Ayarlar',caption:'Profil · dil · geçmiş',kind:'profil'}
+  ];
+  var SALON_ITEMS=[['Konak Akışı','sparkles'],['Persona notları','users'],['Günün ışığı','sun'],['Yeni içerikler','star']];
+  var OZEL_PROFILES=[['Ozan','Kendim'],['Selin','Eş'],['Deniz','Çocuk'],['Arda','Çocuk'],['Ayşe','Anne'],['Kemal','Baba'],['Zeynep','Kardeş'],['Mert','Kardeş'],['Elif','Dost'],['Can','Dost'],['Naz','Dost'],['Pamuk','Dostum 🐾']];
+  var OZEL_TYPES=[['astro','Astroloji','zodiac','selin'],['kahve','Kahve','coffee','suzan'],['elpati','El / Pati','hand','teoman'],['tarot','Tarot','card','arin'],['numeroloji','Numeroloji','numerology','berk'],['ruya','Rüya Yorumu','moon','ayse'],['iching','I-Ching','iching','berk'],['run','Rün','rune','teoman']];
+  var OZEL_PERSONAS=[['suzan','Suzan','coffee','#C1714F','Kahve Yorumu','Anaç, dobra, koruyucu; telveden hikâye çıkarır.'],['teoman','Teoman','hand','#5E7B5A','El Okuması','Babacan, felsefi, psikolojik derinlikli.'],['selin','Selin','zodiac','#7B6CF6','Astroloji','Modern astrolog; farkındalık dili yüksek, rafine.'],['berk','Berk','gem','#3F8E8C','Hibrit Modern Yorum','Analitik ama sıcak; dost gibi konuşur.'],['arin','Arın','card','#9B7BB8','Tarot','Melankolik, sanatsal, sezgisel, yumuşak.'],['ayse','Ayşe','leaf','#A3B18A','Doğa & Şefkat Bilgeliği','Toprak, sabır, bereket, şefkat dili.'],['deniz','Deniz','users','#E8707B','Sosyal Dinamik Okuması','Kıpır kıpır, sezgisel, kanka enerjisi.']];
+  var RD_DATIVE={'Suzan':"Suzan'a",'Teoman':"Teoman'a",'Selin':"Selin'e",'Berk':"Berk'e",'Arın':"Arın'a",'Ayşe':"Ayşe'ye",'Deniz':"Deniz'e"};
+  var RD_CONTENT={
+    kahve:{head:'photos',coffee:true,label:'Kahve okuması',title:'KAHVE OKUMASI',photos:['fincan','fincan','tabak'],
+      open:['Fincanı güzelce kapatmışsın, telve de rahat yayılmış — bu, içine sinmiş bir huzurla oturduğunu gösteriyor bana. Sağ kenarda ince bir patika beliriyor; yakınlarda attığın ya da atmak üzere olduğun bir adım, yavaş yavaş kendi yoluna dönüşüyor. Acele etme, kendi temposunda açılıyor bu.','Tabağa doğru kanat gibi bir iz düşmüş. Ben bunu, iç ferahlatan bir haberin yola çıkması diye okurum — uzaktan değil, tanıdık birinden. Çevresindeki ufak noktalar ise son günlerde kafanı meşgul eden küçük işler; dağınık duruyorlar ama hepsi çözülecek cinsten, sen merak etme canım.'],
+      replies:['İşle bağı var gibi, ama yalnız iş değil bu. Kupanın sapına yakın duran şu yuvarlak, emek verdiğin bir konuda karşılığını görmek gibi. Sen taşı sağlam koy yeter; gerisi kendiliğinden denkleşiyor.','Telvedeki dağınıklık geçici sevgili, birkaç güne toparlanıyor. Kapı zorlamadan aralıyor — sabırlı olman yetiyor.','Yanındaki kişi göründüğünden daha çok yanında. İçin rahat olsun, bu okumada onun izi sıcak.','Küçük bir başlangıç işareti var fincanın dibinde. Acele ettirme kendini, olgunlaşınca tadı bambaşka olacak.']},
+    elpati:{head:'photos',palm:true,label:'El okuması',title:'EL OKUMASI',photos:['el / pati'],
+      open:['Avucunu açtığında ilk göze çarpan kalp çizgin — derin ve yumuşak bir kavisle ilerliyor. Bu, duygularını içine atmadan, sindirerek yaşadığını söylüyor bana. Son dönemde gönlünü yoran bir mesele varsa, onu çoktan olgunlaştırmaya başlamışsın bile.','Akıl çizginle yaşam çizginin başladığı yer birbirine yakın; bu, kararlarını aceleye getirmeden ölçüp biçerek aldığını gösterir. Başparmağının altındaki dolgunluk ise içindeki sıcak, koruyucu tarafın hâlâ güçlü olduğunu fısıldıyor.'],
+      replies:['Avucundaki o ince dallar gibi çizgiler, çoğu zaman yeni başlangıçların habercisidir. Sabırlı ol; vakti gelince kendi filizini veriyor.','Parmaklarının açık, rahat duruşu içten içe yola çıkmaya hazır olduğunu gösteriyor. Bu bir korku değil, bir hazırlık hali.','Bu his geçici. Çizgiler sabit değildir; sen değiştikçe onlar da yumuşar.','El ayanın ortasındaki o küçük yıldız, emeğinin karşılığını göreceğin bir döneme işaret ediyor.']},
+    astro:{head:'modes',label:'Astroloji okuması',title:'ASTROLOJİ OKUMASI',specials:[['topic','Belli Bir Konu'],['compat','İlişki Uyumu'],['family','Aile Okuması']],
+      modes:[['Günlük','Bugün Ay haritanda yumuşak bir açı yapıyor; sabah dağınık başlasa da öğleden sonra zihnin berraklaşıyor. Küçük bir jest gününü tatlandıracak; kalbini açık tut.'],['Haftalık','Bu hafta ilişkiler ön planda; Venüs’ün dokunuşuyla eski bir kırgınlık onarılabilir. Hafta ortasındaki bir haber planını güzel bir yöne çevirebilir.'],['Aylık','Bu ay maddi toparlanma ve içsel olgunlaşma bir arada. İlk yarı tohum atmak, ikinci yarı sabırla beklemek için; ay sonunda ektiğin filiz veriyor.'],['Yıllık','Bu yıl bir eşik yılı: sorumluluk artıyor ama olgunlaştıkça kendi alanını kuruyorsun. Sabırla attığın temel, yıl sonunda sağlam duruyor.']],
+      replies:['Bu dönem iletişim evini hareketlendiriyor; söylemek isteyip ertelediğin şeyi nazikçe dile getirmenin tam zamanı.','Para konusunda temkinli bir iyimserlik var — büyük adımdan önce küçük bir doğrulama bekle.','Yakın bir ilişkide yumuşama görüyorum; ilk jesti senin yapman düğümü çözebilir.']},
+    numeroloji:{head:'modes',label:'Numeroloji okuması',title:'NUMEROLOJİ OKUMASI',
+      modes:[['Günlük','Günün sayısı 3 — ifade, yaratıcılık ve neşe. Bugün kendini anlatmak, paylaşmak ve gülmek için ideal; sesini kıs ama susma.'],['Haftalık','Bu haftanın titreşimi 7: içe dönüş, araştırma ve sezgi. Kalabalıktan çok kendi sessiz alanında berraklaşıyorsun; acele kararları haftaya bırak.'],['Aylık','Bu ayın sayısı 1 — başlangıçlar, inisiyatif ve özgüven. Ertelediğin bir adımı atmak için güçlü bir ay; ilk hamleyi sen yap.']],
+      replies:['Kişisel yılın 5’e denk geliyor: değişim, hareket ve özgürlük teması. Esnek kalırsan kapılar kendiliğinden açılıyor.','İsmindeki sesli harfler ruh arzunu 9’a taşıyor — vermek, tamamlamak ve bırakmak bu dönemin anahtarı.','Doğum günü sayın 5, çok yönlülüğünü gösteriyor; tek bir kulvara sıkışmak sana göre değil.']},
+    ruya:{head:'dream',label:'Rüya yorumu',title:'RÜYA YORUMU',prompt:'Rüyanda ne gördün? Sahneyi, kişileri ve hislerini olabildiğince anlat.',
+      open:['Anlattığın rüyadaki su, çoğu zaman duyguların dilidir; berraksa içinde bir şeyin durulduğunu söyler. Sahnedeki o tanıdık yüz, uzun süredir taşıdığın bir kararın yavaşça olgunlaştığını fısıldıyor.','Rüyada hissettiğin o hafiflik önemli: zihnin, gündüz taşıdığın bir yükü gece bırakmaya çalışıyor. Uyandığında içinde kalan duyguyu küçümseme, sana yol gösteriyor.'],
+      replies:['Rüyadaki yol, çoğunlukla seçim demektir; iki uçtan hangisi içini ısıtıyorsa beden onu çoktan biliyor.','O kapalı kapı bir engel değil, henüz vakti gelmemiş bir olasılık. Zorlamadan beklemek de bir cevap.','Düşmek hissi genelde kontrolü bırakma korkusudur; belki de güvenip akmana izin vermenin zamanı.']},
+    iching:{head:'cast',cast:'iching',label:'I-Ching okuması',title:'I-CHING OKUMASI',hexa:[1,0,0,0,0,0],changing:[0],futureLines:[0,0,0,0,0,0],castName:'24 · Dönüş (Fu)',futureName:'2 · Alıcı (K’un)',
+      open:['Hexagram 24 · Dönüş. Kış biter, ilk filiz toprağı deler. Yenilenme yumuşakça başlıyor; eski bir döngü kapanıp yenisi açılıyor. Zorlamadan, doğanın temposuyla ilerle.'],
+      replies:['Alt çizgilerin sağlam olması temelinin güçlü olduğunu gösteriyor; üstte beliren açıklık ise yeni bir soluğa işaret.','Değişen çizgi sabrı öğütlüyor: acele edilen bir adım, beklenirse çok daha sağlam oturur.','Bu hexagram ilişkilerde içtenliği vurguluyor; açık sözlülük şu dönemde kapıları aralıyor.']},
+    run:{head:'cast',cast:'rune',label:'Rün okuması',title:'RÜN OKUMASI',runes:[['ᚹ','Wunjo','sevinç'],['ᚱ','Raidho','yolculuk'],['ᚦ','Thurisaz','eşik']],
+      open:['Çektiğin ilk taş Wunjo — sevinç ve uyum. Uzun bir gerginliğin ardından gelen ferahlık; küçük şeylerden sevinç devşirme zamanı. Yanındaki Raidho ise bir yolculuğu, içsel ya da dışsal bir hareketi müjdeliyor.'],
+      replies:['Thurisaz taşı bir eşikte durduğunu söylüyor; aceleci bir karardan çok beklemekte sağlamlık var.','Taşların duruşu desteklerin yakın olduğunu gösteriyor; yardım istemek bu dönemde zayıflık değil bilgelik.','Wunjo’nun gücü sürüyor: paylaştıkça çoğalan bir sevinç kapıda.']},
+    tarot:{head:'tarot',label:'Tarot okuması',title:'TAROT OKUMASI',
+      open:['Üç kart da yüzü yukarı bakıyor; bu, sürecin senden yana aktığını gösteriyor. Geçmişte Yıldız — bıraktığın bir yükün ardından gelen şifa ve umut. Şimdi Ay — içsel bir belirsizlik, ama korkutucu değil, sezgini bilemek için. Gelecekte Güneş — açıklık, neşe ve görünür olmanın rahatlığı.'],
+      replies:['Ay kartının sislerine takılma; o sis sezgini keskinleştiriyor, yanıltmıyor.','Güneş kartı emeğinin görüneceği bir döneme işaret; sahnede olmaktan çekinme.','Yıldız hâlâ etkisini sürdürüyor: kendine şefkat, bu açılımın sağaltıcı ipliği.']}
+  };
+  var TAROT_POOL=[['Yıldız','star'],['Ay','moon'],['Güneş','sun'],['İmparatoriçe','heart'],['Aşıklar','heart'],['Çark','sun'],['Kule','gem'],['Adalet','star'],['Kâhin','moon'],['Dünya','sun']];
+  var RUNE_POOL=['ᚹ','ᚱ','ᚦ','ᚠ','ᚨ','ᚲ','ᚷ'];
+  var TAROT_SPREADS_DATA=[
+    {key:'single-insight',title:'Tek Kartlık İçgörü',n:1,gc:1,gr:1,pos:[[1,1,0,'Meselenin Kalbi']]},
+    {key:'big-picture',title:'Büyük Resmi Gör',n:8,gc:5,gr:3,pos:[[3,3,0,'Kariyer / Gelişim'],[2,2.5,0,'Bilgi / Deneyim'],[1,2,0,'Geçmiş Etkiler'],[2,1.5,0,'Maddi Durum'],[3,1,0,'Dışarıdan Görünüş'],[4,1.5,0,'Aşk / Duygular'],[5,2,0,'Destekler'],[4,2.5,0,'Olası Gelecek']]},
+    {key:'star-power',title:'Yıldıza Sor',n:6,gc:4,gr:3,pos:[[2.5,1,0,'Meselenin Kalbi'],[1.5,3,0,'Buraya Getiren Süreç'],[4,1.5,0,'Engeller'],[1,1.5,0,'Güçler / Destekler'],[3.5,3,0,'Gerekli Değişim'],[2.5,2,0,'Olası Sonuç']]},
+    {key:'relationship-deep',title:'İlişkiye Derin Bakış',n:7,gc:5,gr:2,pos:[[1,1.5,0,'Kişi 1 · İlk'],[2,1,0,'Kişi 1 · İkinci'],[2,2,0,'Kişi 1 · Üçüncü'],[5,1.5,0,'Kişi 2 · İlk'],[4,1,0,'Kişi 2 · İkinci'],[4,2,0,'Kişi 2 · Üçüncü'],[3,1.5,0,'İlişkinin Kendisi']]},
+    {key:'should-i',title:'“Bunu Yapmalı mıyım?”',n:4,gc:5,gr:1,pos:[[3,1,0,'Meselenin Kalbi'],[3,1,1,'Engeller'],[1,1,0,'Geçmiş Etkiler'],[5,1,0,'Olası Sonuç']]},
+    {key:'confidence',title:'Özgüven Açılımı',n:4,gc:2,gr:3,pos:[[1.5,1,0,'Güvensizliğin Kökü'],[1,2,0,'İlk Güç Kaynağı'],[2,2,0,'İkinci Güç Kaynağı'],[1.5,3,0,'Atılacak Adım']]},
+    {key:'turning-point',title:'Dönüm Noktası',n:7,gc:5,gr:3,pos:[[3,2,0,'Şükran / Ders'],[2,2,0,'Bırakılacak'],[4,2,0,'İstenecek İhtiyaç'],[1,2,0,'Verilen Enerji'],[5,2,0,'Yaratılacak Alan'],[3,1,0,'Rehber Işık'],[3,3,0,'Tohum']]},
+    {key:'celtic-cross',title:'Klasik Celtic Cross',n:10,gc:5,gr:4,pos:[[2,2.5,0,'Şimdi'],[2,2.5,1,'Meydan Okuma'],[2,3.5,0,'Temel'],[1,2.5,0,'Yakın Geçmiş'],[2,1.5,0,'En İyi Sonuç'],[3,2.5,0,'Yakın Gelecek'],[5,4,0,'İç Etkiler'],[5,3,0,'Dış Etkiler'],[5,2,0,'Umut / Korku'],[5,1,0,'Genel Sonuç']]},
+    {key:'conflict',title:'Çatışma Yorumu',n:8,gc:3,gr:4,pos:[[2,1,0,'Senin Rolün'],[1,1.5,0,'Onlara Bakışın'],[3,1.5,0,'Onların Bakışı'],[1,2.5,0,'Onların Anlamı'],[3,2.5,0,'Senin Anlamın'],[1,3.5,0,'Engeller'],[3,3.5,0,'Güçlü Yan'],[2,4,0,'Olası Sonuç']]},
+    {key:'relationship-check',title:'İlişkiye Bir Göz Atış',n:3,gc:3,gr:1,pos:[[1,1,0,'Sen'],[2,1,0,'Karşı Taraf'],[3,1,0,'İlişkinin Kendisi']]}
+  ];
+
+  var IK_PROFILES=[['Ozan','Kendim'],['Selin','Eş'],['Deniz','Çocuk'],['Ayşe','Anne'],['Kemal','Baba'],['Pamuk','Dostum 🐾']];
+  var IK_SIGNS=['Koç','Boğa','İkizler','Yengeç','Aslan','Başak','Terazi','Akrep','Yay','Oğlak','Kova','Balık'];
+  var IK_CARDS=[
+    ['astro-daily','Genel Astro Günlük','zodiac','astro'],['astro-weekly','Genel Astro Haftalık','zodiac','astro'],['astro-monthly','Genel Astro Aylık','zodiac','astro'],
+    ['compat','Genel Burç Uyumu','users','compat'],['daisy','Papatya ile\nEVET / HAYIR','daisy','daisy'],['cookie','Şans Kurabiyesi','cookie','generic'],
+    ['sphere','Sihirli Küre','crystal','generic'],['affirm','Günlük Olumlamalar','affirm','generic'],['quote','Günlük İlham','star','generic'],
+    ['runes','Günlük Rün Mesajı','rune','generic'],['iching','Günlük I-Ching','iching','iching'],['tarot','Günlük Tek Tarot','card','generic'],
+    ['angel','Günlük Melek Kartı','wings','generic'],['numerology','Günün Numerolojisi','numerology','generic'],['angelnumber','Uğurlu Melek Sayısı','angelnumber','generic']
+  ];
+  var IK_RESULTS={
+    'astro-daily':'Bugün Ay senin evinde yumuşacık duruyor; sabah aceleci başlasan da öğleden sonra her şey kendi yatağına oturuyor. Küçük bir konuşma, uzun süredir taşıdığın bir yükü hafifletecek. Kalbini aç, dinle yeter.',
+    'astro-weekly':'Bu hafta ilişkilerinde bir tazelenme var; Venüs’ün dokunuşu eski bir küskünlüğü onarmaya hazır. Hafta ortası gelen bir haber, planlarını tatlı bir yöne çevirebilir. Esnek kal, akışa güven.',
+    'astro-monthly':'Bu ay maddi konularda toparlanma ve içsel olgunlaşma bir arada. Ayın ilk yarısı tohum atmak, ikinci yarısı sabırla beklemek için. Acele etmeden ektiğin her şey, ay sonunda filiz veriyor.',
+    cookie:'Aradığın cevap, çoktan içinde fısıldıyor; sadece susup dinlemen gerekiyor. Bugün küçük bir ’evet’ büyük bir kapı aralayacak.',
+    sphere:'Küre bulutlanıyor, sonra berraklaşıyor… ’Şu an doğru yoldasın’ diyor. Sabırlı ol, işaretler peş peşe gelecek.',
+    affirm:'Ben sakinim, ben yeterliyim, ben tam da olmam gereken yerdeyim. Bugün kendime şefkatle davranıyorum; nefesim yumuşak, kalbim açık.',
+    quote:'“Suyun yolunu taş kesmez, sadece şarkısını değiştirir.” Bugün engel sandığın şey, belki de yeni bir melodinin başlangıcıdır.',
+    runes:'Bugünün taşı: Wunjo — sevinç ve uyum. Uzun bir gerginliğin ardından gelen ferahlık; küçük şeylerden sevinç devşirme zamanı.',
+    tarot:'Bugünün kartı: Yıldız (düz). Şifa, umut ve sakin bir güven. Geride bıraktığın fırtınadan sonra gökyüzü açılıyor; dileğini tut.',
+    angel:'Melek kartın: ’Sabır’. Görünmeyen bir el, senin için zamanı ayarlıyor. Henüz olmadıysa, daha iyisi yolda demektir.',
+    numerology:'Günün sayısı 3 — ifade, yaratıcılık ve neşe. Bugün kendini anlatmak, paylaşmak ve gülmek için ideal. Sesini kıs ama susma.',
+    angelnumber:'Uğurlu sayın: 1111. Bir eşik anındasın; düşündüğün şey hızla şekilleniyor. Niyetini temiz tut, evren not alıyor.'
+  };
+  var IK_COMPAT={fire:'İki ateş bir araya gelince ortalık ısınır: tutku, kahkaha, bitmeyen enerji. Sırrınız, birbirinizin alanına saygı duymak.',earthwater:'Toprak ve su birbirini besler: biri kök salar, diğeri akıp yeşertir. Sakin, güvenli, derin bir bağ.',air:'İki zihin, bitmeyen bir sohbet: fikirler, espriler, planlar. Bazen düşünmeyi bırakıp sadece hissedin.',mixed:'Farklı elementlerin dansı: kâh çekim, kâh sürtünme. Anahtarı, farklılığı kusur değil renk olarak görmek.'};
+  var IK_ELEM={'Koç':'fire','Aslan':'fire','Yay':'fire','Boğa':'earth','Başak':'earth','Oğlak':'earth','İkizler':'air','Terazi':'air','Kova':'air','Yengeç':'water','Akrep':'water','Balık':'water'};
+  var IK_ASTRO_STATS={'astro-daily':[['Aşk',72],['Kariyer',61],['Enerji',84]],'astro-weekly':[['Aşk',80],['Kariyer',70],['Enerji',58]],'astro-monthly':[['Aşk',64],['Kariyer',78],['Enerji',73]]};
+  var IK_REL_TYPES=['Romantik / Aşk','Evlilik','Flört','Dostluk','İş / Ortaklık','Aile Bağı','Eski Sevgili','Genel'];
+  var IK_REL_DELTA={'Romantik / Aşk':6,'Evlilik':4,'Flört':2,'Dostluk':8,'İş / Ortaklık':0,'Aile Bağı':5,'Eski Sevgili':-10,'Genel':0};
+  var IK_HEXA=[
+    ['2 · Alıcı (K’un)',[0,0,0,0,0,0],'Toprağın sabrı ve kabulü. Bu, üretmek için değil; taşımak, beslemek ve beklemek için bir gün. Zorlamadan, akışa uyarak ilerle — liderlik etmek yerine destek olmak bugün daha çok kapı açıyor.','Bir adımı ertelemek zayıflık değil; doğru zamanı beklemenin bilgeliği.'],
+    ['24 · Dönüş (Fu)',[1,0,0,0,0,0],'Kış biter, ilk filiz toprağı deler. Eski bir döngü kapanıp yenisi yumuşakça başlıyor. Geri dönen bir kişi, fikir ya da fırsat olabilir; kapıyı nazikçe arala.','Küçük bir yeniden başlangıç için tam zamanı.'],
+    ['11 · Barış (T’ai)',[1,1,1,0,0,0],'Gök ve yer uyum içinde. Denge, bolluk ve huzur dönemi; istekle imkân bugün aynı hizada duruyor. Akış senden yana.','Tadını çıkar ve şükret; zorlama, akışta kal.'],
+    ['42 · Artış (I)',[1,1,0,0,1,1],'Bereket ve büyüme rüzgârı. Paylaştıkça çoğalan bir dönemdesin; verdiğin, katlanarak geri dönüyor.','Cömert ol; küçük bir iyilik büyük bir kapı açabilir.'],
+    ['51 · Sarsılma (Chen)',[1,0,0,1,0,0],'Beklenmedik bir gök gürültüsü. Sarsıcı ama uyandırıcı; korkma, bu silkeleniş seni yeniden hizalıyor. Şok geçince zihnin daha berrak olacak.','Ani bir haber seni yolundan değil, yoluna sokuyor.'],
+    ['1 · Yaratıcı (Ch’ien)',[1,1,1,1,1,1],'Saf yaratıcı güç. Açık, kararlı ve öncü bir enerji; girişimlerin için güçlü bir gün. Niyetini netleştir ve ilk adımı at.','İnisiyatif sende; beklemek yerine başlat.'],
+    ['63 · Tamamlanma (Chi Chi)',[1,0,1,0,1,0],'Bir döngü tamamlandı; her şey yerli yerinde. Başarıdan sonra gevşeme tuzağına düşme, dengeyi ve inceliği sürdür.','Bitirdiğin işin son rötuşunu ihmal etme.']
+  ];
+
+  var AY_PROFILES=[['Ozan','Kendisi'],['Selin','Eş'],['Deniz','Çocuk'],['Arda','Çocuk'],['Ayşe','Anne'],['Kemal','Baba'],['Zeynep','Kardeş'],['Mert','Kardeş'],['Elif','Dost'],['Can','Dost'],['Naz','Dost'],['Pamuk','Dostum 🐾']];
+  var AY_TOOLS=[['chart','Doğum Haritası','zodiac'],['numerology','Temel Numeroloji','numerology'],['tests','Testler','compass']];
+  var AY_TESTS=[['mbti','16','MBTI Kişilik Testi','16 tip · ~12 soru'],['compatibility','♥','Uyumluluk Testi','ilişki dinamiği'],['big-five','5','Beş Faktör Testi','OCEAN modeli'],['attachment','⚓','Bağlanma Stili Testi','güvenli / kaygılı / kaçıngan'],['values','✦','Değerler Pusulası','neye önem veriyorsun'],['coping-style','☂','Stresle Başa Çıkma','baş etme stratejin']];
+  var AY_QUESTIONS={mbti:['Kalabalık bir ortamdan sonra yalnız kalmaya ihtiyaç duyarım.','Kararlarımı mantıkla, duygulardan bağımsız alırım.','Planlı olmayı doğaçlamaya tercih ederim.','Yeni fikirler beni somut detaylardan çok cezbeder.','Bir sohbette önce dinler, sonra konuşurum.'],compatibility:['Anlaşmazlıkları konuşarak çözmeyi tercih ederim.','İlişkide kişisel alana saygı önemlidir.','Sevgimi sözden çok davranışla gösteririm.'],'big-five':['Yeni deneyimlere açığım.','Görevlerimi düzenli tamamlarım.','İnsanlarla birlikteyken enerji kazanırım.','Çevremdekilere kolayca güvenirim.','Stresli durumlarda sakin kalmakta zorlanırım.'],attachment:['Yakınlarımın beni terk edeceğinden endişelenirim.','Duygusal yakınlık beni rahatsız eder.','İlişkilerimde kendimi güvende hissederim.'],values:['Özgürlük benim için güvenlikten değerlidir.','Başkalarına yardım hayatıma anlam katar.','Başarı ve tanınma beni motive eder.'],'coping-style':['Stresliyken sorunu adım adım çözerim.','Zorlandığımda sevdiklerime yönelirim.','Kötü hissedince dikkatimi başka şeye veririm.']};
+  var AY_RESULTS={mbti:['INFJ','Sezgisel Rehber','İçe dönük, derin düşünen ve şefkatli bir yapın var. İnsanların özünü hızla okur, anlam ararsın.'],compatibility:['♥','Uyumlu & Açık','İletişimi ve karşılıklı alanı önemsiyorsun. Anlaşmazlıkta köprü kuran bir partnersin.'],'big-five':['OPEN','Açık & Düzenli','Yeniliğe açık ama disiplinli bir dengen var. Merakın seni büyütüyor.'],attachment:['✓','Güvenli Bağlanma','İlişkilerde kendini güvende hissediyorsun. Sağlıklı bir denge.'],values:['✦','Özgür Ruh','Özgürlük ve anlam senin pusulan. Kalıplara sığmıyorsun.'],'coping-style':['☂','Çözüm Odaklı','Zorlukla yüzleşince sorunu parçalayıp çözersin. Esnek bir baş etme stilin var.']};
+  var AY_CHART_REPLIES=['Güneş’in Aslan’da olması, görünür olmaktan çekinmediğini ama takdir görmeye de ihtiyaç duyduğunu söyler.','Ay Balık yerleşimin, duygularını süzgeçsiz hissettiğini gösteriyor; ara ara yalnız kalman şart.','Yükselen İkizler, dışarıya meraklı ve konuşkan bir kapı açıyor. Derinliğini güvendiklerine gösterirsin.','Bu üçlü; parlayan ama içe dönük, hareketli ama hassas bir doğa çiziyor.'];
+
+  var PF_GENDERS=[['K','Kadın'],['E','Erkek'],['D','Diğer']];
+  var PF_REL=['Kendim','Eş','Sevgili','Anne','Baba','Çocuk','Kardeş','Arkadaş','Akraba','Evcil hayvan','Diğer'];
+  var PF_DAYS=(function(){var a=[];for(var i=1;i<=31;i++)a.push(('0'+i).slice(-2));return a;})();
+  var PF_MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var PF_YEARS=(function(){var a=[];for(var y=2025;y>=1940;y--)a.push(''+y);return a;})();
+  var PF_HOURS=(function(){var a=['Bilmiyorum'];for(var i=0;i<24;i++)a.push(('0'+i).slice(-2)+':00');return a;})();
+  var PF_COUNTRIES=['Türkiye','Almanya','Birleşik Krallık','ABD','Hollanda','Fransa','Diğer'];
+  var PF_CITIES=['İstanbul','İzmir','Ankara','Bursa','Antalya','Adana','Diğer'];
+  var PF_DISTRICTS=['Merkez','Konak','Kadıköy','Çankaya','Nilüfer','Muratpaşa','Diğer'];
+
+  /* ===== aura ===== */
+  function syncAura(){
+    var night=S.aura==='gece';
+    var day={'--wordmark':'#8A6A28','--ink':'#3B2A32','--ink2':'#5A4A52','--door-bg':'rgba(255,250,244,.7)','--door-border':'rgba(201,162,74,.5)','--door-ink':'#4A2F5A','--door-sub':'#6A596D','--door-icon':'#B98F3C','--medallion-bg':'rgba(255,252,248,.72)','--medallion-ring':'rgba(201,162,74,.34)','--shutter-edge':'rgba(201,162,74,.55)','--gold':'#8A6A28','--bar-bg':'rgba(231,220,208,.5)','--send-bg':'linear-gradient(135deg,#C9A24A,#A9842F)','--send-border':'rgba(201,162,74,.6)','--send-shadow':'0 8px 20px rgba(201,162,74,.32)','--ruh-ink-plum':'#4A2F5A','--ruh-text-secondary':'#6A596D','--ruh-glass-strong':'rgba(255,251,246,.94)','--field-bg':'rgba(255,255,255,.6)','--danger':'#B5453A','--opt-bg':'#FBF3E9','--opt-ink':'#3B2A32','--tsh':'0 1px 10px rgba(255,249,242,.5),0 1px 3px rgba(36,20,42,.16)','--tsh-wm':'0 1px 2px rgba(36,20,42,.30),0 6px 26px rgba(36,20,42,.30)'};
+    var gece={'--wordmark':'#E6C173','--ink':'#FFF6EA','--ink2':'rgba(255,246,234,.88)','--door-bg':'rgba(248,244,255,.13)','--door-border':'rgba(230,193,115,.45)','--door-ink':'#FFF6EA','--door-sub':'rgba(255,246,234,.82)','--door-icon':'#E6C173','--medallion-bg':'rgba(255,255,255,.10)','--medallion-ring':'rgba(230,193,115,.42)','--shutter-edge':'rgba(230,193,115,.5)','--gold':'#E6C173','--bar-bg':'rgba(14,10,24,.55)','--send-bg':'linear-gradient(135deg,#E6C173,#C49A4A)','--send-border':'rgba(230,193,115,.5)','--send-shadow':'0 8px 20px rgba(8,6,16,.34)','--ruh-ink-plum':'#FFF6EA','--ruh-text-secondary':'rgba(255,246,234,.78)','--ruh-glass-strong':'rgba(26,19,40,.94)','--field-bg':'rgba(255,255,255,.08)','--danger':'#E0857A','--opt-bg':'#241733','--opt-ink':'#FFF6EA','--tsh':'0 1px 1px rgba(8,6,16,.9),0 0 7px rgba(8,6,16,.85),0 2px 16px rgba(8,6,16,.55)','--tsh-wm':'0 1px 1px rgba(8,6,16,.9),0 0 8px rgba(8,6,16,.8),0 2px 22px rgba(8,6,16,.6)'};
+    var v=night?gece:day,root=el('root');for(var k in v)root.style.setProperty(k,v[k]);
+    root.style.background=night?'var(--ruh-aura-night)':'var(--ruh-aura-day)';
+    el('scene').style.background=night?'var(--ruh-aura-night)':'var(--ruh-aura-day)';
+    el('interiorScene').style.background=night?'var(--ruh-aura-night)':'var(--ruh-aura-day)';
+    el('statusbar').style.color=night?'#FFF6EA':'#4A2F5A';
+    var mist=el('mist');
+    if(night){mist.style.background='radial-gradient(115% 44% at 50% 6%,rgba(8,6,18,.30),transparent 58%),radial-gradient(120% 60% at 78% 64%,rgba(123,108,246,.10),transparent 62%),linear-gradient(180deg,rgba(14,10,24,.06) 0%,rgba(14,10,24,.02) 45%,rgba(14,10,24,.22) 100%)';mist.style.opacity='1';mist.style.animation=S.motion?'ruhFog 22s ease-in-out infinite':'none';}
+    else{mist.style.opacity='0';mist.style.animation='none';}
+    document.body.setAttribute('data-motion',S.motion?'on':'off');
+  }
+  function tierColor(p){var night=S.aura==='gece';p=+p;var C=night?{g:'#86E0A6',o:'#E8B084',r:'#E89A8F'}:{g:'#2F7A4B',o:'#B5803A',r:'#B5453A'};return p>=70?C.g:(p>=50?C.o:C.r);}
+  function paintStats(){
+    document.querySelectorAll('[data-statbar]').forEach(function(e){var p=+e.getAttribute('data-pct')||0;e.style.width=p+'%';e.style.background=tierColor(p);});
+    document.querySelectorAll('[data-statpct]').forEach(function(e){var p=+e.getAttribute('data-pct')||0;e.style.color=tierColor(p);});
+  }
+  function updateIkThumb(){var row=el('ikProfRow'),th=el('ikProfThumb');if(!row||!th)return;var ratio=row.scrollWidth>0?row.clientWidth/row.scrollWidth:1;var maxS=row.scrollWidth-row.clientWidth;var pos=maxS>0?row.scrollLeft/maxS:0;var w=Math.max(18,Math.min(100,ratio*100));th.style.width=w+'%';th.style.marginLeft=(pos*(100-w))+'%';}
+
+  /* ===== lobby ===== */
+  function lobbyHTML(){
+    function win(r){return '<button class="win" data-act="open" data-key="'+r.key+'">'+(r.soon?'<span class="soonbadge">Çok yakında</span>':'')+'<span class="med"><span class="glow"></span>'+icon(r.icon,23,'var(--door-icon)',1.5)+'</span><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:16.5px;line-height:1.12;color:var(--door-ink)">'+r.title+'</span><span style="font-family:var(--ruh-font-ui);font-size:11.5px;line-height:1.25;color:var(--door-sub)">'+r.caption+'</span></button>';}
+    return '<div data-anim style="text-align:center;flex:none;animation:ruhRise .8s var(--ruh-ease) both">'+
+      '<div style="font-family:\'Cinzel\',serif;font-weight:600;font-size:23px;letter-spacing:.14em;color:var(--wordmark);line-height:1;text-shadow:var(--tsh-wm)">RUHBAZ KONAĞI</div>'+
+      '<div style="display:flex;align-items:center;justify-content:center;gap:11px;margin:12px 0"><span style="width:34px;height:1px;background:linear-gradient(90deg,transparent,rgba(201,162,74,.8))"></span><span style="width:6px;height:6px;background:#C9A24A;transform:rotate(45deg);box-shadow:0 0 8px rgba(201,162,74,.55)"></span><span style="width:34px;height:1px;background:linear-gradient(90deg,rgba(201,162,74,.8),transparent)"></span></div>'+
+      '<div style="font-family:var(--ruh-font-display);font-weight:600;font-size:27px;line-height:1.05;color:var(--ink);text-shadow:var(--tsh)">Hoş geldin.</div>'+
+      '<p style="font-family:var(--ruh-font-ui);font-style:italic;font-size:13.5px;line-height:1.5;color:var(--ink2);margin:6px auto 0;max-width:250px;text-shadow:var(--tsh)">Bugün konakta hangi pencereden geçelim?</p></div>'+
+      '<div style="flex:none;display:flex;flex-direction:column;gap:22px;margin-top:34px"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px">'+ROOMS.slice(0,3).map(win).join('')+'</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px">'+ROOMS.slice(3).map(win).join('')+'</div></div>';
+  }
+  function header(title,sub,backLabel,backAct){return '<div style="flex:none;display:flex;align-items:center;gap:11px;margin-bottom:14px"><button class="backbtn" data-act="'+backAct+'"><span style="font-size:16px;line-height:1;margin-top:-1px">‹</span> '+backLabel+'</button><div style="min-width:0"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:21px;line-height:1.05;color:var(--ink);text-shadow:var(--tsh)">'+title+'</div><div style="font-family:var(--ruh-font-ui);font-style:italic;font-size:11.5px;color:var(--ink2);text-shadow:var(--tsh)">'+sub+'</div></div></div>';}
+
+  /* ===== ozel ===== */
+  function ozelHTML(){
+    if(S.ozelStep==='types'){
+      var profs=OZEL_PROFILES.map(function(p,i){var sel=i===S.ozelProfile;return '<button data-act="ozelProfile" data-i="'+i+'" style="position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:11px 4px;border-radius:14px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:14px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+'<span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ruh-font-display);font-weight:700;font-size:14.5px;color:var(--door-ink)">'+p[0]+'</span><span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ruh-font-ui);font-size:10px;color:var(--door-sub)">'+p[1]+'</span></button>';}).join('');
+      var types=OZEL_TYPES.map(function(t){return '<button class="typecard" data-act="ozelType" data-key="'+t[0]+'"><span class="med" style="width:40px;height:40px">'+icon(t[2],21,'var(--door-icon)',1.5)+'</span><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:15.5px;line-height:1.1;color:var(--door-ink)">'+t[1]+'</span></button>';}).join('');
+      return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 20px 40px">'+header('Salon','senin evin · kişisel okumalar','Konak','close')+'<div style="flex:1;min-height:0;display:flex;flex-direction:column;margin-bottom:18px"><div class="lab" style="margin:0 2px 13px">Kimin için?</div><div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:2px"><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">'+profs+'</div></div></div><div style="flex:none;margin-bottom:14px"><div class="lab" style="margin:0 2px 13px">Okuma Tipi</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+types+'</div></div></div>';
+    }
+    if(S.ozelStep==='reading')return readingHTML();
+    var subProf=OZEL_PROFILES[S.ozelProfile][0];var tArr=OZEL_TYPES.filter(function(t){return t[0]===S.ozelType;});var subType=tArr.length?tArr[0][1]:'';
+    var personas=OZEL_PERSONAS.map(function(p){var sel=p[0]===S.ozelPersona;return '<button data-act="ozelPersona" data-key="'+p[0]+'" style="position:relative;display:flex;flex-direction:row;align-items:center;gap:13px;text-align:left;cursor:pointer;padding:12px 14px;border-radius:18px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:18px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+'<span class="med">'+icon(p[2],24,p[3],1.5)+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="display:flex;align-items:baseline;gap:8px"><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:16px;color:var(--door-ink)">'+p[1]+'</span><span style="font-family:var(--ruh-font-ui);font-size:10.5px;font-weight:700;color:var(--gold)">'+p[4]+'</span></span><span style="font-family:var(--ruh-font-ui);font-style:italic;font-size:11.5px;line-height:1.35;color:var(--door-sub)">'+p[5]+'</span></span></button>';}).join('');
+    return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 20px 0">'+header('Yorumcu Seç',subType+' · '+subProf,'Salon','ozelBack')+'<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:10px 2px 14px;display:flex;flex-direction:column;gap:9px">'+personas+'</div><div style="flex:none;padding:12px 0 18px;background:linear-gradient(180deg,transparent,var(--bar-bg) 44%)"><button class="pill sendbtn" data-act="ozelGo" style="width:100%;display:flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:18px;font-size:15px">Yoruma Geç '+icon('chevron',17,'#FFF6EA',2.2)+'</button></div></div>';
+  }
+
+  /* ===== okuma ekranı (Kahve / El-Pati) ===== */
+  function initReading(){
+    var rc=RD_CONTENT[S.ozelType]||RD_CONTENT.kahve;
+    S.rdInput='';S.rdReplyIdx=0;S.rdPlaying=false;S.rdRecording=false;S.rdLightbox=false;S.rdThinking=false;S.rdDeck=null;S.rdTopic='';S.rdDream='';S.rdMode=0;S.rdSpread=null;S.rdCoffeeMode='upload';S.rdCardZoom=null;S.rdAstroSpecial=null;S.rdAstroGen=false;S.rdAstroTopic='';S.rdCompatPerson=null;S.rdCompatRel='Sevgili';S.rdFamily=[];
+    S.rdPhotos=rc.coffee?[false,false,false]:(rc.palm?[false]:[]);
+    if(rc.head==='tarot'){S.rdStage='spread';S.rdMessages=[];}
+    else if(rc.head==='photos'){S.rdStage='setup';S.rdMessages=[];}
+    else if(rc.head==='dream'||rc.head==='cast'){S.rdStage='setup';S.rdMessages=[];}
+    else if(rc.head==='modes'){S.rdStage='read';S.rdMessages=[{role:'reading',text:rc.modes[0][1]}];}
+    else{S.rdStage='read';S.rdMessages=(rc.open||[]).map(function(t){return {role:'reading',text:t};});}
+  }
+  function rdScrollDown(){var sc=el('rdScroll');if(sc)sc.scrollTop=sc.scrollHeight+400;}
+  function rdStartRead(rc,extra){S.rdStage='read';var msgs=[];if(extra)msgs.push({role:'user',text:extra});(rc.open||[]).forEach(function(t){msgs.push({role:'reading',text:t});});S.rdMessages=msgs;up();rdScrollDown();}
+  function disc(){return '<span style="font-family:var(--ruh-font-ui);font-style:italic;font-size:10.5px;line-height:1.4;color:var(--door-sub);text-align:center;display:block">Yapay zekâ ile üretilen, tamamen eğlence amaçlı bir içeriktir.</span>';}
+  function deckStyle(deck){
+    if(deck==='gilded')return {card:'background:linear-gradient(160deg,#3a2b56,#1f1733);border:2px solid #C9A24A;box-shadow:0 6px 16px rgba(20,12,34,.4),inset 0 0 0 1px rgba(201,162,74,.5)',inner:'background:rgba(201,162,74,.18);box-shadow:inset 0 0 0 1px rgba(201,162,74,.6)',icon:'#E6C173'};
+    return {card:'background:linear-gradient(160deg,#FBF4E6,#EFE2CC);border:2px solid #B98F3C;box-shadow:0 6px 16px rgba(74,47,90,.18),inset 0 0 0 1px rgba(201,162,74,.45)',inner:'background:rgba(201,162,74,.14);box-shadow:inset 0 0 0 1px rgba(201,162,74,.45)',icon:'#8A6A28'};
+  }
+  function rdHeaderHtml(rc,pName,prof){return '<div style="position:absolute;top:58px;left:16px;right:16px;z-index:30;display:flex;align-items:center;gap:11px"><button class="backbtn" data-act="rdBack"><span style="font-size:16px;line-height:1;margin-top:-1px">‹</span> Salon</button><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:18px;line-height:1.05;color:var(--ink);text-shadow:var(--tsh)">'+pName+'</span><span style="font-family:var(--ruh-font-ui);font-size:11px;color:var(--ink2);text-shadow:var(--tsh)">'+prof+' · '+rc.label+'</span></div><button class="pill" data-act="rdFinish" style="flex:none;padding:8px 15px;background:transparent;border:1px solid var(--door-border);font-size:12px;color:var(--door-ink);font-weight:700">Bitir</button></div>';}
+  function ichingHexHTML(lines,color,changing){changing=changing||[];return '<div style="display:flex;flex-direction:column;gap:7px;width:104px">'+lines.map(function(v,i){var mk=changing.indexOf(i)!==-1;var dot=mk?'<span style="flex:none;width:6px;height:6px;border-radius:999px;background:#fff;box-shadow:0 0 6px '+color+'"></span>':'<span style="flex:none;width:6px"></span>';var bars=v===1?'<div style="flex:1;height:9px;border-radius:3px;background:'+color+'"></div>':'<div style="flex:1;display:flex;gap:8px"><div style="flex:1;height:9px;border-radius:3px;background:'+color+'"></div><div style="flex:1;height:9px;border-radius:3px;background:'+color+'"></div></div>';return '<div style="display:flex;align-items:center;gap:6px">'+bars+dot+'</div>';}).join('')+'</div>';}
+  function rdHead(rc){
+    if(rc.head==='photos'){
+    if(rc.coffee&&S.rdCoffeeMode==='ai')return '<div style="text-align:center;font-family:var(--ruh-font-ui);font-style:italic;font-size:11.5px;color:var(--door-sub)">Senin niyetine içildi; fotoğrafsız okundu.</div>';
+    return '<div style="display:flex;gap:8px;justify-content:center">'+rc.photos.map(function(l){return '<button data-act="rdPhoto" style="flex:none;width:74px;position:relative;cursor:pointer;aspect-ratio:1;border-radius:14px;overflow:hidden;border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft);padding:0;background:repeating-linear-gradient(135deg,rgba(201,162,74,.16) 0 6px,rgba(201,162,74,.06) 6px 12px)"><span style="position:absolute;inset:0;display:grid;place-items:center;font-size:9px;color:var(--door-sub)">'+l+'</span><span style="position:absolute;bottom:5px;right:5px;display:grid;place-items:center;width:20px;height:20px;border-radius:7px;background:rgba(40,28,44,.58)">'+icon('search',12,'#FFF6EA',1.8)+'</span></button>';}).join('')+'</div><span style="font-family:var(--ruh-font-ui);font-size:10px;color:var(--door-sub);text-align:center;display:block;margin-top:5px">Büyütmek için dokun</span>';}
+    if(rc.head==='modes'){var per=rc.modes.map(function(m,i){var on=(S.rdAstroSpecial==null&&i===S.rdMode);return '<button data-act="rdMode" data-i="'+i+'" class="pill" style="padding:7px 13px;font-size:12px;font-weight:700;'+(on?'background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow);color:#FFF6EA':'background:var(--door-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">'+m[0]+'</button>';}).join('');var sp=(rc.specials||[]).map(function(s){var on=S.rdAstroSpecial===s[0];return '<button data-act="rdAstroSpecial" data-key="'+s[0]+'" class="pill" style="padding:7px 13px;font-size:12px;font-weight:700;'+(on?'background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow);color:#FFF6EA':'background:var(--door-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">'+s[1]+'</button>';}).join('');return '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">'+per+sp+'</div>';}
+    if(rc.head==='numero')return '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+rc.cores.map(function(c){return '<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;border-radius:13px;background:var(--door-bg);border:1px solid var(--door-border)"><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:22px;color:var(--gold)">'+c[1]+'</span><span style="font-family:var(--ruh-font-ui);font-size:9.5px;color:var(--door-sub);text-align:center">'+c[0]+'</span></div>';}).join('')+'</div>';
+    if(rc.head==='cast'){
+      if(rc.cast==='iching'){return '<div style="display:flex;justify-content:center;align-items:flex-start;gap:16px;padding:6px 0"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;max-width:120px">'+ichingHexHTML(rc.hexa,'var(--door-icon)',rc.changing||[])+'<span style="font-family:var(--ruh-font-display);font-weight:700;font-size:13px;color:var(--door-icon);text-align:center">'+rc.castName+'</span></div>'+(rc.futureLines?'<span style="color:var(--door-sub);font-size:22px;margin-top:30px">→</span><div style="display:flex;flex-direction:column;align-items:center;gap:8px;max-width:120px">'+ichingHexHTML(rc.futureLines,'#C98B7A',[])+'<span style="font-family:var(--ruh-font-display);font-weight:700;font-size:13px;color:#C98B7A;text-align:center">'+rc.futureName+'</span></div>':'')+'</div>';}
+      return '<div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;padding:4px 0">'+rc.runes.map(function(rn){return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;max-width:92px"><div style="width:46px;height:56px;display:grid;place-items:center;border-radius:12px;background:var(--door-bg);border:1px solid var(--door-border);font-size:26px;color:var(--door-icon)">'+rn[0]+'</div><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:12.5px;color:var(--ruh-ink-plum)">'+rn[1]+'</span><span style="font-family:var(--ruh-font-ui);font-size:10.5px;color:var(--door-sub)">'+rn[2]+'</span></div>';}).join('')+'</div>';
+    }
+    if(rc.head==='tarot'){var ds=deckStyle(S.rdDeck);var sp=S.rdSpread;if(!sp)return '';var contH=Math.round(sp.gr*44)+6;var cards=sp.pos.map(function(p,i){var c=TAROT_POOL[i%TAROT_POOL.length];var x=((p[0]-0.5)/sp.gc)*100;var y=((p[1]-0.5)/sp.gr)*100;var rot=p[2]?' rotate(90deg)':'';var z=p[2]?3:2;return '<button data-act="rdCardZoom" data-i="'+i+'" style="position:absolute;left:'+x+'%;top:'+y+'%;transform:translate(-50%,-50%)'+rot+';z-index:'+z+';width:30px;height:44px;border-radius:6px;display:grid;place-items:center;cursor:pointer;padding:0;'+ds.card+'"><span style="position:absolute;top:1px;left:3px;font-family:var(--ruh-font-ui);font-size:8px;font-weight:800;color:'+ds.icon+'">'+(i+1)+'</span>'+icon(c[1],15,ds.icon,1.5)+'</button>';}).join('');return '<div style="position:relative;width:100%;height:'+contH+'px;margin:2px 0 4px">'+cards+'</div><span style="font-family:var(--ruh-font-ui);font-size:10px;color:var(--door-sub);text-align:center;display:block">'+sp.title+' · büyütmek için karta dokun</span>';}
+    return '';
+  }
+  function rdReadPage(rc){
+    var msgs=S.rdMessages.map(function(m){return m.role==='user'?'<div style="display:flex;justify-content:flex-end"><div style="max-width:80%;padding:10px 15px;border-radius:18px 18px 6px 18px;background:var(--bubble-bg,rgba(201,162,74,.16));border:1px solid rgba(201,162,74,.42);font-family:var(--ruh-font-ui);font-size:14px;line-height:1.45;color:var(--door-ink)">'+esc(m.text)+'</div></div>':'<p style="margin:0;font-family:var(--ruh-font-ui);font-size:16px;line-height:1.64;color:var(--ink);text-shadow:var(--tsh);overflow-wrap:anywhere">'+esc(m.text)+'</p>';}).join('');
+    var thinking=S.rdThinking?'<div style="display:flex;align-items:center;gap:6px;padding:2px"><span data-anim style="width:7px;height:7px;border-radius:999px;background:var(--door-icon);animation:ruhEq .9s ease-in-out infinite"></span><span data-anim style="width:7px;height:7px;border-radius:999px;background:var(--door-icon);animation:ruhEq .9s ease-in-out .2s infinite"></span><span data-anim style="width:7px;height:7px;border-radius:999px;background:var(--door-icon);animation:ruhEq .9s ease-in-out .4s infinite"></span></div>':'';
+    var playInner=S.rdPlaying?('<span data-anim style="display:flex;align-items:flex-end;gap:2px;height:11px"><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out infinite"></span><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out .25s infinite"></span><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out .5s infinite"></span></span> Duraklat'):(icon('speaker',14,'var(--door-icon)',1.6)+' Telefona Okut');
+    var pf=OZEL_PERSONAS.filter(function(p){return p[0]===S.ozelPersona;});var pName=pf.length?pf[0][1]:'Suzan';
+    return '<div style="position:absolute;top:108px;left:14px;right:14px;bottom:90px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);overflow:hidden;display:flex;flex-direction:column">'+
+      '<div style="flex:none;display:flex;flex-direction:column;gap:9px;padding:15px 16px 10px"><div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold)">'+rc.title+'</div>'+disc()+rdHead(rc)+'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="pill" data-act="rdPlay" style="display:flex;align-items:center;gap:7px;padding:6px 13px 6px 10px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft);font-size:11px;color:var(--door-ink);font-weight:700">'+playInner+'</button><span style="display:inline-flex;align-items:center;gap:6px;margin-left:auto;padding:6px 11px;border-radius:999px;border:1px dashed var(--door-border);font-family:var(--ruh-font-ui);font-size:11px;font-weight:700;color:var(--door-sub)">'+(RD_DATIVE[pName]||pName+"'a")+' Okut <span style="font-size:7.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7A5A12;background:rgba(232,201,138,.7);padding:1px 5px;border-radius:999px">Yakında</span></span></div></div>'+
+      '<div id="rdScroll" class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:14px 18px 18px;display:flex;flex-direction:column;gap:14px;border-top:1px solid rgba(201,162,74,.2)">'+msgs+thinking+'</div>'+
+    '</div>';
+  }
+  function rdInputBar(){return '<div style="position:absolute;left:0;right:0;bottom:0;z-index:35;padding:12px 14px 16px;background:linear-gradient(180deg,transparent,var(--bar-bg) 38%)"><div style="display:flex;align-items:flex-end;gap:8px;padding:7px 8px;border-radius:26px;border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-card);background:var(--input-bg,var(--field-bg))"><button data-act="rdMic" style="flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;cursor:pointer;background:var(--mic-bg,var(--field-bg));border:1px solid var(--door-border)">'+icon('mic',22,S.rdRecording?'#E66':'var(--door-icon)',1.6)+'</button><textarea id="rdInput" data-act="rdType" rows="1" placeholder="Bir şey sor…" style="flex:1;min-width:0;resize:none;border:none;outline:none;background:transparent;font-family:var(--ruh-font-ui);font-size:15px;line-height:1.4;color:var(--ink);max-height:80px;height:38px;padding:8px 4px">'+esc(S.rdInput||'')+'</textarea><button data-act="rdSend" style="flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;cursor:pointer;background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow)">'+icon('send',22,'#FFF6EA',1.7)+'</button></div></div>';}
+  function rdPhotoSetup(rc){
+    var coffee=!!rc.coffee;
+    var slots;
+    if(coffee&&S.rdCoffeeMode==='ai'){slots='<div style="text-align:center;font-family:var(--ruh-font-ui);font-style:italic;font-size:13px;color:var(--ruh-text-secondary);padding:8px 0">Senin niyetine içip bakıyoruz; fotoğraf gerekmiyor.</div>';}
+    else{slots='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+S.rdPhotos.map(function(up,i){return '<button data-act="rdPhotoSlot" data-i="'+i+'" style="flex:none;width:80px;aspect-ratio:1;border-radius:14px;cursor:pointer;display:grid;place-items:center;border:1px solid '+(up?'var(--door-icon)':'var(--door-border)')+';background:'+(up?'rgba(201,162,74,.16)':'var(--field-bg)')+'">'+(up?icon('star',24,'var(--door-icon)',1.6):icon('plus',24,'var(--door-sub)',1.8))+'</button>';}).join('')+'</div><span style="font-family:var(--ruh-font-ui);font-size:10.5px;color:var(--door-sub);text-align:center;display:block">'+(coffee?'Fincan ve tabak görsellerini ekle':'El ya da pati görselini ekle')+'</span>';}
+    var modeRow=coffee?'<div style="display:flex;gap:8px"><button data-act="rdCoffeeMode" data-v="upload" class="pill" style="flex:1;padding:11px;font-size:12.5px;font-weight:700;'+(S.rdCoffeeMode==='upload'?'background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow);color:#FFF6EA':'background:var(--field-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">Fotoğraf yükle</button><button data-act="rdCoffeeMode" data-v="ai" class="pill" style="flex:1;padding:11px;font-size:12.5px;font-weight:700;'+(S.rdCoffeeMode==='ai'?'background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow);color:#FFF6EA':'background:var(--field-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">Benim yerime iç</button></div>':'';
+    return '<div class="ruh-scroll" style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;gap:13px;padding:18px;overflow-y:auto">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold)">'+rc.title+'</div>'+disc()+
+      '<div class="lab2">Konu / soru (opsiyonel)</div><textarea id="rdTopic" data-act="rdTopicType" placeholder="Aklındaki konuyu yazabilirsin…" style="width:100%;box-sizing:border-box;min-height:60px;resize:none;border:1px solid var(--door-border);border-radius:14px;background:var(--field-bg);font-family:var(--ruh-font-ui);font-size:14px;line-height:1.5;color:var(--ink);padding:12px;outline:none">'+esc(S.rdTopic||'')+'</textarea>'+
+      modeRow+slots+
+      '<button class="pill sendbtn" data-act="rdStartReading" style="padding:14px;border-radius:16px;font-size:15px;margin-top:8px">Okumamı Başlat</button></div>';
+  }
+  function rdSetupPage(rc){
+    if(rc.head==='photos')return rdPhotoSetup(rc);
+    var isDream=rc.head==='dream';
+    var title=isDream?'Rüyanı Anlat':'Niyetini Tut';
+    var ph=isDream?rc.prompt:'Bir konu ya da soru yaz; istersen boş bırak.';
+    var btn=isDream?'Yorumla':'Okumaya başla';
+    var act=isDream?'rdDreamGo':'rdCastGo';
+    var taId=isDream?'rdDream':'rdTopic';var taAct=isDream?'rdDreamType':'rdTopicType';
+    var val=isDream?(S.rdDream||''):(S.rdTopic||'');
+    return '<div style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;padding:18px">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold);margin-bottom:8px">'+rc.title+'</div>'+disc()+
+      '<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:14px"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:20px;color:var(--ink);text-align:center;text-shadow:var(--tsh)">'+title+'</div><textarea id="'+taId+'" data-act="'+taAct+'" placeholder="'+esc(ph)+'" style="width:100%;box-sizing:border-box;min-height:120px;resize:none;border:1px solid var(--door-border);border-radius:16px;background:var(--field-bg);font-family:var(--ruh-font-ui);font-size:15px;line-height:1.5;color:var(--ink);padding:13px;outline:none">'+esc(val)+'</textarea><button class="pill sendbtn" data-act="'+act+'" style="padding:14px;border-radius:16px;font-size:15px">'+btn+'</button></div></div>';
+  }
+  function rdDeckPage(rc){
+    function deckCard(v,name,desc){var ds=deckStyle(v);return '<button data-act="rdDeck" data-v="'+v+'" style="flex:1;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px 12px;border-radius:20px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)"><div style="width:62px;height:94px;border-radius:10px;display:grid;place-items:center;'+ds.card+'"><div style="display:grid;place-items:center;width:38px;height:38px;border-radius:8px;'+ds.inner+'">'+icon('star',20,ds.icon,1.5)+'</div></div><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:15px;color:var(--door-ink);text-align:center">'+name+'</span><span style="font-family:var(--ruh-font-ui);font-size:10.5px;line-height:1.35;color:var(--door-sub);text-align:center">'+desc+'</span></button>';}
+    return '<div style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;padding:18px">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold);margin-bottom:8px">'+rc.title+'</div>'+disc()+
+      '<div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:14px"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:20px;color:var(--ink);text-align:center;text-shadow:var(--tsh)">Deste Seç</div><div style="display:flex;gap:12px">'+deckCard('rw','Rider-Waite Klasik','Klasik sembol dili, tanıdık ikonografi; kart kenarı ve fonu sade.')+deckCard('gilded','Yaldızlı Düşler','Daha parlak, mistik ve masalsı; yaldızlı çerçeve, koyu fon.')+'</div></div></div>';
+  }
+  function rdSpreadPage(rc){
+    var title='Açılım Seç';
+    var rows=TAROT_SPREADS_DATA.map(function(s){return '<button data-act="rdSpread" data-key="'+s.key+'" style="display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;padding:13px 15px;border-radius:16px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)"><span style="flex:none;height:38px;padding:0 11px;border-radius:11px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring);font-family:var(--ruh-font-display);font-weight:700;font-size:13px;color:var(--gold);white-space:nowrap">'+s.n+' kart</span><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:15px;color:var(--door-ink)">'+s.title+'</span><span style="margin-left:auto;opacity:.5">'+icon('chevron',15,'var(--door-ink)',2)+'</span></button>';}).join('');
+    return '<div style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;padding:18px">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold);margin-bottom:6px">'+rc.title+'</div><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:19px;color:var(--ink);text-align:center;text-shadow:var(--tsh);margin-bottom:10px">'+title+'</div>'+
+      '<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:2px">'+rows+'</div></div>';
+  }
+  function rdAstroSetup(rc){
+    var form='';var btn='Yorumla';
+    if(S.rdAstroSpecial==='topic'){
+      form='<div class="lab2" style="margin:0 0 6px 2px">Yorumlanacak konu</div><textarea id="rdAstroTopic" data-act="rdAstroTopicType" placeholder="Örn. iş değişikliği, bir ilişki, taşınma…" style="width:100%;box-sizing:border-box;min-height:96px;resize:none;border:1px solid var(--door-border);border-radius:14px;background:var(--field-bg);font-family:var(--ruh-font-ui);font-size:15px;line-height:1.5;color:var(--ink);padding:13px;outline:none">'+esc(S.rdAstroTopic||'')+'</textarea>';
+    } else if(S.rdAstroSpecial==='compat'){
+      btn='Uyumu Yorumla';
+      var pc=OZEL_PROFILES.map(function(p,i){var on=S.rdCompatPerson===i;return '<button data-act="rdCompatPerson" data-i="'+i+'" class="pill" style="padding:8px 13px;font-size:12.5px;font-weight:700;'+(on?'background:var(--send-bg);border:1px solid var(--send-border);color:#FFF6EA':'background:var(--door-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">'+p[0]+'</button>';}).join('');
+      var rels=['Sevgili','Eş','Arkadaş','İş ortağı','Aile','Diğer'];var opt=rels.map(function(rl){return '<option value="'+rl+'"'+(rl===S.rdCompatRel?' selected':'')+'>'+rl+'</option>';}).join('');
+      form='<div class="lab2" style="margin:0 0 6px 2px">Kiminle?</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+pc+'</div><div class="lab2" style="margin:12px 0 6px 2px">İlişki türü</div><select class="fld sel" data-act="rdCompatRel">'+opt+'</select>';
+    } else {
+      btn='Aileyi Yorumla';
+      var fc=OZEL_PROFILES.map(function(p,i){var on=S.rdFamily.indexOf(i)!==-1;return '<button data-act="rdFamilyToggle" data-i="'+i+'" class="pill" style="padding:8px 13px;font-size:12.5px;font-weight:700;'+(on?'background:var(--send-bg);border:1px solid var(--send-border);color:#FFF6EA':'background:var(--door-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">'+p[0]+'</button>';}).join('');
+      form='<div class="lab2" style="margin:0 0 6px 2px">Aileye kimleri dâhil edelim?</div><div style="display:flex;gap:7px;flex-wrap:wrap">'+fc+'</div>';
+    }
+    return '<div class="ruh-scroll" style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;gap:13px;padding:16px;overflow-y:auto">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold)">'+rc.title+'</div>'+disc()+rdHead(rc)+
+      '<div>'+form+'</div>'+
+      '<button class="pill sendbtn" data-act="rdAstroGen" style="padding:14px;border-radius:16px;font-size:15px;margin-top:6px">'+btn+'</button></div>';
+  }
+  function rdTarotIntentPage(rc){
+    return '<div class="ruh-scroll" style="position:absolute;top:108px;left:14px;right:14px;bottom:24px;z-index:20;border-radius:26px;background:var(--page-bg,linear-gradient(180deg,rgba(255,251,246,.6),rgba(251,244,236,.5)));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);display:flex;flex-direction:column;gap:13px;padding:16px;overflow-y:auto">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:15px;letter-spacing:.16em;color:var(--gold)">'+rc.title+'</div>'+disc()+rdHead(rc)+
+      '<div class="lab2" style="margin:4px 0 2px 2px">Aklında bir soru var mı? (opsiyonel)</div><textarea id="rdTopic" data-act="rdTopicType" placeholder="İstersen bir konu ya da soru yaz; boş da bırakabilirsin." style="width:100%;box-sizing:border-box;min-height:78px;resize:none;border:1px solid var(--door-border);border-radius:14px;background:var(--field-bg);font-family:var(--ruh-font-ui);font-size:15px;line-height:1.5;color:var(--ink);padding:13px;outline:none">'+esc(S.rdTopic||'')+'</textarea>'+
+      '<button class="pill sendbtn" data-act="rdTarotGo" style="padding:14px;border-radius:16px;font-size:15px;margin-top:4px">Açılımı Yorumla</button></div>';
+  }
+  function readingHTML(){
+    var rc=RD_CONTENT[S.ozelType]||RD_CONTENT.kahve;
+    var pf=OZEL_PERSONAS.filter(function(p){return p[0]===S.ozelPersona;});var pName=pf.length?pf[0][1]:'Suzan';
+    var prof=OZEL_PROFILES[S.ozelProfile][0];
+    var rec=S.rdRecording?'<div style="position:absolute;left:50%;bottom:104px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;background:rgba(40,28,44,.92);box-shadow:0 10px 28px rgba(74,47,90,.34);white-space:nowrap"><span style="width:9px;height:9px;border-radius:999px;background:#E66"></span><span style="font-family:var(--ruh-font-ui);font-size:12px;font-weight:700;color:#FFF5E8">Dinliyorum… bırakınca yazacağım</span></div>':'';
+    var body;
+    if(S.rdStage==='spread')body=rdSpreadPage(rc);
+    else if(S.rdStage==='deck')body=rdDeckPage(rc);
+    else if(S.rdStage==='tarotIntent')body=rdTarotIntentPage(rc);
+    else if(S.rdStage==='setup')body=rdSetupPage(rc);
+    else if(rc.head==='modes'&&S.rdAstroSpecial&&!S.rdAstroGen)body=rdAstroSetup(rc)+rec;
+    else body=rdReadPage(rc)+rec+rdInputBar();
+    return '<div style="position:absolute;inset:0">'+rdHeaderHtml(rc,pName,prof)+body+'</div>';
+  }
+
+  /* ===== feed (Salon) ===== */
+  function feedHTML(r){
+    var items=SALON_ITEMS.map(function(it){return '<button class="typecard" data-act="toast" data-msg="'+r.title+'  ›  '+it[0]+'" style="width:238px;max-width:80%"><span class="med" style="width:46px;height:46px">'+icon(it[1],24,'var(--door-icon)',1.5)+'</span><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:16px;color:var(--door-ink)">'+it[0]+'</span></button>';}).join('');
+    return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 20px 26px">'+header(r.title,'Konakta neler oluyor','Konak','close')+'<div style="flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px">'+items+'</div></div>';
+  }
+
+  /* ===== ikram ===== */
+  function ikramHTML(){
+    var profs=IK_PROFILES.map(function(p,i){var sel=i===S.ikProfile;return '<button data-act="ikProfile" data-i="'+i+'" style="position:relative;flex:none;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;padding:9px 15px;border-radius:14px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:14px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+'<span style="font-family:var(--ruh-font-display);font-weight:700;font-size:14px;color:var(--door-ink);white-space:nowrap">'+p[0]+'</span><span style="font-family:var(--ruh-font-ui);font-size:9.5px;color:var(--door-sub);white-space:nowrap">'+p[1]+'</span></button>';}).join('');
+    var cards=IK_CARDS.map(function(c){return '<button class="ruh-card typecard" data-act="ikCard" data-key="'+c[0]+'" style="min-height:60px"><span class="med" style="width:40px;height:40px">'+icon(c[2],21,'var(--door-icon)',1.5)+'</span><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:14.5px;line-height:1.12;color:var(--door-ink);white-space:pre-line">'+c[1]+'</span></button>';}).join('');
+    return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 18px 18px">'+header('İkram Masası','günün ikramları · genel okumalar','Konak','close')+
+      '<div style="flex:none;margin-bottom:16px"><div class="lab" style="margin:0 2px 12px">Kimin için?</div><div id="ikProfRow" class="ruh-xrow" style="display:flex;gap:8px;overflow-x:auto;padding:2px">'+profs+'</div><div style="margin:9px 4px 0;height:4px;border-radius:999px;background:rgba(201,162,74,.16)"><div id="ikProfThumb" style="height:100%;width:34%;border-radius:999px;background:rgba(201,162,74,.55);transition:margin-left .12s linear"></div></div></div>'+
+      '<div class="lab" style="flex:none;margin:0 2px 12px">Okuma Tipleri</div><div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:2px 2px 6px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+cards+'</div></div></div>';
+  }
+  function ikSheetHTML(){
+    var cArr=IK_CARDS.filter(function(c){return c[0]===S.ikCard;});if(!cArr.length)return '';var c=cArr[0];var kind=c[3];
+    var body='';
+    if(kind==='daisy'){
+      body='<div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:6px 0 4px"><p style="margin:0;text-align:center;font-family:var(--ruh-font-ui);font-size:13px;line-height:1.5;color:var(--ruh-text-secondary)">Aklındaki soruyu tut, yaprakları tek tek kopar.</p><div id="ikDaisy" style="position:relative;width:150px;height:150px"></div><div id="ikDaisyWord" style="font-family:var(--ruh-font-display);font-weight:700;font-size:30px;letter-spacing:.04em;color:var(--ruh-ink-plum);min-height:38px"></div><button class="pill" data-act="ikNewDaisy" style="padding:11px 22px;border:1px solid var(--door-border);background:var(--door-bg);font-size:13px;color:var(--door-ink);font-weight:700">Yeni Papatya</button></div>';
+    } else if(kind==='compat'){
+      var optsA=IK_SIGNS.map(function(s){return '<option value="'+s+'"'+(s===S.ikSignA?' selected':'')+'>'+s+'</option>';}).join('');
+      var optsB=IK_SIGNS.map(function(s){return '<option value="'+s+'"'+(s===S.ikSignB?' selected':'')+'>'+s+'</option>';}).join('');
+      var optsR=IK_REL_TYPES.map(function(s){return '<option value="'+s+'"'+(s===S.ikRelType?' selected':'')+'>'+s+'</option>';}).join('');
+      var match='';
+      if(S.ikMatchText){
+        var subs=S.ikMatchSubs.map(function(st){return '<div style="display:flex;align-items:center;gap:8px"><span style="flex:none;width:56px;font-family:var(--ruh-font-ui);font-size:11px;font-weight:700;color:var(--door-ink)">'+st[0]+'</span><div style="flex:1;height:6px;border-radius:999px;background:rgba(201,162,74,.16);overflow:hidden"><div data-statbar data-pct="'+st[1]+'" style="height:100%;width:0;border-radius:999px"></div></div><span data-statpct data-pct="'+st[1]+'" style="flex:none;width:34px;text-align:right;font-family:var(--ruh-font-ui);font-size:11px;font-weight:800">%'+st[1]+'</span></div>';}).join('');
+        match='<div style="display:flex;align-items:center;gap:14px;margin-top:2px"><div style="flex:none;width:80px;height:80px;border-radius:999px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring)"><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:25px;color:var(--gold)">%'+S.ikMatchPct+'</span></div><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">'+subs+'</div></div><p style="margin:6px 0 0;font-family:var(--ruh-font-ui);font-size:14px;line-height:1.56;color:var(--ruh-text-secondary)">'+esc(S.ikMatchText)+'</p>';
+      }
+      body='<div style="display:flex;flex-direction:column;gap:13px"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div class="lab2" style="margin:0 0 6px 2px">1. Kişi</div><select class="fld sel" data-act="ikSignA">'+optsA+'</select></div><div style="flex:1;min-width:0"><div class="lab2" style="margin:0 0 6px 2px">2. Kişi</div><select class="fld sel" data-act="ikSignB">'+optsB+'</select></div></div><div><div class="lab2" style="margin:0 0 6px 2px">İlişki türü</div><select class="fld sel" data-act="ikRelType">'+optsR+'</select></div><button class="pill sendbtn" data-act="ikShowMatch" style="padding:13px;border-radius:14px;font-size:14px">Uyumu Göster</button>'+match+'</div>';
+    } else if(kind==='iching'){
+      body='<div style="display:flex;flex-direction:column;gap:13px;padding:2px 0"><div style="text-align:center;font-family:\'Cinzel\',serif;font-weight:600;font-size:11px;letter-spacing:.18em;color:var(--gold)">GÜNÜN HEXAGRAMI</div><div style="display:flex;justify-content:center;align-items:flex-start;gap:16px"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;max-width:120px">'+ichingHexHTML(IK_HEXA[1][1],'var(--door-icon)',[0])+'<span style="font-family:var(--ruh-font-display);font-weight:700;font-size:12.5px;color:var(--door-icon);text-align:center">'+IK_HEXA[1][0]+'</span></div><span style="color:var(--door-sub);font-size:22px;margin-top:30px">→</span><div style="display:flex;flex-direction:column;align-items:center;gap:8px;max-width:120px">'+ichingHexHTML(IK_HEXA[0][1],'#C98B7A',[])+'<span style="font-family:var(--ruh-font-display);font-weight:700;font-size:12.5px;color:#C98B7A;text-align:center">'+IK_HEXA[0][0]+'</span></div></div><p style="margin:0;font-family:var(--ruh-font-ui);font-size:15px;line-height:1.6;color:var(--ruh-ink-plum)">'+IK_HEXA[1][2]+'</p><div style="display:flex;align-items:flex-start;gap:9px;padding:11px 13px;border-radius:14px;background:rgba(201,162,74,.12);border:1px solid rgba(201,162,74,.3)"><span style="flex:none;font-family:var(--ruh-font-ui);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);padding-top:2px">Bugün</span><span style="font-family:var(--ruh-font-ui);font-size:13.5px;line-height:1.5;color:var(--ruh-ink-plum)">'+IK_HEXA[1][3]+'</span></div></div>';
+    } else {
+      var astro=kind==='astro';
+      var stats='';
+      if(astro){var arr=IK_ASTRO_STATS[S.ikCard]||[];stats='<div style="display:flex;flex-direction:column;gap:9px;margin:0 0 16px">'+arr.map(function(st){return '<div style="display:flex;align-items:center;gap:10px"><span style="flex:none;width:62px;font-family:var(--ruh-font-ui);font-size:12px;font-weight:700;color:var(--door-ink)">'+st[0]+'</span><div style="flex:1;height:7px;border-radius:999px;background:rgba(201,162,74,.16);overflow:hidden"><div data-statbar data-pct="'+st[1]+'" style="height:100%;width:0;border-radius:999px"></div></div><span data-statpct data-pct="'+st[1]+'" style="flex:none;width:40px;text-align:right;font-family:var(--ruh-font-ui);font-size:12.5px;font-weight:800">%'+st[1]+'</span></div>';}).join('')+'</div>';}
+      var playInner=S.ikPlaying?('<span data-anim style="display:flex;align-items:flex-end;gap:2px;height:13px"><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out infinite"></span><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out .25s infinite"></span><span style="width:3px;background:var(--door-icon);border-radius:1px;height:100%;transform-origin:bottom;animation:ruhEq .8s ease-in-out .5s infinite"></span></span> Duraklat'):(icon('speaker',16,'var(--door-icon)',1.6)+' Telefon Okusun');
+      var kis=astro?'<button class="pill" data-act="ikPersonal" style="display:flex;align-items:center;gap:6px;padding:9px 15px;background:transparent;border:1px solid var(--send-border);font-size:12.5px;color:var(--gold)">Kişiye Özel '+icon('chevron',14,'var(--gold)',2.2)+'</button>':'';
+      body='<p style="margin:0 0 14px;font-family:var(--ruh-font-display);font-size:16px;line-height:1.62;color:var(--ruh-ink-plum)">'+esc(IK_RESULTS[S.ikCard]||'')+'</p>'+stats+'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><button class="pill" data-act="ikPlay" style="display:flex;align-items:center;gap:8px;padding:9px 15px 9px 12px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft);font-size:12.5px;color:var(--door-ink);font-weight:700">'+playInner+'</button>'+kis+'</div>';
+    }
+    return '<div data-act="ikClose" style="position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:26px;background:rgba(24,16,32,.46);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)"><div data-act="noop" style="position:relative;width:100%;max-width:320px;max-height:78%;display:flex;flex-direction:column;padding:18px 20px 22px;border-radius:28px;background:var(--ruh-glass-strong);border:1px solid rgba(201,162,74,.42);box-shadow:var(--ruh-shadow-lift);animation:ruhSheet .42s var(--ruh-ease) both"><div style="flex:none;display:flex;align-items:center;gap:12px;margin-bottom:6px"><span class="med">'+icon(c[2],24,'var(--door-icon)',1.5)+'</span><div style="min-width:0;flex:1"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:18px;line-height:1.1;color:var(--ruh-ink-plum);white-space:pre-line">'+c[1]+'</div><div style="font-family:var(--ruh-font-ui);font-size:11px;color:var(--door-sub)">'+IK_PROFILES[S.ikProfile][0]+' için</div></div><button data-act="ikClose" style="flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:999px;cursor:pointer;background:transparent;border:1px solid var(--door-border)">'+icon('close',16,'var(--door-ink)',2)+'</button></div><div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:10px 2px 4px">'+body+'</div></div></div>';
+  }
+  function buildDaisy(){
+    var host=el('ikDaisy');if(!host||host.dataset.built)return;host.dataset.built='1';host.innerHTML='';
+    var word=el('ikDaisyWord');if(word)word.textContent='';
+    var N=12,cx=75,cy=75,R=48,ns='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 150 150');svg.setAttribute('width','150');svg.setAttribute('height','150');
+    var petals=[];
+    for(var i=0;i<N;i++){var ang=(i/N)*Math.PI*2;var px=cx+Math.cos(ang)*R,py=cy+Math.sin(ang)*R;var p=document.createElementNS(ns,'ellipse');p.setAttribute('cx',px);p.setAttribute('cy',py);p.setAttribute('rx','7');p.setAttribute('ry','17');p.setAttribute('fill','#FBF4E6');p.setAttribute('stroke','rgba(201,162,74,0.5)');p.setAttribute('stroke-width','1');p.setAttribute('transform','rotate('+(ang*180/Math.PI+90)+' '+px+' '+py+')');p.style.cursor='pointer';p.style.transition='opacity .25s';svg.appendChild(p);petals.push(p);}
+    var core=document.createElementNS(ns,'circle');core.setAttribute('cx',cx);core.setAttribute('cy',cy);core.setAttribute('r','17');core.setAttribute('fill','#E8C98A');core.setAttribute('stroke','rgba(201,162,74,0.6)');core.setAttribute('stroke-width','1.5');core.style.cursor='pointer';svg.appendChild(core);
+    host.appendChild(svg);
+    var idx=0,words=['EVET','HAYIR'];
+    function pluck(){if(idx>=petals.length)return;var p=petals[idx];p.style.setProperty('--px',(Math.random()*50-25)+'px');p.style.setProperty('--pr',(Math.random()*120-60)+'deg');if(S.motion)p.style.animation='ruhPetal .7s ease-in forwards';else p.style.opacity='0';p.style.pointerEvents='none';var w=el('ikDaisyWord');if(w)w.textContent=words[idx%2];idx++;}
+    petals.forEach(function(p){p.addEventListener('click',pluck);});core.addEventListener('click',pluck);
+  }
+  function ikSetIching(val){var idx=Math.round((val/100)*(IK_HEXA.length-1));S.ikIchingVal=val;S.ikIchingIdx=idx;var h=IK_HEXA[idx];var ln=el('ikIchingLines');if(ln){ln.innerHTML=h[1].map(function(v){return v===1?'<div style="height:9px;border-radius:3px;background:var(--door-icon)"></div>':'<div style="display:flex;gap:9px"><div style="flex:1;height:9px;border-radius:3px;background:var(--door-icon)"></div><div style="flex:1;height:9px;border-radius:3px;background:var(--door-icon)"></div></div>';}).join('');}var nm=el('ikIchingName');if(nm)nm.textContent=h[0];var tx=el('ikIchingText');if(tx)tx.textContent=h[2];var td=el('ikIchingToday');if(td)td.textContent=h[3]||'';}
+  function ikRenderIching(){var h=IK_HEXA[S.ikIchingIdx]||IK_HEXA[1];var ln=el('ikIchingLines');if(ln){ln.innerHTML=h[1].map(function(v){return v===1?'<div style="height:9px;border-radius:3px;background:var(--door-icon)"></div>':'<div style="display:flex;gap:9px"><div style="flex:1;height:9px;border-radius:3px;background:var(--door-icon)"></div><div style="flex:1;height:9px;border-radius:3px;background:var(--door-icon)"></div></div>';}).join('');}var nm=el('ikIchingName');if(nm)nm.textContent=h[0];var tx=el('ikIchingText');if(tx)tx.textContent=h[2];var td=el('ikIchingToday');if(td)td.textContent=h[3]||'';}
+  function ikShowMatch(){
+    var a=IK_ELEM[S.ikSignA],b=IK_ELEM[S.ikSignB],key='mixed',base=62;
+    if(a===b&&a==='fire'){key='fire';base=85;}else if(a===b&&a==='air'){key='air';base=82;}
+    else if((a==='earth'&&b==='water')||(a==='water'&&b==='earth')||(a===b&&(a==='earth'||a==='water'))){key='earthwater';base=80;}
+    else if((a==='fire'&&b==='air')||(a==='air'&&b==='fire')){base=76;}
+    else if((a==='fire'&&b==='water')||(a==='water'&&b==='fire')||(a==='earth'&&b==='air')||(a==='air'&&b==='earth')){base=52;}
+    function cl(n){return Math.max(35,Math.min(96,Math.round(n)));}
+    var ov=cl(base+(IK_REL_DELTA[S.ikRelType]||0));
+    S.ikMatchPct=ov;S.ikMatchSubs=[['Uyum',ov],['İletişim',cl(ov+((a==='air'||b==='air')?7:-4))],['Tutku',cl(ov+((a==='fire'||b==='fire')?8:-6))]];
+    S.ikMatchText=S.ikSignA+' ✦ '+S.ikSignB+' ('+lc(S.ikRelType)+') — '+IK_COMPAT[key];
+    up();
+  }
+
+  /* ===== ayna ===== */
+  function aynaHTML(){
+    var titleMap={home:'Aynalı Oda',chart:'Doğum Haritası',tests:'Testler',runner:(S.ayTest?AY_TESTS.filter(function(t){return t[0]===S.ayTest;})[0][2]:'Test')};
+    var subMap={home:'kendini tanıma · Mirror Room',chart:AY_PROFILES[S.ayProfile][0]+' · sembolik öz-bakış',tests:'kendini keşfet',runner:AY_PROFILES[S.ayProfile][0]+' için'};
+    var backLabel=S.ayView==='home'?'Konak':(S.ayView==='runner'?'Testler':'Oda');
+    var backAct=S.ayView==='home'?'close':(S.ayView==='runner'?'ayToTests':'ayHome');
+    var inner='';
+    if(S.ayView==='home'){
+      var profs=AY_PROFILES.map(function(p,i){var sel=i===S.ayProfile;return '<button data-act="ayProfile" data-i="'+i+'" style="position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:11px 4px;border-radius:14px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:14px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+'<span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ruh-font-display);font-weight:700;font-size:14.5px;color:var(--door-ink)">'+p[0]+'</span><span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--ruh-font-ui);font-size:10px;color:var(--door-sub)">'+p[1]+'</span></button>';}).join('');
+      var tools=AY_TOOLS.map(function(t){return '<button class="ruh-card typecard" data-act="ayTool" data-key="'+t[0]+'" style="min-height:60px"><span class="med" style="width:40px;height:40px">'+icon(t[2],21,'var(--door-icon)',1.5)+'</span><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:15.5px;line-height:1.1;color:var(--door-ink)">'+t[1]+'</span></button>';}).join('');
+      inner='<div style="flex:none;margin-bottom:16px"><div class="lab" style="margin:0 2px 14px">Kimin için?</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">'+profs+'</div></div><div style="flex:none"><div class="lab" style="margin:0 2px 13px">Araçlar</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+tools+'</div></div>';
+    } else if(S.ayView==='chart'){
+      var msgs='';
+      if(S.ayChartText){
+        msgs='<p style="margin:0;font-family:var(--ruh-font-ui);font-size:16px;line-height:1.64;color:var(--ink);text-shadow:var(--tsh)">'+esc(S.ayChartText)+'</p>'+S.ayChartMsgs.map(function(m){return m.role==='user'?'<div style="display:flex;justify-content:flex-end"><div style="max-width:80%;padding:10px 15px;border-radius:18px 18px 6px 18px;background:rgba(201,162,74,.16);border:1px solid rgba(201,162,74,.42);font-family:var(--ruh-font-ui);font-size:14px;line-height:1.45;color:var(--door-ink)">'+esc(m.text)+'</div></div>':'<p style="margin:0;font-family:var(--ruh-font-ui);font-size:16px;line-height:1.64;color:var(--ink);text-shadow:var(--tsh)">'+esc(m.text)+'</p>';}).join('');
+      } else {
+        msgs='<button class="pill sendbtn" data-act="ayInterpret" style="align-self:center;padding:11px 26px;border-radius:999px;font-size:14px;font-weight:700">Yorumla</button>';
+      }
+      var bar=S.ayChartText?'<div style="flex:none;padding-top:12px"><div style="display:flex;align-items:flex-end;gap:8px;padding:7px 8px;border-radius:26px;border:1px solid var(--door-border);background:var(--field-bg)"><div style="flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;background:var(--field-bg);border:1px solid var(--door-border)">'+icon('mic',22,'var(--door-icon)',1.6)+'</div><input id="ayInput" placeholder="Yorum hakkında soru sor…" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:var(--ruh-font-ui);font-size:15px;color:var(--ink);padding:8px 4px"><button data-act="ayAsk" style="flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;cursor:pointer;border:1px solid var(--send-border);background:var(--send-bg);box-shadow:var(--send-shadow)">'+icon('send',22,'#FFF6EA',1.7)+'</button></div></div>':'';
+      inner='<div style="flex:1;min-height:0;display:flex;flex-direction:column;border-radius:26px;background:linear-gradient(180deg,rgba(255,251,246,.5),rgba(251,244,236,.4));border:1px solid rgba(201,162,74,.26);box-shadow:var(--ruh-shadow-card);overflow:hidden"><div class="ruh-scroll" id="ayChartScroll" style="flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:13px"><div id="ayWheel" style="align-self:center;position:relative;width:176px;height:176px;flex:none"></div><div style="align-self:center;font-family:var(--ruh-font-ui);font-style:italic;font-size:10.5px;color:var(--ruh-text-secondary);text-align:center">Gezegen yerleşimlerine sembolik bir öz-bakış.</div>'+msgs+'</div></div>'+bar;
+    } else if(S.ayView==='tests'){
+      var tests=AY_TESTS.map(function(t){return '<button class="ruh-card" data-act="ayStart" data-key="'+t[0]+'" style="display:flex;align-items:center;gap:13px;text-align:left;cursor:pointer;padding:15px 16px;border-radius:18px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)"><span style="flex:none;width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring);font-family:var(--ruh-font-display);font-weight:700;font-size:18px;color:var(--gold)">'+t[1]+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:15.5px;color:var(--door-ink)">'+t[2]+'</span><span style="font-family:var(--ruh-font-ui);font-size:11px;color:var(--door-sub)">'+t[3]+'</span></span><span style="margin-left:auto;opacity:.5">'+icon('chevron',15,'var(--door-ink)',2)+'</span></button>';}).join('');
+      inner='<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px">'+tests+'</div>';
+    } else { /* runner */
+      var qs=AY_QUESTIONS[S.ayTest]||[];var done=S.ayAns.length>=qs.length;
+      if(!done){
+        var pct=qs.length?Math.round((S.ayAns.length/qs.length)*100):0;
+        var opts=[['Tamamen katılıyorum',5,'rgba(74,138,91,.18)','rgba(74,138,91,.55)','var(--opt-green)'],['Katılıyorum',4,'rgba(122,150,96,.16)','rgba(122,150,96,.5)','var(--opt-green2)'],['Kararsızım',3,'rgba(201,162,74,.14)','rgba(201,162,74,.45)','var(--door-ink)'],['Katılmıyorum',2,'rgba(201,123,74,.16)','rgba(201,123,74,.5)','var(--opt-orange)'],['Hiç katılmıyorum',1,'rgba(181,69,58,.16)','rgba(181,69,58,.5)','var(--opt-red)']];
+        var ob=opts.map(function(o){return '<button data-act="ayAnswer" data-v="'+o[1]+'" style="cursor:pointer;padding:14px 16px;border-radius:14px;background:'+o[2]+';border:1px solid '+o[3]+';box-shadow:var(--ruh-shadow-soft);font-family:var(--ruh-font-ui);font-size:14.5px;font-weight:700;color:'+o[4]+';text-align:left">'+o[0]+'</button>';}).join('');
+        inner='<div style="flex:none;margin-bottom:18px"><div style="display:flex;justify-content:space-between;font-family:var(--ruh-font-ui);font-size:11px;font-weight:700;color:var(--door-sub);margin:0 2px 6px"><span>Soru '+Math.min(S.ayQ+1,qs.length)+' / '+qs.length+'</span></div><div style="height:6px;border-radius:999px;background:rgba(201,162,74,.18);overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--send-bg);border-radius:999px;transition:width .3s var(--ruh-ease)"></div></div></div><div style="flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:22px"><p style="margin:0;text-align:center;font-family:var(--ruh-font-display);font-weight:700;font-size:21px;line-height:1.4;color:var(--ruh-ink-plum);padding:0 6px">'+esc(qs[S.ayQ]||'')+'</p><div style="display:flex;flex-direction:column;gap:9px">'+ob+'</div></div>';
+      } else {
+        var res=AY_RESULTS[S.ayTest];
+        inner='<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:8px"><div style="width:96px;height:96px;border-radius:999px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring),var(--ruh-glow-gold)"><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:30px;color:var(--gold)">'+res[0]+'</span></div><div style="text-align:center"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:22px;color:var(--ruh-ink-plum);margin-bottom:8px">'+res[1]+'</div><p style="margin:0;font-family:var(--ruh-font-ui);font-size:14px;line-height:1.55;color:var(--ruh-text-secondary);max-width:290px">'+res[2]+'</p></div><div style="display:flex;gap:10px;width:100%;max-width:300px"><button class="pill" data-act="ayRetake" style="flex:1;padding:13px;border-radius:14px;border:1px solid var(--door-border);background:transparent;font-size:13.5px;color:var(--door-ink);font-weight:700">Yeniden Çöz</button><button class="pill sendbtn" data-act="ayToTests" style="flex:1;padding:13px;border-radius:14px;font-size:13.5px">Testlere Dön</button></div></div>';
+      }
+    }
+    return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 20px 18px">'+header(titleMap[S.ayView],subMap[S.ayView],backLabel,backAct)+inner+'</div>';
+  }
+  function buildWheel(){
+    var host=el('ayWheel');if(!host||host.dataset.built)return;host.dataset.built='1';host.innerHTML='';
+    var ns='http://www.w3.org/2000/svg',Sz=176,c=Sz/2,gold='rgba(201,162,74,0.85)',goldF='rgba(201,162,74,0.5)';
+    var svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 '+Sz+' '+Sz);svg.setAttribute('width',Sz);svg.setAttribute('height',Sz);
+    function ring(r,sw,op){var ci=document.createElementNS(ns,'circle');ci.setAttribute('cx',c);ci.setAttribute('cy',c);ci.setAttribute('r',r);ci.setAttribute('fill','none');ci.setAttribute('stroke',gold);ci.setAttribute('stroke-width',sw);ci.setAttribute('opacity',op);return ci;}
+    var g=document.createElementNS(ns,'g');if(S.motion){g.style.transformOrigin='center';g.style.animation='ruhSpin 90s linear infinite';}
+    g.appendChild(ring(84,1.5,0.9));g.appendChild(ring(68,1,0.5));g.appendChild(ring(41,1,0.7));
+    var glyphs=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+    for(var i=0;i<12;i++){var a=(i/12)*Math.PI*2-Math.PI/2;var l=document.createElementNS(ns,'line');l.setAttribute('x1',c+Math.cos(a)*41);l.setAttribute('y1',c+Math.sin(a)*41);l.setAttribute('x2',c+Math.cos(a)*84);l.setAttribute('y2',c+Math.sin(a)*84);l.setAttribute('stroke',goldF);l.setAttribute('stroke-width','1');g.appendChild(l);var gl=document.createElementNS(ns,'text');gl.setAttribute('x',c+Math.cos(a+Math.PI/12)*76);gl.setAttribute('y',c+Math.sin(a+Math.PI/12)*76+3.5);gl.setAttribute('text-anchor','middle');gl.setAttribute('font-size','10');gl.setAttribute('fill',gold);gl.textContent=glyphs[i];g.appendChild(gl);}
+    [['☉',56,0.4],['☽',50,2.1],['☿',62,3.3],['♀',46,4.0],['♂',58,5.2]].forEach(function(pl){var t=document.createElementNS(ns,'text');t.setAttribute('x',c+Math.cos(pl[2])*pl[1]);t.setAttribute('y',c+Math.sin(pl[2])*pl[1]+4);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','12');t.setAttribute('fill','#B98F3C');t.setAttribute('font-weight','700');t.textContent=pl[0];g.appendChild(t);});
+    svg.appendChild(g);var center=document.createElementNS(ns,'circle');center.setAttribute('cx',c);center.setAttribute('cy',c);center.setAttribute('r','3.5');center.setAttribute('fill',gold);svg.appendChild(center);host.appendChild(svg);
+  }
+
+  /* ===== profil ===== */
+  function profilHTML(){
+    var profs=S.pfProfiles.map(function(p,i){var sel=i===S.pfSel;var rel=p.rel+(p.detail?(' · '+p.detail):'');var meta=rel+' · '+((p.day&&p.year)?(p.day+' '+p.month+' '+p.year):'tarih yok');return '<div style="position:relative;display:flex;align-items:center;gap:13px;padding:13px 14px;border-radius:18px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:18px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+'<button data-act="pfSelect" data-i="'+i+'" style="flex:1;display:flex;align-items:center;gap:13px;min-width:0;cursor:pointer;background:transparent;border:none;padding:0;text-align:left"><span style="flex:none;width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:var(--medallion-bg);box-shadow:inset 0 0 0 1px var(--medallion-ring);font-family:var(--ruh-font-display);font-weight:700;font-size:18px;color:var(--gold)">'+(p.name||'?').charAt(0).toLocaleUpperCase('tr')+'</span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-family:var(--ruh-font-display);font-weight:600;font-size:16px;color:var(--door-ink)">'+esc(p.name)+'</span><span style="font-family:var(--ruh-font-ui);font-size:11px;color:var(--door-sub)">'+esc(meta)+'</span></span></button><button data-act="pfEdit" data-i="'+i+'" class="pill" style="flex:none;padding:7px 13px;background:transparent;border:1px solid var(--door-border);font-size:11.5px;color:var(--door-ink);font-weight:700">Düzenle</button></div>';}).join('');
+    function rowList(rows){return '<div style="border-radius:18px;overflow:hidden;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft)">'+rows+'</div>';}
+    var activity=[['search','Son Okumalar','toast','Son Okumalar → geçmiş'],['heart','Kalplilerim','toast','Favori okumalar']].map(function(r){return '<button data-act="'+r[2]+'" data-msg="'+r[3]+'" style="width:100%;display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 15px;background:transparent;border:none;border-bottom:1px solid var(--door-border);text-align:left">'+icon(r[0],19,'var(--door-icon)',1.6)+'<span style="flex:1;font-family:var(--ruh-font-ui);font-size:14.5px;font-weight:600;color:var(--door-ink)">'+r[1]+'</span>'+icon('chevron',15,'var(--door-sub)',2)+'</button>';}).join('');
+    var langs=[['tr','Türkçe'],['en','English']].map(function(l){var sel=S.pfLang===l[0];return '<button data-act="pfLang" data-v="'+l[0]+'" class="pill" style="position:relative;flex:1;padding:13px;border-radius:15px;background:var(--door-bg);border:1px solid var(--door-border);box-shadow:var(--ruh-shadow-soft);font-size:14px;font-weight:700;color:var(--door-ink)">'+(sel?'<span style="position:absolute;inset:-1px;border-radius:15px;border:2px solid var(--door-icon);box-shadow:var(--ruh-glow-gold);pointer-events:none"></span>':'')+l[1]+'</button>';}).join('');
+    var dataRows=[['Yedek Al',0,'toast','Yedek alındı (demo)'],['Yedeği Geri Yükle',0,'toast','Geri yükleme (demo)'],['Yasal Bilgilendirme',0,'toast','Yasal bilgilendirme'],['Tüm Verimi Sil',1,'pfDelData','']].map(function(r){var col=r[1]?'var(--danger)':'var(--door-ink)';return '<button data-act="'+r[2]+'"'+(r[3]?' data-msg="'+r[3]+'"':'')+' style="width:100%;display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 15px;background:transparent;border:none;border-bottom:1px solid var(--door-border);text-align:left"><span style="flex:1;font-family:var(--ruh-font-ui);font-size:14px;font-weight:600;color:'+col+'">'+r[0]+'</span>'+icon('chevron',14,'var(--door-sub)',2)+'</button>';}).join('');
+    return '<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:62px 18px 0">'+header('Profil & Ayarlar','profiller, geçmiş ve tercihler','Konak','close')+
+      '<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:2px 2px 22px;display:flex;flex-direction:column;gap:20px">'+
+        '<div><div style="display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px"><span class="lab" style="font-size:12px">Profiller</span><button data-act="pfAdd" class="pill" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--door-bg);border:1px solid var(--door-border);font-size:11.5px;color:var(--gold)">'+icon('plus',13,'var(--gold)',2.4)+' Profil Ekle</button></div><div style="display:flex;flex-direction:column;gap:9px">'+profs+'</div></div>'+
+        '<div><div class="lab" style="font-size:12px;margin:0 2px 10px">Etkinlik</div>'+rowList(activity)+'</div>'+
+        '<div><div class="lab" style="font-size:12px;margin:0 2px 10px">Dil</div><div style="display:flex;gap:9px">'+langs+'</div></div>'+
+        '<div><div class="lab" style="font-size:12px;margin:0 2px 10px">Veri & Yasal</div>'+rowList(dataRows)+'</div>'+
+      '</div></div>';
+  }
+  function pfEditorHTML(){
+    if(!S.pfEditing)return '';var f=S.pfForm||{};
+    function selOf(act,val,opts,ph){var o=(ph?'<option value="">'+ph+'</option>':'')+opts.map(function(x){return '<option value="'+x+'"'+(x===val?' selected':'')+'>'+x+'</option>';}).join('');return '<select class="fld sel" data-act="'+act+'">'+o+'</select>';}
+    var genders=PF_GENDERS.map(function(g){var on=f.gender===g[0];return '<button data-act="pfGender" data-v="'+g[0]+'" class="pill" style="flex:1;padding:11px;border-radius:13px;font-size:13px;font-weight:700;'+(on?'background:var(--send-bg);border:1px solid var(--send-border);box-shadow:var(--send-shadow);color:#FFF6EA':'background:var(--field-bg);border:1px solid var(--door-border);color:var(--door-ink)')+'">'+g[1]+'</button>';}).join('');
+    function lbl(t){return '<div class="lab2" style="margin:0 0 6px 2px">'+t+'</div>';}
+    var isMain=S.pfEditIdx===0;
+    var relBlock='';
+    if(!isMain){
+      relBlock='<div>'+lbl('Yakınlık')+selOf('pfRel',f.rel||'',PF_REL,'')+'</div>';
+      var dl=f.rel==='Akraba'?['Akrabalık','Örn. teyze, dayı, kuzen…']:(f.rel==='Diğer'?['Açıklama','Bu kişiyi kısaca tanımla…']:(f.rel==='Evcil hayvan'?['Tür','Kedi, köpek, kuş…']:null));
+      if(dl)relBlock+='<div>'+lbl(dl[0])+'<input class="fld" data-act="pfDetail" value="'+esc(f.detail||'')+'" placeholder="'+dl[1]+'" style="font-weight:400"></div>';
+    }
+    return '<div data-act="pfClose" style="position:absolute;inset:0;z-index:50;display:flex;align-items:flex-end;background:rgba(24,16,32,.46);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)"><div data-act="noop" style="position:relative;width:100%;max-height:88%;display:flex;flex-direction:column;padding:10px 20px 20px;border-radius:30px 30px 42px 42px;background:var(--ruh-glass-strong);border-top:1px solid rgba(201,162,74,.4);box-shadow:0 -16px 40px rgba(74,47,90,.26);animation:ruhSheet .4s var(--ruh-ease) both">'+
+      '<div style="flex:none;width:44px;height:4px;border-radius:999px;background:rgba(74,47,90,.22);margin:4px auto 14px"></div>'+
+      '<div style="flex:none;font-family:var(--ruh-font-display);font-weight:600;font-size:20px;color:var(--ruh-ink-plum);margin:0 2px 14px">'+(S.pfEditIdx==null?'Yeni Profil':'Profili Düzenle')+'</div>'+
+      '<div class="ruh-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:2px;display:flex;flex-direction:column;gap:13px">'+
+        '<div>'+lbl('İsim')+'<input class="fld" data-act="pfName" value="'+esc(f.name||'')+'" placeholder="İsim" style="font-weight:400"></div>'+
+        relBlock+
+        '<div>'+lbl('Cinsiyet')+'<div style="display:flex;gap:7px">'+genders+'</div></div>'+
+        '<div>'+lbl('Doğum tarihi')+'<div style="display:flex;gap:8px"><div style="flex:1">'+selOf('pfDay',f.day||'',PF_DAYS,'Gün')+'</div><div style="flex:1.5">'+selOf('pfMonth',f.month||'',PF_MONTHS,'Ay')+'</div><div style="flex:1.3">'+selOf('pfYear',f.year||'',PF_YEARS,'Yıl')+'</div></div></div>'+
+        '<div>'+lbl('Doğum saati (opsiyonel)')+selOf('pfHour',f.hour||'Bilmiyorum',PF_HOURS,'')+'</div>'+
+        '<div>'+lbl('Doğum yeri (opsiyonel)')+'<div style="display:flex;flex-direction:column;gap:8px">'+selOf('pfCountry',f.country||'',PF_COUNTRIES,'Ülke')+'<div style="display:flex;gap:8px"><div style="flex:1">'+selOf('pfCity',f.city||'',PF_CITIES,'Şehir')+'</div><div style="flex:1">'+selOf('pfDistrict',f.district||'',PF_DISTRICTS,'İlçe')+'</div></div></div></div>'+
+      '</div>'+
+      '<div style="flex:none;display:flex;gap:10px;padding-top:14px">'+((S.pfEditIdx!=null&&S.pfEditIdx!==0)?'<button data-act="pfDelProfile" class="pill" style="flex:none;padding:14px 16px;border-radius:14px;border:1px solid rgba(181,69,58,.4);background:transparent;font-size:13.5px;color:var(--danger);font-weight:700">Sil</button>':'')+'<button data-act="pfClose" class="pill" style="flex:1;padding:14px;border-radius:14px;border:1px solid var(--door-border);background:transparent;font-size:14px;color:var(--door-ink);font-weight:700">Kapat</button><button data-act="pfSave" class="pill sendbtn" style="flex:1.4;padding:14px;border-radius:14px;font-size:14px">'+(S.pfEditIdx==null?'Profili Kaydet':'Güncelle')+'</button></div>'+
+    '</div></div>';
+  }
+
+  /* ===== interior + modals ===== */
+  function renderInterior(){
+    var r=null;for(var i=0;i<ROOMS.length;i++)if(ROOMS[i].key===S.active)r=ROOMS[i];
+    var h='';if(r){if(r.kind==='ozel')h=ozelHTML();else if(r.kind==='feed')h=feedHTML(r);else if(r.kind==='ikram')h=ikramHTML();else if(r.kind==='ayna')h=aynaHTML();else if(r.kind==='profil')h=profilHTML();}
+    el('interiorContent').innerHTML=h;
+  }
+  function modalsHTML(){
+    var h='';
+    if(S.soon){h+='<div data-act="dismissSoon" style="position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:34px;background:rgba(24,16,32,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)"><div data-act="noop" style="width:100%;max-width:300px;padding:30px 26px 24px;border-radius:26px;text-align:center;background:var(--ruh-glass-strong);border:1px solid rgba(201,162,74,.4);box-shadow:var(--ruh-shadow-lift)"><div style="font-family:\'Cinzel\',serif;font-weight:600;font-size:13px;letter-spacing:.16em;color:var(--gold);margin-bottom:10px">SİMYA ODASI</div><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:26px;line-height:1.1;color:var(--ruh-ink-plum);margin-bottom:9px">Çok yakında</div><p style="font-family:var(--ruh-font-ui);font-size:13.5px;line-height:1.55;color:var(--ruh-text-secondary);margin:0 0 20px">Manifest köşesi ve kendi okumanı yaratabileceğin yaratıcı masa, çok yakında konağa katılıyor.</p><button class="pill" data-act="dismissSoon" style="padding:11px 28px;border:1px solid rgba(201,162,74,.5);background:rgba(201,162,74,.16);color:var(--ruh-ink-plum);font-size:13.5px">Anladım</button></div></div>';}
+    if(S.ozelConfirm){var tA=OZEL_TYPES.filter(function(x){return x[0]===S.ozelConfirm;});var lbl=tA.length?tA[0][1]:'';var prof=OZEL_PROFILES[S.ozelProfile][0];h+='<div data-act="ozelNo" style="position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:34px;background:rgba(24,16,32,.42);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)"><div data-act="noop" style="width:100%;max-width:300px;padding:28px 24px 22px;border-radius:24px;text-align:center;background:var(--ruh-glass-strong);border:1px solid rgba(201,162,74,.4);box-shadow:var(--ruh-shadow-lift)"><div style="font-family:var(--ruh-font-display);font-weight:600;font-size:23px;line-height:1.12;color:var(--ruh-ink-plum);margin-bottom:8px">'+lbl+' okuması</div><p style="font-family:var(--ruh-font-ui);font-size:13.5px;line-height:1.5;color:var(--ruh-text-secondary);margin:0 0 20px">'+prof+' için '+lc(lbl)+' okuması başlatalım mı? Sonra yorumcunu seçeceksin.</p><div style="display:flex;gap:10px"><button class="pill" data-act="ozelNo" style="flex:1;padding:12px;border:1px solid rgba(74,47,90,.2);background:transparent;color:var(--ruh-ink-plum);font-weight:700;font-size:14px">Hayır</button><button class="pill sendbtn" data-act="ozelYes" style="flex:1;padding:12px;font-size:14px">Evet</button></div></div></div>';}
+    if(S.active==='ikram'&&S.ikCard)h+=ikSheetHTML();
+    if(S.active==='ozel'&&S.ozelStep==='reading'&&S.rdCardZoom!=null){var dz=deckStyle(S.rdDeck);var cz=TAROT_POOL[S.rdCardZoom%TAROT_POOL.length];var pt=(S.rdSpread&&S.rdSpread.pos&&S.rdSpread.pos[S.rdCardZoom])?S.rdSpread.pos[S.rdCardZoom][3]:'';h+='<div data-act="rdCloseCardZoom" style="position:absolute;inset:0;z-index:70;display:grid;place-items:center;padding:30px;background:rgba(20,14,26,.74)"><div data-act="noop" style="width:200px;height:300px;border-radius:18px;display:grid;place-items:center;'+dz.card+'"><div style="display:flex;flex-direction:column;align-items:center;gap:12px"><div style="display:grid;place-items:center;width:84px;height:84px;border-radius:14px;'+dz.inner+'">'+icon(cz[1],46,dz.icon,1.4)+'</div><span style="font-family:var(--ruh-font-display);font-weight:700;font-size:19px;color:'+(S.rdDeck==='gilded'?'#FFF6EA':'#4A2F5A')+'">'+cz[0]+'</span><span style="font-family:var(--ruh-font-ui);font-size:11px;color:'+(S.rdDeck==='gilded'?'rgba(255,246,234,.7)':'#6A596D')+'">'+(pt?pt+' · ':'')+(S.rdCardZoom+1)+'. kart · '+(S.rdDeck==='gilded'?'Yaldızlı Düşler':'Rider-Waite')+'</span></div></div><button data-act="rdCloseCardZoom" style="position:absolute;top:22px;right:22px;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;cursor:pointer;background:rgba(255,250,244,.16);border:1px solid rgba(255,255,255,.3)">'+icon('close',18,'#FFF6EA',2)+'</button></div>';}
+    if(S.active==='ozel'&&S.ozelStep==='reading'&&S.rdLightbox)h+='<div data-act="rdCloseLightbox" style="position:absolute;inset:0;z-index:70;display:grid;place-items:center;padding:30px;background:rgba(20,14,26,.74)"><div data-act="noop" style="position:relative;width:100%;max-width:300px;aspect-ratio:1;border-radius:22px;overflow:hidden;border:1px solid rgba(201,162,74,.45);box-shadow:var(--ruh-shadow-lift);background:repeating-linear-gradient(135deg,rgba(201,162,74,.2) 0 11px,rgba(201,162,74,.08) 11px 22px)"><span style="position:absolute;inset:0;display:grid;place-items:center;font-family:var(--ruh-font-ui);font-size:13px;letter-spacing:.06em;color:rgba(255,246,234,.86)">görsel</span></div><button data-act="rdCloseLightbox" style="position:absolute;top:22px;right:22px;display:grid;place-items:center;width:40px;height:40px;border-radius:999px;cursor:pointer;background:rgba(255,250,244,.16);border:1px solid rgba(255,255,255,.3)">'+icon('close',18,'#FFF6EA',2)+'</button></div>';
+    if(S.active==='profil')h+=pfEditorHTML();
+    if(S.pfConfirm){var ct={delprofile:['Bu profili silmek istediğine emin misin? Bu işlem geri alınamaz.','Sil'],deldata:['Tüm verilerini kalıcı olarak silmek üzeresin. Bu işlem geri alınamaz.','Hepsini Sil']}[S.pfConfirm];if(ct)h+='<div data-act="pfNo" style="position:absolute;inset:0;z-index:55;display:grid;place-items:center;padding:34px;background:rgba(24,16,32,.5);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)"><div data-act="noop" style="width:100%;max-width:300px;padding:26px 22px 20px;border-radius:24px;text-align:center;background:var(--ruh-glass-strong);border:1px solid rgba(201,162,74,.4);box-shadow:var(--ruh-shadow-lift)"><p style="font-family:var(--ruh-font-ui);font-size:14.5px;line-height:1.5;color:var(--ruh-ink-plum);margin:0 0 20px">'+ct[0]+'</p><div style="display:flex;gap:10px"><button class="pill" data-act="pfNo" style="flex:1;padding:12px;border:1px solid var(--door-border);background:transparent;color:var(--door-ink);font-weight:700;font-size:14px">Vazgeç</button><button class="pill" data-act="pfYes" style="flex:1;padding:12px;border:1px solid rgba(181,69,58,.5);background:var(--danger);color:#fff;font-weight:800;font-size:14px">'+ct[1]+'</button></div></div></div>';}
+    if(S.toast)h+='<div style="position:absolute;left:50%;bottom:30px;transform:translateX(-50%);z-index:60;padding:10px 17px;border-radius:999px;background:rgba(40,28,44,.9);box-shadow:0 10px 30px rgba(74,47,90,.3);white-space:nowrap"><span style="font-family:var(--ruh-font-ui);font-size:12.5px;font-weight:700;color:#FFF5E8">'+esc(S.toast)+'</span></div>';
+    el('modals').innerHTML=h;
+  }
+  function afterRender(){
+    if(S.active==='ikram')updateIkThumb();
+    if(S.active==='ayna'&&S.ayView==='chart')buildWheel();
+    if(S.active==='ikram'&&S.ikCard){var cA=IK_CARDS.filter(function(c){return c[0]===S.ikCard;});if(cA.length){if(cA[0][3]==='daisy')buildDaisy();if(cA[0][3]==='iching')ikRenderIching();}}
+    paintStats();
+  }
+  function up(){renderInterior();modalsHTML();afterRender();}
+  function flash(msg){S.toast=msg;modalsHTML();clearTimeout(S.toastT);S.toastT=setTimeout(function(){S.toast='';modalsHTML();},2000);}
+
+  /* ===== transition ===== */
+  function openRoom(key){
+    var r=null;for(var i=0;i<ROOMS.length;i++)if(ROOMS[i].key===key)r=ROOMS[i];if(!r)return;
+    if(r.kind==='soon'){S.soon=true;modalsHTML();return;}
+    clearTimeout(openT);clearTimeout(closeT);closing=false;
+    S.view='room';S.active=key;S.shut=false;
+    if(key==='ozel'){S.ozelStep='types';S.ozelType=null;S.ozelConfirm=null;}
+    if(key==='ikram'){S.ikCard=null;}
+    if(key==='ayna'){S.ayView='home';S.ayTest=null;}
+    if(key==='profil'){S.pfEditing=false;S.pfConfirm=null;}
+    up();
+    var I=el('interior'),L=el('shutterL'),R=el('shutterR'),Lo=el('lobby');
+    I.style.transition='none';I.style.opacity='0';I.style.transform='scale(.25)';
+    L.style.transition='none';R.style.transition='none';L.style.transform='translateX(0)';R.style.transform='translateX(0)';
+    void I.offsetWidth;
+    I.style.transition='opacity .5s var(--ruh-ease),transform .55s var(--ruh-ease)';I.style.opacity='1';I.style.transform='scale(1)';I.style.pointerEvents='auto';
+    Lo.style.transition='opacity .4s var(--ruh-ease)';Lo.style.opacity='0';Lo.style.pointerEvents='none';
+    openT=setTimeout(function(){if(S.view!=='room'||closing)return;L.style.transition=R.style.transition='transform .62s var(--ruh-ease)';L.style.transform='translateX(-101%)';R.style.transform='translateX(101%)';S.shut=true;},90);
+  }
+  function closeRoom(){
+    clearTimeout(openT);clearTimeout(closeT);closing=true;
+    var I=el('interior'),L=el('shutterL'),R=el('shutterR'),Lo=el('lobby');
+    L.style.transition=R.style.transition='transform .62s var(--ruh-ease)';L.style.transform='translateX(0)';R.style.transform='translateX(0)';S.shut=false;
+    closeT=setTimeout(function(){closing=false;S.view='lobby';S.active=null;I.style.transition='opacity .4s var(--ruh-ease)';I.style.opacity='0';I.style.pointerEvents='none';Lo.style.transition='opacity .4s var(--ruh-ease)';Lo.style.opacity='1';Lo.style.pointerEvents='auto';setTimeout(function(){I.style.transition='none';I.style.transform='scale(.25)';},420);},600);
+  }
+
+  /* ===== events ===== */
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-act]');if(!t)return;var a=t.getAttribute('data-act');
+    if(a==='noop')return;
+    else if(a==='open')openRoom(t.getAttribute('data-key'));
+    else if(a==='close')closeRoom();
+    else if(a==='dismissSoon'){S.soon=false;modalsHTML();}
+    else if(a==='toast')flash(t.getAttribute('data-msg'));
+    else if(a==='aura'){S.aura=t.getAttribute('data-v');el('auraDay').classList.toggle('on',S.aura==='gündüz');el('auraNight').classList.toggle('on',S.aura==='gece');syncAura();}
+    else if(a==='motion'){S.motion=!S.motion;el('motionBtn').classList.toggle('on',S.motion);el('motionBtn').textContent=S.motion?'Açık':'Kapalı';syncAura();up();}
+    // ozel
+    else if(a==='ozelProfile'){S.ozelProfile=+t.getAttribute('data-i');up();}
+    else if(a==='ozelType'){S.ozelConfirm=t.getAttribute('data-key');modalsHTML();}
+    else if(a==='ozelNo'){S.ozelConfirm=null;modalsHTML();}
+    else if(a==='ozelYes'){var k=S.ozelConfirm;var tt=OZEL_TYPES.filter(function(x){return x[0]===k;})[0];S.ozelStep='persona';S.ozelType=k;S.ozelPersona=tt?tt[3]:null;S.ozelConfirm=null;up();}
+    else if(a==='ozelBack'){S.ozelStep='types';S.ozelType=null;up();}
+    else if(a==='ozelPersona'){S.ozelPersona=t.getAttribute('data-key');up();}
+    else if(a==='ozelGo'){S.ozelStep='reading';initReading();up();rdScrollDown();}
+    else if(a==='rdBack'){S.ozelStep='persona';up();}
+    else if(a==='rdFinish'){closeRoom();}
+    else if(a==='rdPlay'){S.rdPlaying=!S.rdPlaying;up();}
+    else if(a==='rdPhoto'){S.rdLightbox=true;up();}
+    else if(a==='rdCloseLightbox'){S.rdLightbox=false;up();}
+    else if(a==='rdMode'){S.rdAstroSpecial=null;S.rdAstroGen=false;S.rdMode=+t.getAttribute('data-i');var rcm=RD_CONTENT[S.ozelType];S.rdMessages=[{role:'reading',text:rcm.modes[S.rdMode][1]}];up();rdScrollDown();}
+    else if(a==='rdAstroSpecial'){S.rdAstroSpecial=t.getAttribute('data-key');S.rdAstroGen=false;up();}
+    else if(a==='rdCompatPerson'){S.rdCompatPerson=+t.getAttribute('data-i');up();}
+    else if(a==='rdFamilyToggle'){var fi=+t.getAttribute('data-i');var p=S.rdFamily.indexOf(fi);if(p===-1)S.rdFamily.push(fi);else S.rdFamily.splice(p,1);up();}
+    else if(a==='rdAstroGen'){var atx='';if(S.rdAstroSpecial==='topic'){var tp=(S.rdAstroTopic||'').trim();if(!tp){flash('Bir konu yaz');return;}atx='“'+tp+'” konusunda haritana baktığımda, şu an bu alanı yöneten gezegenler sana sabırlı ama kararlı bir tutum öneriyor. Acele bir hamleden çok küçük ve tutarlı adımlar bu dönemde daha çok kapı açıyor; içindeki sesi de hesaba kat.';}else if(S.rdAstroSpecial==='compat'){if(S.rdCompatPerson==null){flash('Bir kişi seç');return;}var nm=OZEL_PROFILES[S.rdCompatPerson][0];atx=nm+' ile aranızdaki ('+lc(S.rdCompatRel)+') gökyüzü uyumu sıcak: Ay ve Venüs yerleşimleriniz birbirini yumuşatıyor. Anlaşmazlıkta köprü kurmak ikinize de kolay; tek dikkat, ifade hızındaki fark — biriniz hızlı, diğeriniz tartarak konuşuyor.';}else{if(!S.rdFamily.length){flash('En az bir kişi seç');return;}var names=S.rdFamily.map(function(i){return OZEL_PROFILES[i][0];}).join(', ');atx='Ailenizin ('+names+') ortak ritmi toprak ağırlıklı: güven, süreklilik ve sofra etrafında toplanma sizi besliyor. Bu dönem küçük bir geleneği tazelemek bağı belirgin biçimde güçlendiriyor.';}S.rdAstroGen=true;S.rdMessages=[{role:'reading',text:atx}];up();rdScrollDown();}
+    else if(a==='rdDeck'){S.rdDeck=t.getAttribute('data-v');S.rdStage='tarotIntent';up();}
+    else if(a==='rdTarotGo'){rdStartRead(RD_CONTENT[S.ozelType],(S.rdTopic||'').trim()||null);}
+    else if(a==='rdSpread'){var spk=t.getAttribute('data-key');S.rdSpread=TAROT_SPREADS_DATA.filter(function(x){return x.key===spk;})[0];S.rdStage='deck';up();}
+    else if(a==='rdCoffeeMode'){S.rdCoffeeMode=t.getAttribute('data-v');up();}
+    else if(a==='rdPhotoSlot'){var pi=+t.getAttribute('data-i');S.rdPhotos[pi]=!S.rdPhotos[pi];up();}
+    else if(a==='rdStartReading'){var rcp=RD_CONTENT[S.ozelType];var ok=rcp.palm?S.rdPhotos.some(Boolean):(S.rdCoffeeMode==='upload'?S.rdPhotos.some(Boolean):true);if(!ok){flash(rcp.palm?'Bir el/pati fotoğrafı ekle':'En az bir fincan fotoğrafı ekle');return;}rdStartRead(rcp,(S.rdTopic||'').trim()||null);}
+    else if(a==='rdCardZoom'){S.rdCardZoom=+t.getAttribute('data-i');up();}
+    else if(a==='rdCloseCardZoom'){S.rdCardZoom=null;up();}
+    else if(a==='rdDreamGo'){rdStartRead(RD_CONTENT[S.ozelType],(S.rdDream||'').trim()||null);}
+    else if(a==='rdCastGo'){rdStartRead(RD_CONTENT[S.ozelType],(S.rdTopic||'').trim()||null);}
+    else if(a==='rdMic'){S.rdRecording=true;up();clearTimeout(S._rdMicT);S._rdMicT=setTimeout(function(){S.rdRecording=false;S.rdInput=(S.rdInput?S.rdInput+' ':'')+'Bu konuda biraz daha açar mısın?';up();},1000);}
+    else if(a==='rdSend'){var rt=(S.rdInput||'').trim();if(!rt)return;S.rdMessages=S.rdMessages.concat([{role:'user',text:rt}]);S.rdInput='';S.rdThinking=true;up();rdScrollDown();clearTimeout(S._rdT);S._rdT=setTimeout(function(){var rc=RD_CONTENT[S.ozelType]||RD_CONTENT.kahve;S.rdThinking=false;S.rdMessages=S.rdMessages.concat([{role:'reading',text:rc.replies[S.rdReplyIdx%rc.replies.length]}]);S.rdReplyIdx++;up();rdScrollDown();},1200);}
+    // ikram
+    else if(a==='ikProfile'){S.ikProfile=+t.getAttribute('data-i');up();}
+    else if(a==='ikCard'){S.ikCard=t.getAttribute('data-key');S.ikPlaying=false;S.ikMatchText='';if(S.ikCard==='iching')S.ikIchingIdx=1;up();}
+    else if(a==='ikClose'){S.ikCard=null;up();}
+    else if(a==='ikNewDaisy'){var hd=el('ikDaisy');if(hd)hd.dataset.built='';buildDaisy();}
+    else if(a==='ikPlay'){S.ikPlaying=!S.ikPlaying;up();}
+    else if(a==='ikShowMatch'){ikShowMatch();}
+    else if(a==='ikPersonal'){S.ikCard=null;openRoom('ozel');}
+    // ayna
+    else if(a==='ayProfile'){S.ayProfile=+t.getAttribute('data-i');up();}
+    else if(a==='ayTool'){var tk=t.getAttribute('data-key');if(tk==='numerology'){flash('Temel Numeroloji yakında');}else if(tk==='tests'){S.ayView='tests';up();}else{S.ayView='chart';S.ayChartText='';S.ayChartMsgs=[];var w=el('ayWheel');if(w)w.dataset.built='';up();}}
+    else if(a==='ayHome'){S.ayView='home';S.ayChartText='';S.ayChartMsgs=[];up();}
+    else if(a==='ayInterpret'){S.ayChartText=AY_PROFILES[S.ayProfile][0]+' için haritanda Güneş Aslan, Ay Balık, Yükselen İkizler öne çıkıyor. Parladığın yerde bile içine dönmeye ihtiyaç duyarsın; bu bir çelişki değil, zenginliğin.';S._cr=0;up();}
+    else if(a==='ayAsk'){var inp=el('ayInput');var txt=inp?inp.value.trim():'';if(!txt)return;var rep=AY_CHART_REPLIES[(S._cr||0)%AY_CHART_REPLIES.length];S._cr=(S._cr||0)+1;S.ayChartMsgs=S.ayChartMsgs.concat([{role:'user',text:txt},{role:'reading',text:rep}]);up();var sc=el('ayChartScroll');if(sc)sc.scrollTop=sc.scrollHeight+200;}
+    else if(a==='ayStart'){S.ayView='runner';S.ayTest=t.getAttribute('data-key');S.ayQ=0;S.ayAns=[];up();}
+    else if(a==='ayAnswer'){var qs=AY_QUESTIONS[S.ayTest]||[];S.ayAns=S.ayAns.concat([+t.getAttribute('data-v')]);if(S.ayAns.length<qs.length)S.ayQ++;up();}
+    else if(a==='ayRetake'){S.ayQ=0;S.ayAns=[];up();}
+    else if(a==='ayToTests'){S.ayView='tests';S.ayTest=null;S.ayQ=0;S.ayAns=[];up();}
+    // profil
+    else if(a==='pfSelect'){S.pfSel=+t.getAttribute('data-i');up();}
+    else if(a==='pfAdd'){S.pfEditing=true;S.pfEditIdx=null;S.pfForm={name:'',rel:'Çocuk',gender:'K',detail:'',day:'',month:'',year:'',hour:'Bilmiyorum',country:'',city:'',district:''};up();}
+    else if(a==='pfEdit'){var ix=+t.getAttribute('data-i');S.pfEditing=true;S.pfEditIdx=ix;S.pfForm=Object.assign({},S.pfProfiles[ix]);up();}
+    else if(a==='pfClose'){S.pfEditing=false;S.pfEditIdx=null;S.pfForm=null;up();}
+    else if(a==='pfGender'){S.pfForm.gender=t.getAttribute('data-v');up();}
+    else if(a==='pfLang'){S.pfLang=t.getAttribute('data-v');up();}
+    else if(a==='pfSave'){if(!S.pfForm.name.trim()){flash('İsim gerekli');return;}var arr=S.pfProfiles.slice();if(S.pfEditIdx==null)arr.push(S.pfForm);else arr[S.pfEditIdx]=S.pfForm;S.pfProfiles=arr;S.pfEditing=false;S.pfEditIdx=null;S.pfForm=null;up();flash('Profil kaydedildi');}
+    else if(a==='pfDelProfile'){S.pfConfirm='delprofile';modalsHTML();}
+    else if(a==='pfDelData'){S.pfConfirm='deldata';modalsHTML();}
+    else if(a==='pfNo'){S.pfConfirm=null;modalsHTML();}
+    else if(a==='pfYes'){var ck=S.pfConfirm;S.pfConfirm=null;if(ck==='delprofile'){S.pfProfiles=S.pfProfiles.filter(function(_,i){return i!==S.pfEditIdx;});S.pfEditing=false;S.pfEditIdx=null;S.pfForm=null;S.pfSel=0;up();flash('Profil silindi');}else{up();flash('Tüm veriler silindi (demo)');}}
+  });
+  document.addEventListener('input',function(e){
+    var t=e.target.closest('[data-act]');if(!t)return;var a=t.getAttribute('data-act');
+    if(a==='ikIching')ikSetIching(+t.value);
+    else if(a==='rdType'){S.rdInput=t.value;}
+    else if(a==='rdDreamType'){S.rdDream=t.value;}
+    else if(a==='rdTopicType'){S.rdTopic=t.value;}
+    else if(a==='rdAstroTopicType'){S.rdAstroTopic=t.value;}
+    else if(a==='pfName'){if(S.pfForm)S.pfForm.name=t.value;}
+    else if(a==='pfDetail'){if(S.pfForm)S.pfForm.detail=t.value;}
+  });
+  document.addEventListener('change',function(e){
+    var t=e.target.closest('[data-act]');if(!t)return;var a=t.getAttribute('data-act');var v=t.value;
+    if(a==='ikSignA')S.ikSignA=v;else if(a==='ikSignB')S.ikSignB=v;else if(a==='ikRelType')S.ikRelType=v;else if(a==='rdCompatRel')S.rdCompatRel=v;
+    else if(a==='pfRel'&&S.pfForm){S.pfForm.rel=v;up();}else if(a==='pfDay'&&S.pfForm)S.pfForm.day=v;else if(a==='pfMonth'&&S.pfForm)S.pfForm.month=v;else if(a==='pfYear'&&S.pfForm)S.pfForm.year=v;else if(a==='pfHour'&&S.pfForm)S.pfForm.hour=v;else if(a==='pfCountry'&&S.pfForm)S.pfForm.country=v;else if(a==='pfCity'&&S.pfForm)S.pfForm.city=v;else if(a==='pfDistrict'&&S.pfForm)S.pfForm.district=v;
+  });
+
+  document.addEventListener('scroll',function(e){var t=e.target;if(t&&t.id==='ikProfRow')updateIkThumb();},true);
+
+  /* ===== init ===== */
+  el('lobby').innerHTML=lobbyHTML();
+  renderInterior();modalsHTML();afterRender();syncAura();
+})();
+</script>
+</body>
+</html>
